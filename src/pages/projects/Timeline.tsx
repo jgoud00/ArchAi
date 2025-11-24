@@ -1,9 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Plus } from 'lucide-react'
 import { getProjectTasks } from '@/services/tasks'
 import { getProject } from '@/services/projects'
-import { useAuthStore } from '@/store/authStore'
 import { Task, Project } from '@/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -16,60 +15,15 @@ import Gantt from 'frappe-gantt'
 export const Timeline = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { user } = useAuthStore()
   const { showToast } = useToast()
-  const ganttRef = useRef<HTMLSVGElement>(null)
+  const ganttRef = useRef<SVGSVGElement>(null)
   const [ganttInstance, setGanttInstance] = useState<Gantt | null>(null)
   
   const [project, setProject] = useState<Project | null>(null)
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    if (id) {
-      loadData()
-    }
-  }, [id])
-
-  useEffect(() => {
-    if (ganttRef.current && tasks.length > 0) {
-      // Clear previous instance
-      if (ganttInstance) {
-        ganttRef.current.innerHTML = ''
-      }
-
-      const ganttData = tasks.map((task) => ({
-        id: task.id,
-        name: task.taskName,
-        start: task.startDate.toISOString().split('T')[0],
-        end: task.endDate.toISOString().split('T')[0],
-        progress: task.status === 'completed' ? 100 : task.status === 'in_progress' ? 50 : 0,
-        custom_class: task.status,
-      }))
-
-      try {
-        const gantt = new Gantt(ganttRef.current, ganttData, {
-          view_mode: 'Month',
-          language: 'en',
-          on_click: (task: any) => {
-            // Handle task click
-          },
-          on_date_change: (task: any, start: Date, end: Date) => {
-            // Handle date change
-          },
-          on_progress_change: (task: any, progress: number) => {
-            // Handle progress change
-          },
-        })
-
-        setGanttInstance(gantt)
-      } catch (error) {
-        console.error('Error initializing Gantt chart:', error)
-      }
-    }
-  }, [tasks])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!id) return
     try {
       setLoading(true)
@@ -84,7 +38,51 @@ export const Timeline = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [id, showToast])
+
+  useEffect(() => {
+    if (id) {
+      loadData()
+    }
+  }, [id, loadData])
+
+  useEffect(() => {
+    // Clear previous instance
+    if (ganttInstance) {
+      ganttRef.current!.innerHTML = ''
+    }
+
+    if (ganttRef.current && tasks.length > 0) {
+      const ganttData = tasks.map((task) => ({
+        id: task.id,
+        name: task.taskName,
+        start: task.startDate.toISOString().split('T')[0],
+        end: task.endDate.toISOString().split('T')[0],
+        progress: task.status === 'completed' ? 100 : task.status === 'in_progress' ? 50 : 0,
+        custom_class: task.status,
+      }))
+
+      try {
+        const gantt = new Gantt(ganttRef.current, ganttData, {
+          view_mode: 'Month',
+          language: 'en',
+          on_click: () => {
+            // Handle task click
+          },
+          on_date_change: () => {
+            // Handle date change
+          },
+          on_progress_change: (_task: any, _progress: number) => {
+            // Handle progress change
+          },
+        })
+
+        setGanttInstance(gantt)
+      } catch (error) {
+        console.error('Error initializing Gantt chart:', error)
+      }
+    }
+  }, [tasks, ganttInstance])
 
   if (loading) {
     return (

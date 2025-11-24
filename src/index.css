@@ -40,3 +40,262 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  /* Smooth scroll behavior */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Animation keyframes */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes parallax {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(-20px);
+    }
+  }
+
+  @keyframes blueprintGrid {
+    0% {
+      transform: translate(0, 0);
+    }
+    50% {
+      transform: translate(15px, 15px);
+    }
+    100% {
+      transform: translate(0, 0);
+    }
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+
+  /* Animation utilities */
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+
+  .animate-slide-in-up {
+    animation: slideInUp 0.8s ease-out forwards;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.5s ease-out forwards;
+  }
+
+  /* Intersection Observer animation classes */
+  .fade-in-on-scroll {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  }
+
+  .fade-in-on-scroll.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Focus visible styles for accessibility */
+  *:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  /* Sticky header */
+  .sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(10px);
+    background-color: hsl(var(--background) / 0.95);
+  }
+
+
+  /* Micro-interaction hover effects */
+  .hover-lift {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+  }
+
+  /* Icon animation */
+  .icon-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  /* Button enhancements - Primary with neon-cyan accent */
+  .btn-primary-enhanced {
+    background: linear-gradient(135deg, #00E5FF 0%, #00B8D4 100%);
+    color: #0A1B2E;
+    font-weight: 600;
+    box-shadow: 0 4px 16px rgba(0, 229, 255, 0.4), 0 0 20px rgba(0, 229, 255, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: none;
+  }
+
+  .btn-primary-enhanced:hover {
+    background: linear-gradient(135deg, #00F0FF 0%, #00E5FF 100%);
+    box-shadow: 0 6px 24px rgba(0, 229, 255, 0.5), 0 0 30px rgba(0, 229, 255, 0.3);
+    transform: translateY(-2px);
+  }
+
+  .btn-primary-enhanced:active {
+    transform: translateY(0);
+  }
+
+  /* Button enhancements - Secondary thin outlined style */
+  .btn-outline-enhanced {
+    border: 1.5px solid #00E5FF;
+    background: transparent;
+    color: #00E5FF;
+    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 0 0 rgba(0, 229, 255, 0);
+  }
+
+  .btn-outline-enhanced:hover {
+    background: rgba(0, 229, 255, 0.08);
+    border-color: #00E5FF;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 229, 255, 0.2);
+  }
+
+  .btn-outline-enhanced:active {
+    transform: translateY(0);
+  }
+
+  /* Enhanced glassmorphism */
+  .glass {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 8px 32px 0 rgba(10, 27, 46, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+  }
+
+  .glass-dark {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 12px 40px 0 rgba(10, 27, 46, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+  }
+
+  /* Enhanced blueprint grid with subtle animation */
+  .blueprint-grid {
+    background-image: 
+      linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    animation: blueprintGrid 50s ease-in-out infinite;
+  }
+
+  /* Hero glow effect */
+  .hero-glow {
+    position: relative;
+  }
+
+  .hero-glow::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120%;
+    height: 120%;
+    background: radial-gradient(circle, rgba(0, 229, 255, 0.15) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  /* Enhanced shadow utilities */
+  .shadow-soft {
+    box-shadow: 0 2px 8px rgba(10, 27, 46, 0.06), 0 4px 16px rgba(10, 27, 46, 0.04);
+  }
+
+  .shadow-soft-lg {
+    box-shadow: 0 4px 12px rgba(10, 27, 46, 0.08), 0 8px 24px rgba(10, 27, 46, 0.06);
+  }
+
+  .shadow-soft-xl {
+    box-shadow: 0 8px 16px rgba(10, 27, 46, 0.1), 0 16px 32px rgba(10, 27, 46, 0.08);
+  }
+
+  /* Premium hero gradient */
+  .hero-gradient {
+    background: linear-gradient(135deg, 
+      rgba(0, 229, 255, 0.08) 0%,
+      rgba(0, 184, 212, 0.05) 30%,
+      rgba(10, 27, 46, 0.02) 60%,
+      rgba(255, 255, 255, 0) 100%
+    );
+  }
+
+  /* Text glow for hero headline */
+  .text-glow {
+    text-shadow: 0 0 20px rgba(0, 229, 255, 0.3), 0 0 40px rgba(0, 229, 255, 0.15);
+  }
+
+  /* Enhanced hover lift with better shadow */
+  .hover-lift {
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.35s ease;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 32px rgba(10, 27, 46, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+  }
+}

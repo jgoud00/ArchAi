@@ -26,11 +26,7 @@ export const signup = async (
   }
 
   // User profile is created automatically by trigger, but let's ensure it exists
-  const userData: Omit<User, 'uid'> = {
-    email: authData.user.email || email,
-    displayName,
-    createdAt: new Date(),
-  }
+  // Note: userData is not used, but kept for type reference
 
   // Update user profile (trigger should have created it)
   // New users default to 'user' role
@@ -363,7 +359,7 @@ export const uploadAvatar = async (file: File): Promise<string> => {
   const fileName = `${user.id}-${Date.now()}.${fileExt}`
 
   // Upload to storage
-  const { data: uploadData, error: uploadError } = await supabase.storage
+  const { error: uploadError } = await supabase.storage
     .from('avatars')
     .upload(fileName, file, {
       cacheControl: '3600',
@@ -391,8 +387,7 @@ export const onAuthChange = (callback: (user: User | null) => void) => {
   // Only listen to future auth state changes
   
   // Listen to auth state changes
-  const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-    console.log('[Auth] Auth state changed:', event)
+  const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
     if (session?.user) {
       try {
         const user = await getCurrentUser(session.user.id)

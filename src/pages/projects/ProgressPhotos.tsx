@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'react-router-dom'
 import { Plus, X, Upload } from 'lucide-react'
 import { getProjectProgressPhotos, uploadProgressPhoto, deleteProgressPhoto } from '@/services/progressPhotos'
 import { getProject } from '@/services/projects'
 import { useAuthStore } from '@/store/authStore'
 import { ProgressPhoto, Project } from '@/types'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
+import { Card, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import { Modal } from '@/components/ui/Modal'
@@ -27,13 +27,7 @@ export const ProgressPhotos = () => {
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [caption, setCaption] = useState('')
 
-  useEffect(() => {
-    if (id) {
-      loadData()
-    }
-  }, [id])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!id) return
     try {
       setLoading(true)
@@ -48,7 +42,13 @@ export const ProgressPhotos = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [id, showToast])
+
+  useEffect(() => {
+    if (id) {
+      loadData()
+    }
+  }, [id, loadData])
 
   const handleUpload = async () => {
     if (!id || !user || !photoFile) return

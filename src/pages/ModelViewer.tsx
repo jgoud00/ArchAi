@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, PerspectiveCamera, useGLTF } from '@react-three/drei'
-import { Upload, ArrowLeft, Download } from 'lucide-react'
+import { Upload, ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
+import { Card, CardContent } from '@/components/ui/Card'
 import { useToast } from '@/hooks/useToast'
 import { Spinner } from '@/components/ui/Spinner'
 import { supabase } from '@/services/supabase'
@@ -25,19 +25,13 @@ export const ModelViewer = () => {
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => {
-    if (id) {
-      loadModel()
-    }
-  }, [id])
-
-  const loadModel = async () => {
+  const loadModel = useCallback(async () => {
     if (!id) return
 
     try {
       setLoading(true)
       // Check if project has a 3D model
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('blueprints')
         .select('json_url')
         .eq('project_id', id)
@@ -51,7 +45,13 @@ export const ModelViewer = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [id, showToast])
+
+  useEffect(() => {
+    if (id) {
+      loadModel()
+    }
+  }, [id, loadModel])
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]

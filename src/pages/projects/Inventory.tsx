@@ -1,21 +1,18 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Plus, Edit, Trash2 } from 'lucide-react'
 import { getProjectInventory, deleteInventoryItem } from '@/services/inventory'
 import { getProject } from '@/services/projects'
-import { useAuthStore } from '@/store/authStore'
 import { InventoryItem, Project } from '@/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import { Modal } from '@/components/ui/Modal'
 import { useToast } from '@/hooks/useToast'
-import { format } from 'date-fns'
 
 export const Inventory = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { user } = useAuthStore()
   const { showToast } = useToast()
   
   const [project, setProject] = useState<Project | null>(null)
@@ -24,13 +21,7 @@ export const Inventory = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [itemToDelete, setItemToDelete] = useState<InventoryItem | null>(null)
 
-  useEffect(() => {
-    if (id) {
-      loadData()
-    }
-  }, [id])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!id) return
     try {
       setLoading(true)
@@ -45,7 +36,13 @@ export const Inventory = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [id, showToast])
+
+  useEffect(() => {
+    if (id) {
+      loadData()
+    }
+  }, [id, loadData])
 
   const handleDelete = async () => {
     if (!itemToDelete) return

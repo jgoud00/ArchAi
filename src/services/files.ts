@@ -23,16 +23,14 @@ export const uploadFile = async (
   projectId: string,
   userId: string,
   category?: string,
-  description?: string,
-  onProgress?: (progress: number) => void
+  description?: string
 ): Promise<ProjectFile> => {
   // Generate unique filename
-  const fileExt = file.name.split('.').pop()
   const timestamp = Date.now()
   const fileName = `${projectId}/${timestamp}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
 
   // Upload to Supabase Storage
-  const { data: uploadData, error: uploadError } = await supabase.storage
+  const { error: uploadError } = await supabase.storage
     .from('project-files')
     .upload(fileName, file, {
       cacheControl: '3600',

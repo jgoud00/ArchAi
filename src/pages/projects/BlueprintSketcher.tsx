@@ -1,9 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { useParams } from 'react-router-dom'
 import { Save, Download, RotateCcw } from 'lucide-react'
-import { getProjectBlueprint, saveBlueprint, loadBlueprintJson } from '@/services/blueprints'
+import { getProjectBlueprint, saveBlueprint } from '@/services/blueprints'
 import { getProject } from '@/services/projects'
-import { useAuthStore } from '@/store/authStore'
 import { Blueprint, Project } from '@/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -12,7 +11,6 @@ import { useToast } from '@/hooks/useToast'
 
 export const BlueprintSketcher = () => {
   const { id } = useParams<{ id: string }>()
-  const { user } = useAuthStore()
   const { showToast } = useToast()
   
   const [project, setProject] = useState<Project | null>(null)
@@ -24,27 +22,7 @@ export const BlueprintSketcher = () => {
   const [drawingMode, setDrawingMode] = useState<'line' | 'rectangle'>('line')
   const [startPos, setStartPos] = useState<{ x: number; y: number } | null>(null)
 
-  useEffect(() => {
-    if (id) {
-      loadData()
-    }
-  }, [id])
-
-  useEffect(() => {
-    if (canvasRef.current && blueprint?.pngUrl) {
-      const img = new Image()
-      img.crossOrigin = 'anonymous'
-      img.onload = () => {
-        const ctx = canvasRef.current?.getContext('2d')
-        if (ctx) {
-          ctx.drawImage(img, 0, 0)
-        }
-      }
-      img.src = blueprint.pngUrl
-    }
-  }, [blueprint])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!id) return
     try {
       setLoading(true)
@@ -59,7 +37,27 @@ export const BlueprintSketcher = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [id, showToast])
+
+  useEffect(() => {
+    if (id) {
+      loadData()
+    }
+  }, [id, loadData])
+
+  useEffect(() => {
+    if (canvasRef.current && blueprint?.pngUrl) {
+      const img = new Image()
+      img.crossOrigin = 'anonymous'
+      img.onload = () => {
+        const ctx = canvasRef.current?.getContext('2d')
+        if (ctx) {
+          ctx.drawImage(img, 0, 0)
+        }
+      }
+      img.src = blueprint.pngUrl
+    }
+  }, [blueprint])
 
   const getMousePos = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current

@@ -1,5 +1,6 @@
 import { supabase } from './supabase'
 import { Expense } from '../types'
+import { getProjectBudget, createOrUpdateBudget } from './budgets'
 
 export const getProjectExpenses = async (projectId: string): Promise<Expense[]> => {
   const { data, error } = await supabase
@@ -71,7 +72,6 @@ export const createExpense = async (
   // Update actual cost in budget
   const expenses = await getProjectExpenses(projectId)
   const totalActual = expenses.reduce((sum, exp) => sum + exp.amount, 0)
-  const { getProjectBudget, createOrUpdateBudget } = await import('./budgets')
   const budget = await getProjectBudget(projectId)
   await createOrUpdateBudget(projectId, budget?.estimatedCost || 0, totalActual)
 
@@ -108,7 +108,6 @@ export const updateExpense = async (
   if (expense) {
     const expenses = await getProjectExpenses(expense.project_id)
     const totalActual = expenses.reduce((sum, exp) => sum + exp.amount, 0)
-    const { getProjectBudget, createOrUpdateBudget } = await import('./budgets')
     const budget = await getProjectBudget(expense.project_id)
     await createOrUpdateBudget(expense.project_id, budget?.estimatedCost || 0, totalActual)
   }
@@ -135,7 +134,6 @@ export const deleteExpense = async (expenseId: string): Promise<void> => {
   if (expense) {
     const expenses = await getProjectExpenses(expense.project_id)
     const totalActual = expenses.reduce((sum, exp) => sum + exp.amount, 0)
-    const { getProjectBudget, createOrUpdateBudget } = await import('./budgets')
     const budget = await getProjectBudget(expense.project_id)
     await createOrUpdateBudget(expense.project_id, budget?.estimatedCost || 0, totalActual)
   }

@@ -3,7 +3,6 @@ import { useDropzone } from 'react-dropzone'
 import { Upload, X } from 'lucide-react'
 import { cn } from '@/utils/cn'
 import { Button } from './ui/Button'
-import { Spinner } from './ui/Spinner'
 
 interface FileUploadProps {
   onUpload: (file: File, onProgress: (progress: number) => void) => Promise<void>

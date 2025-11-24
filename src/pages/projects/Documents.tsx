@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'react-router-dom'
 import { Plus, FileText, Download, Trash2, Upload } from 'lucide-react'
 import { getProjectDocuments, uploadDocument, deleteDocument } from '@/services/documents'
 import { getProject } from '@/services/projects'
 import { useAuthStore } from '@/store/authStore'
 import { Document, Project } from '@/types'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
+import { Card, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import { Modal } from '@/components/ui/Modal'
@@ -24,13 +24,7 @@ export const Documents = () => {
   const [uploading, setUploading] = useState(false)
   const [docFile, setDocFile] = useState<File | null>(null)
 
-  useEffect(() => {
-    if (id) {
-      loadData()
-    }
-  }, [id])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!id) return
     try {
       setLoading(true)
@@ -45,7 +39,13 @@ export const Documents = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [id, showToast])
+
+  useEffect(() => {
+    if (id) {
+      loadData()
+    }
+  }, [id, loadData])
 
   const handleUpload = async () => {
     if (!id || !user || !docFile) return

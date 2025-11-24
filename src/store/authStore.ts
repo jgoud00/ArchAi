@@ -111,8 +111,6 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
    * 3. Set up listener for future auth changes (only once)
    */
   initializeAuth: async () => {
-    console.log('[Auth Store] Initializing authentication...')
-    
     // Step 1: Unblock UI immediately
     set({ loading: false, user: null, userRole: null })
     
@@ -125,7 +123,6 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         // Set up listener even if session check fails
         if (!authUnsubscribe) {
           authUnsubscribe = onAuthChange((user) => {
-            console.log('[Auth Store] Auth state changed:', user?.email || 'logged out', 'Role:', user?.role)
             set({ user, userRole: user?.role || null, loading: false })
           })
         }
@@ -137,7 +134,6 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         try {
           const user = await authService.getCurrentUser(session.user.id)
           if (user) {
-            console.log('[Auth Store] Found existing session:', user.email, 'Role:', user.role)
             set({ user, userRole: user.role, loading: false })
           }
         } catch (error) {
@@ -151,7 +147,6 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     // Step 3: Set up listener for future auth state changes (only once)
     if (!authUnsubscribe) {
       authUnsubscribe = onAuthChange((user) => {
-        console.log('[Auth Store] Auth state changed:', user?.email || 'logged out', 'Role:', user?.role)
         set({ user, userRole: user?.role || null, loading: false })
       })
     }

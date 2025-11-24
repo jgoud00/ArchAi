@@ -1,9 +1,10 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import { LayoutDashboard, FolderOpen, Settings, LogOut, User, BookOpen, Shield, X, Calendar, FileText } from 'lucide-react'
+import { LayoutDashboard, Settings, LogOut, User, BookOpen, Shield, X, Calendar, FileText, Home } from 'lucide-react'
 import { cn } from '@/utils/cn'
 import { useAuthStore } from '@/store/authStore'
 import { Button } from '../ui/Button'
 import { ShowIfHasRole } from '../RoleGuard'
+import { Logo } from '../Logo'
 
 const navItems = [
   { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -39,9 +40,12 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
   return (
     <div className="w-64 bg-card border-r border-border flex flex-col h-screen">
       <div className="p-6 border-b border-border flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-primary">ArchitectAI</h1>
-          <p className="text-sm text-muted-foreground mt-1">Construction Management</p>
+        <div className="flex items-center gap-3">
+          <Logo size="md" />
+          <div>
+            <h1 className="text-2xl font-bold text-primary">ArchitectAI</h1>
+            <p className="text-sm text-muted-foreground mt-1">Construction Management</p>
+          </div>
         </div>
         {onClose && (
           <Button
@@ -56,6 +60,26 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
       </div>
 
       <nav className="flex-1 p-4 space-y-2">
+        <button
+          onClick={() => handleNavigate('/')}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              handleNavigate('/')
+            }
+          }}
+          className={cn(
+            "w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1",
+            location.pathname === '/'
+              ? "bg-primary text-primary-foreground"
+              : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+          )}
+          aria-label="Navigate to home page"
+          aria-current={location.pathname === '/' ? 'page' : undefined}
+        >
+          <Home className="h-5 w-5" />
+          Home
+        </button>
         {navItems.map((item) => {
           const Icon = item.icon
           const isActive = location.pathname === item.path
@@ -64,12 +88,20 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
             <button
               key={item.path}
               onClick={() => handleNavigate(item.path)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  handleNavigate(item.path)
+                }
+              }}
               className={cn(
-                "w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                "w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1",
                 isActive
                   ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
               )}
+              aria-label={`Navigate to ${item.label}`}
+              aria-current={isActive ? 'page' : undefined}
             >
               <Icon className="h-5 w-5" />
               {item.label}

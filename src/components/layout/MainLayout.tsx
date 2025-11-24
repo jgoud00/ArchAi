@@ -2,8 +2,7 @@ import { useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { Topbar } from './Topbar'
-import { Menu, X } from 'lucide-react'
-import { Button } from '../ui/Button'
+import { Breadcrumb } from '../Breadcrumb'
 import { cn } from '@/utils/cn'
 
 export const MainLayout = () => {
@@ -33,6 +32,7 @@ export const MainLayout = () => {
       <div className="flex-1 flex flex-col overflow-hidden w-full lg:w-auto">
         <Topbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
         <main className="flex-1 overflow-y-auto bg-background p-4 lg:p-6">
+          <Breadcrumb />
           <Outlet />
         </main>
       </div>

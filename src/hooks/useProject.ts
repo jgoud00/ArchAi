@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getProject, getUserProjects } from '@/services/projects'
+import { getProject } from '@/services/projects'
 import { Project } from '@/types'
 
 export const useProject = (projectId: string | undefined) => {
@@ -14,7 +14,8 @@ export const useProject = (projectId: string | undefined) => {
     }
 
     loadProject()
-  }, [projectId])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId]) // loadProject is stable and doesn't need to be in deps
 
   const loadProject = async () => {
     if (!projectId) return

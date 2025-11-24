@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
@@ -6,7 +6,7 @@ import interactionPlugin from '@fullcalendar/interaction'
 import { useAuthStore } from '@/store/authStore'
 import { getProjectTasks } from '@/services/tasks'
 import { getUserProjects } from '@/services/projects'
-import { Task, Project } from '@/types'
+import { Task } from '@/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Spinner } from '@/components/ui/Spinner'
 import { useToast } from '@/hooks/useToast'
@@ -17,13 +17,7 @@ export const Calendar = () => {
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    if (user) {
-      loadTasks()
-    }
-  }, [user])
-
-  const loadTasks = async () => {
+  const loadTasks = useCallback(async () => {
     if (!user?.uid) return
     
     try {
@@ -44,7 +38,13 @@ export const Calendar = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [user?.uid, showToast])
+
+  useEffect(() => {
+    if (user) {
+      loadTasks()
+    }
+  }, [user, loadTasks])
 
   const calendarEvents = tasks.map(task => ({
     id: task.id,

@@ -18,7 +18,7 @@ interface SearchBarProps {
   projects: Project[]
 }
 
-export const SearchBar = ({ onSearch, projects }: SearchBarProps) => {
+export const SearchBar = ({ onSearch }: SearchBarProps) => {
   const [query, setQuery] = useState('')
   const [showFilters, setShowFilters] = useState(false)
   const [filters, setFilters] = useState<SearchFilters>({})

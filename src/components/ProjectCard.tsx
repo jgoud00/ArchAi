@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { Calendar, Users, Image as ImageIcon, MoreVertical } from 'lucide-react'
+import { Calendar, Users, Image as ImageIcon } from 'lucide-react'
 import { format } from 'date-fns'
 import { Card, CardContent, CardHeader, CardTitle } from './ui/Card'
 import { Badge } from './ui/Badge'

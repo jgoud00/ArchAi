@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Plus, AlertTriangle, CheckCircle, Clock, X } from 'lucide-react'
 import { getProjectIssues, deleteIssue } from '@/services/issues'
 import { getProject } from '@/services/projects'
-import { useAuthStore } from '@/store/authStore'
 import { Issue, Project } from '@/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -16,7 +15,6 @@ import { format } from 'date-fns'
 export const IssuesList = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { user } = useAuthStore()
   const { showToast } = useToast()
   
   const [project, setProject] = useState<Project | null>(null)
@@ -25,13 +23,7 @@ export const IssuesList = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [issueToDelete, setIssueToDelete] = useState<Issue | null>(null)
 
-  useEffect(() => {
-    if (id) {
-      loadData()
-    }
-  }, [id])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!id) return
     try {
       setLoading(true)
@@ -46,7 +38,13 @@ export const IssuesList = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [id, showToast])
+
+  useEffect(() => {
+    if (id) {
+      loadData()
+    }
+  }, [id, loadData])
 
   const handleDelete = async () => {
     if (!issueToDelete) return

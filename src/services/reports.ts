@@ -7,7 +7,6 @@ export const generateProjectReport = async (
   scans: Scan[]
 ): Promise<void> => {
   const doc = new jsPDF()
-  const pageWidth = doc.internal.pageSize.width
   const margin = 20
   let yPosition = margin
 

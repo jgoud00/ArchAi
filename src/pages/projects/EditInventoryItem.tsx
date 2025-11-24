@@ -1,9 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { getInventoryItem, updateInventoryItem } from '@/services/inventory'
-import { useAuthStore } from '@/store/authStore'
-import { InventoryItem } from '@/types'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
@@ -25,7 +23,6 @@ type InventoryFormData = z.infer<typeof inventorySchema>
 export const EditInventoryItem = () => {
   const { id, itemId } = useParams<{ id: string; itemId: string }>()
   const navigate = useNavigate()
-  const { user } = useAuthStore()
   const { showToast } = useToast()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -34,13 +31,7 @@ export const EditInventoryItem = () => {
     resolver: zodResolver(inventorySchema),
   })
 
-  useEffect(() => {
-    if (itemId) {
-      loadItem()
-    }
-  }, [itemId])
-
-  const loadItem = async () => {
+  const loadItem = useCallback(async () => {
     if (!itemId) return
     try {
       setLoading(true)
@@ -58,7 +49,13 @@ export const EditInventoryItem = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [itemId, showToast, reset])
+
+  useEffect(() => {
+    if (itemId) {
+      loadItem()
+    }
+  }, [itemId, loadItem])
 
   const onSubmit = async (data: InventoryFormData) => {
     if (!itemId) return

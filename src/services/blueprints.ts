@@ -48,7 +48,7 @@ export const saveBlueprint = async (
 
   // Upload JSON
   const jsonBlob = new Blob([jsonData], { type: 'application/json' })
-  const { data: jsonUpload, error: jsonError } = await supabase.storage
+  const { error: jsonError } = await supabase.storage
     .from(STORAGE_BUCKET)
     .upload(jsonPath, jsonBlob, {
       cacheControl: '3600',

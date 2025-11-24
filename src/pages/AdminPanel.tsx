@@ -14,7 +14,6 @@ import { format } from 'date-fns'
 
 export const AdminPanel = () => {
   const { user, isAdmin } = useAuthStore()
-  const navigate = useNavigate()
   const { showToast } = useToast()
   
   const [users, setUsers] = useState<UserType[]>([])

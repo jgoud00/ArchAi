@@ -89,9 +89,13 @@ export const getBudgetAlerts = async (): Promise<BudgetAlert[]> => {
     if (estimatedCost > 0 && threshold > 0) {
       const thresholdAmount = (estimatedCost * threshold) / 100
       if (actualCost > thresholdAmount) {
+        // Handle both array and object cases from Supabase join
+        const projectName = Array.isArray(budget.projects) 
+          ? (budget.projects[0] as any)?.name 
+          : (budget.projects as any)?.name
         alerts.push({
           projectId: budget.project_id,
-          projectName: budget.projects?.name || 'Unknown Project',
+          projectName: projectName || 'Unknown Project',
           estimatedCost,
           actualCost,
           threshold,

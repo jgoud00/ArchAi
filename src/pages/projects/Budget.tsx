@@ -1,10 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Plus, DollarSign } from 'lucide-react'
 import { getProjectBudget, createOrUpdateBudget } from '@/services/budgets'
 import { getProjectExpenses } from '@/services/expenses'
 import { getProject } from '@/services/projects'
-import { useAuthStore } from '@/store/authStore'
 import { Budget, Expense, Project } from '@/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -12,12 +11,11 @@ import { Spinner } from '@/components/ui/Spinner'
 import { Modal } from '@/components/ui/Modal'
 import { Input } from '@/components/ui/Input'
 import { useToast } from '@/hooks/useToast'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
+import { Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 
 export const BudgetPage = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { user } = useAuthStore()
   const { showToast } = useToast()
   
   const [project, setProject] = useState<Project | null>(null)
@@ -27,13 +25,7 @@ export const BudgetPage = () => {
   const [editModalOpen, setEditModalOpen] = useState(false)
   const [estimatedCost, setEstimatedCost] = useState('0')
 
-  useEffect(() => {
-    if (id) {
-      loadData()
-    }
-  }, [id])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!id) return
     try {
       setLoading(true)
@@ -51,7 +43,13 @@ export const BudgetPage = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [id, showToast])
+
+  useEffect(() => {
+    if (id) {
+      loadData()
+    }
+  }, [id, loadData])
 
   const handleUpdateBudget = async () => {
     if (!id || !budget) return
@@ -161,12 +159,16 @@ export const BudgetPage = () => {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  label={(props: any) => {
+                    const name = props.name || ''
+                    const percent = props.percent || 0
+                    return `${name} ${(percent * 100).toFixed(0)}%`
+                  }}
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"
                 >
-                  {chartData.map((entry, index) => (
+                  {chartData.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>

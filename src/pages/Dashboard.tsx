@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus, FolderOpen, Image as ImageIcon, Users, AlertTriangle } from 'lucide-react'
 import { getUserProjects, createProject } from '@/services/projects'
@@ -43,25 +43,16 @@ export const Dashboard = () => {
     resolver: zodResolver(projectSchema),
   })
 
-  useEffect(() => {
-    if (user) {
-      loadProjects()
-      loadBudgetAlerts()
-    } else {
-      setLoading(false)
-    }
-  }, [user])
-
-  const loadBudgetAlerts = async () => {
+  const loadBudgetAlerts = useCallback(async () => {
     try {
       const alerts = await getBudgetAlerts()
       setBudgetAlerts(alerts)
     } catch (error) {
       console.error('Failed to load budget alerts:', error)
     }
-  }
+  }, [])
 
-  const loadProjects = async () => {
+  const loadProjects = useCallback(async () => {
     if (!user?.uid) return
     
     try {
@@ -74,7 +65,16 @@ export const Dashboard = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [user?.uid, showToast])
+
+  useEffect(() => {
+    if (user) {
+      loadProjects()
+      loadBudgetAlerts()
+    } else {
+      setLoading(false)
+    }
+  }, [user, loadProjects, loadBudgetAlerts])
 
   const handleSearch = (query: string, filters: any) => {
     let filtered = [...projects]

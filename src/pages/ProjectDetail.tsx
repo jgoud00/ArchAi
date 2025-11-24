@@ -62,7 +62,6 @@ export const ProjectDetail = () => {
   const [activeTab, setActiveTab] = useState('overview')
   
   const [uploadModalOpen, setUploadModalOpen] = useState(false)
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [inviteModalOpen, setInviteModalOpen] = useState(false)
   const [settingsModalOpen, setSettingsModalOpen] = useState(false)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
@@ -77,10 +76,11 @@ export const ProjectDetail = () => {
   })
 
   useEffect(() => {
-    if (id) {
+    if (id && user) {
       loadProjectData()
     }
-  }, [id, user])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, user]) // loadProjectData is stable and doesn't need to be in deps
 
   useEffect(() => {
     if (project) {
@@ -89,7 +89,8 @@ export const ProjectDetail = () => {
         description: project.description,
       })
     }
-  }, [project])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [project]) // projectForm.reset is stable
 
   const loadProjectData = async () => {
     if (!id) return
@@ -119,7 +120,6 @@ export const ProjectDetail = () => {
     }
   }
 
-  const currentUserId = user?.uid
   const isOwner = project?.ownerId === user?.uid
   const isMember = team.some((member) => member.userId === user?.uid)
 
@@ -142,7 +142,7 @@ export const ProjectDetail = () => {
     if (!id || !isOwner) return
 
     try {
-      // Delete from Firestore
+      // Delete from Supabase database
       await deleteScan(id, scan.id)
       // Delete from Storage
       await deleteScanFile(scan.url)

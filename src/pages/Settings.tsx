@@ -35,7 +35,7 @@ type PasswordFormData = z.infer<typeof passwordSchema>
 export const Settings = () => {
   const { user, logout, setUser } = useAuthStore()
   const { toasts, showToast, dismissToast } = useToast()
-  const { t, i18n } = useTranslation()
+  const { i18n } = useTranslation()
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
@@ -167,15 +167,13 @@ export const Settings = () => {
     if (!user) return
 
     try {
-      // Delete user from Supabase Auth (this will cascade delete from database)
-      const { error } = await supabase.auth.admin.deleteUser(user.uid)
+      // Note: User deletion requires backend/admin API
+      // Frontend cannot directly delete users via admin API
+      // Use a Supabase RPC function or Edge Function for this
+      const { error: deleteError } = await supabase.rpc('delete_user_account')
       
-      if (error) {
-        // If admin API is not available, use regular API
-        const { error: deleteError } = await supabase.rpc('delete_user_account')
-        if (deleteError) {
-          throw deleteError
-        }
+      if (deleteError) {
+        throw new Error(deleteError.message || 'Failed to delete account. Please contact support.')
       }
 
       showToast('Account deleted successfully', 'success')

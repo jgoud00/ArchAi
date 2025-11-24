@@ -1,7 +1,6 @@
 import { Navigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import { Spinner } from './ui/Spinner'
-import { isDevAdminModeEnabled } from '@/config/devMode'
 
 interface ProtectedRouteProps {
   children: React.ReactNode

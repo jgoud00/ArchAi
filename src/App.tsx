@@ -28,12 +28,12 @@ import { NewTask } from './pages/projects/NewTask'
 import { ModelViewer } from './pages/ModelViewer'
 import { Templates } from './pages/Templates'
 import { Calendar } from './pages/Calendar'
-import { Spinner } from './components/ui/Spinner'
+import { Home } from './pages/Home'
 import { ConfigError } from './components/ConfigError'
 import { isSupabaseConfigured } from './services/supabase'
 
 function App() {
-  const { loading, initializeAuth, user } = useAuthStore()
+  const { initializeAuth, user } = useAuthStore()
 
   useEffect(() => {
     if (isSupabaseConfigured()) {
@@ -61,6 +61,7 @@ function App() {
     >
       <Routes>
         {/* Public routes */}
+        <Route path="/" element={<Home />} />
         <Route
           path="/login"
           element={user ? <Navigate to="/dashboard" replace /> : <Login />}
@@ -78,16 +79,14 @@ function App() {
           element={user ? <Navigate to="/dashboard" replace /> : <ResetPassword />}
         />
 
-        {/* Protected routes */}
+        {/* Protected routes - using a wrapper to avoid path conflict */}
         <Route
-          path="/"
           element={
             <ProtectedRoute>
               <MainLayout />
             </ProtectedRoute>
           }
         >
-          <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="admin" element={<AdminPanel />} />
           <Route path="projects/:id" element={<ProjectDetail />} />
@@ -112,7 +111,7 @@ function App() {
         </Route>
 
         {/* Catch all */}
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   )

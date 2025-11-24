@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FileText, Home, Building2, Paintbrush, Copy } from 'lucide-react'
+import { Home, Building2, Paintbrush, Copy } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { useAuthStore } from '@/store/authStore'
 import { createProject } from '@/services/projects'
+import { createOrUpdateBudget } from '@/services/budgets'
+import { createTask } from '@/services/tasks'
 import { useToast } from '@/hooks/useToast'
 import { Spinner } from '@/components/ui/Spinner'
 
@@ -86,13 +88,13 @@ export const Templates = () => {
 
       // Create default budget if specified
       if (template.defaultBudget) {
-        const { createOrUpdateBudget } = await import('@/services/budgets')
+        // Use static import instead of dynamic import
         await createOrUpdateBudget(projectId, template.defaultBudget, 0)
       }
 
       // Create default tasks if specified
       if (template.defaultTasks && template.defaultTasks.length > 0) {
-        const { createTask } = await import('@/services/tasks')
+        // Use static import instead of dynamic import
         const now = new Date()
         for (let i = 0; i < template.defaultTasks.length; i++) {
           const startDate = new Date(now)

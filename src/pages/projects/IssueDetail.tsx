@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Edit, Trash2 } from 'lucide-react'
 import { getIssue, updateIssue, deleteIssue } from '@/services/issues'
-import { useAuthStore } from '@/store/authStore'
 import { Issue } from '@/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -15,7 +14,6 @@ import { format } from 'date-fns'
 export const IssueDetail = () => {
   const { id, issueId } = useParams<{ id: string; issueId: string }>()
   const navigate = useNavigate()
-  const { user } = useAuthStore()
   const { showToast } = useToast()
   
   const [issue, setIssue] = useState<Issue | null>(null)
@@ -25,20 +23,7 @@ export const IssueDetail = () => {
   const [status, setStatus] = useState<'open' | 'in_progress' | 'resolved'>('open')
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium')
 
-  useEffect(() => {
-    if (issueId) {
-      loadIssue()
-    }
-  }, [issueId])
-
-  useEffect(() => {
-    if (issue) {
-      setStatus(issue.status)
-      setPriority(issue.priority)
-    }
-  }, [issue])
-
-  const loadIssue = async () => {
+  const loadIssue = useCallback(async () => {
     if (!issueId) return
     try {
       setLoading(true)
@@ -49,7 +34,13 @@ export const IssueDetail = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [issueId, showToast])
+
+  useEffect(() => {
+    if (issueId) {
+      loadIssue()
+    }
+  }, [issueId, loadIssue])
 
   const handleUpdateStatus = async () => {
     if (!issue) return
