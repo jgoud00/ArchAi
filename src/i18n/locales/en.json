@@ -1,0 +1,75 @@
+{
+  "common": {
+    "dashboard": "Dashboard",
+    "projects": "Projects",
+    "settings": "Settings",
+    "admin": "Admin Panel",
+    "documentation": "Documentation",
+    "logout": "Logout",
+    "login": "Login",
+    "signup": "Signup",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "filter": "Filter",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "dashboard": {
+    "title": "Your Projects",
+    "subtitle": "Manage your construction projects",
+    "newProject": "New Project",
+    "noProjects": "No projects yet",
+    "createFirst": "Create your first project to get started",
+    "totalProjects": "Total Projects",
+    "totalScans": "Total Scans",
+    "teamMembers": "Team Members",
+    "budgetAlerts": "Budget Alerts"
+  },
+  "project": {
+    "name": "Project Name",
+    "description": "Description",
+    "status": "Status",
+    "active": "Active",
+    "completed": "Completed",
+    "archived": "Archived",
+    "create": "Create New Project",
+    "edit": "Edit Project",
+    "delete": "Delete Project"
+  },
+  "budget": {
+    "title": "Budget",
+    "estimated": "Estimated Cost",
+    "actual": "Actual Cost",
+    "threshold": "Alert Threshold (%)",
+    "addExpense": "Add Expense",
+    "expenses": "Expenses"
+  },
+  "issues": {
+    "title": "Issues",
+    "new": "New Issue",
+    "priority": "Priority",
+    "status": "Status",
+    "open": "Open",
+    "inProgress": "In Progress",
+    "resolved": "Resolved"
+  },
+  "inventory": {
+    "title": "Inventory",
+    "addItem": "Add Item",
+    "itemName": "Item Name",
+    "quantity": "Quantity",
+    "unit": "Unit",
+    "category": "Category"
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": "Profile",
+    "language": "Language"
+  }
+}
+

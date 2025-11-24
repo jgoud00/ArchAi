@@ -1,0 +1,75 @@
+{
+  "common": {
+    "dashboard": "डैशबोर्ड",
+    "projects": "प्रोजेक्ट",
+    "settings": "सेटिंग्स",
+    "admin": "एडमिन पैनल",
+    "documentation": "दस्तावेज़",
+    "logout": "लॉगआउट",
+    "login": "लॉगिन",
+    "signup": "साइनअप",
+    "cancel": "रद्द करें",
+    "save": "सहेजें",
+    "delete": "हटाएं",
+    "edit": "संपादित करें",
+    "create": "बनाएं",
+    "search": "खोजें",
+    "filter": "फ़िल्टर",
+    "loading": "लोड हो रहा है...",
+    "error": "त्रुटि",
+    "success": "सफल"
+  },
+  "dashboard": {
+    "title": "आपके प्रोजेक्ट",
+    "subtitle": "अपने निर्माण प्रोजेक्ट प्रबंधित करें",
+    "newProject": "नया प्रोजेक्ट",
+    "noProjects": "अभी तक कोई प्रोजेक्ट नहीं",
+    "createFirst": "शुरू करने के लिए अपना पहला प्रोजेक्ट बनाएं",
+    "totalProjects": "कुल प्रोजेक्ट",
+    "totalScans": "कुल स्कैन",
+    "teamMembers": "टीम सदस्य",
+    "budgetAlerts": "बजट अलर्ट"
+  },
+  "project": {
+    "name": "प्रोजेक्ट नाम",
+    "description": "विवरण",
+    "status": "स्थिति",
+    "active": "सक्रिय",
+    "completed": "पूर्ण",
+    "archived": "संग्रहीत",
+    "create": "नया प्रोजेक्ट बनाएं",
+    "edit": "प्रोजेक्ट संपादित करें",
+    "delete": "प्रोजेक्ट हटाएं"
+  },
+  "budget": {
+    "title": "बजट",
+    "estimated": "अनुमानित लागत",
+    "actual": "वास्तविक लागत",
+    "threshold": "अलर्ट थ्रेशोल्ड (%)",
+    "addExpense": "खर्च जोड़ें",
+    "expenses": "खर्च"
+  },
+  "issues": {
+    "title": "समस्याएं",
+    "new": "नई समस्या",
+    "priority": "प्राथमिकता",
+    "status": "स्थिति",
+    "open": "खुला",
+    "inProgress": "प्रगति में",
+    "resolved": "हल"
+  },
+  "inventory": {
+    "title": "इन्वेंटरी",
+    "addItem": "आइटम जोड़ें",
+    "itemName": "आइटम नाम",
+    "quantity": "मात्रा",
+    "unit": "इकाई",
+    "category": "श्रेणी"
+  },
+  "settings": {
+    "title": "सेटिंग्स",
+    "profile": "प्रोफ़ाइल",
+    "language": "भाषा"
+  }
+}
+

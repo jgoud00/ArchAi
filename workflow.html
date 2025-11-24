@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ArchitectAI - Construction Management Workflow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      /* Color Palette */
+      --primary: #3b82f6;
+      --primary-dark: #2563eb;
+      --primary-light: #60a5fa;
+      --secondary: #8b5cf6;
+      --accent: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      
+      /* Section Colors */
+      --auth-bg: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      --project-bg: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+      --budget-bg: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+      --doc-bg: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      --issue-bg: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+      --timeline-bg: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      --inventory-bg: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+      --output-bg: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+      
+      /* Neutral Colors */
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --text-light: #94a3b8;
+      --border: #e2e8f0;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      
+      /* Spacing */
+      --spacing-xs: 0.5rem;
+      --spacing-sm: 1rem;
+      --spacing-md: 1.5rem;
+      --spacing-lg: 2rem;
+      --spacing-xl: 3rem;
+      
+      /* Typography */
+      --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-size-xs: 0.75rem;
+      --font-size-sm: 0.875rem;
+      --font-size-base: 1rem;
+      --font-size-lg: 1.125rem;
+      --font-size-xl: 1.25rem;
+      --font-size-2xl: 1.5rem;
+      --font-size-3xl: 2rem;
+      --font-size-4xl: 2.5rem;
+      
+      /* Border Radius */
+      --radius-sm: 0.375rem;
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      --radius-xl: 1rem;
+      --radius-2xl: 1.5rem;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Header */
+    .header {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      padding: var(--spacing-md) var(--spacing-lg);
+      box-shadow: var(--shadow-sm);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      font-size: var(--font-size-xl);
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--auth-bg);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 800;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: var(--spacing-sm);
+    }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-md);
+      border: none;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: var(--font-size-sm);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: var(--spacing-xl) var(--spacing-lg);
+    }
+
+    /* Workflow SVG Container */
+    .workflow-container {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-2xl);
+      padding: var(--spacing-xl);
+      box-shadow: var(--shadow-xl);
+      margin: var(--spacing-lg) 0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .workflow-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+      animation: shimmer 3s infinite;
+    }
+
+    @keyframes shimmer {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .workflow-svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* SVG Styles */
+    .workflow-svg .section-card {
+      filter: drop-shadow(var(--shadow-md));
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .workflow-svg .section-card:hover {
+      filter: drop-shadow(var(--shadow-lg));
+      transform: translateY(-2px);
+    }
+
+    .workflow-svg .section-title {
+      font-family: var(--font-family);
+      font-size: 18px;
+      font-weight: 700;
+      fill: #ffffff;
+      text-anchor: middle;
+      letter-spacing: 0.5px;
+    }
+
+    .workflow-svg .section-text {
+      font-family: var(--font-family);
+      font-size: 13px;
+      fill: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .workflow-svg .section-text-bold {
+      font-weight: 600;
+      fill: var(--text-primary);
+    }
+
+    .workflow-svg .section-text-light {
+      fill: var(--text-secondary);
+      font-size: 12px;
+    }
+
+    .workflow-svg .arrow {
+      stroke-width: 3;
+      fill: none;
+      stroke: var(--text-secondary);
+      opacity: 0.6;
+      transition: all 0.3s ease;
+    }
+
+    .workflow-svg .arrow:hover {
+      stroke: var(--primary);
+      opacity: 1;
+      stroke-width: 4;
+    }
+
+    .workflow-svg .loop-arrow {
+      stroke-width: 3;
+      fill: none;
+      stroke: var(--primary);
+      opacity: 0.7;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; }
+    }
+
+    .workflow-svg .icon-group {
+      transition: all 0.3s ease;
+    }
+
+    .workflow-svg .section-card:hover .icon-group {
+      transform: scale(1.1);
+    }
+
+    /* Footer */
+    .footer {
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+      padding: var(--spacing-lg);
+      margin-top: var(--spacing-xl);
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: var(--font-size-sm);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+      .container {
+        padding: var(--spacing-md);
+      }
+
+      .workflow-container {
+        padding: var(--spacing-md);
+      }
+
+      .workflow-svg {
+        min-height: 1200px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .header-content {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+      }
+
+      .workflow-svg .section-title {
+        font-size: 14px;
+      }
+
+      .workflow-svg .section-text {
+        font-size: 11px;
+      }
+
+      .workflow-svg .section-text-light {
+        font-size: 10px;
+      }
+    }
+
+    /* Scroll Snap */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    .workflow-container {
+      scroll-snap-align: start;
+    }
+
+    /* Loading Animation */
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .workflow-container {
+      animation: slideUp 0.6s ease-out;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <div class="logo">
+        <div class="logo-icon">A</div>
+        <span>ArchitectAI</span>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-primary">Export Workflow</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="container">
+    <div class="workflow-container">
+      <svg class="workflow-svg" viewBox="0 0 1000 1750" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <!-- Gradients -->
+          <linearGradient id="authGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#2563eb;stop-opacity:1" />
+          </linearGradient>
+          <linearGradient id="projectGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:1" />
+          </linearGradient>
+          <linearGradient id="budgetGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#06b6d4;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#0891b2;stop-opacity:1" />
+          </linearGradient>
+          <linearGradient id="docGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#f59e0b;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#d97706;stop-opacity:1" />
+          </linearGradient>
+          <linearGradient id="issueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#f97316;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#ea580c;stop-opacity:1" />
+          </linearGradient>
+          <linearGradient id="timelineGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+          </linearGradient>
+          <linearGradient id="inventoryGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#ec4899;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#db2777;stop-opacity:1" />
+          </linearGradient>
+          <linearGradient id="outputGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#4f46e5;stop-opacity:1" />
+          </linearGradient>
+
+          <!-- Arrow Markers -->
+          <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+            <polygon points="0 0, 10 3, 0 6" fill="#64748b" />
+          </marker>
+          <marker id="arrowhead-primary" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+            <polygon points="0 0, 10 3, 0 6" fill="#3b82f6" />
+          </marker>
+        </defs>
+
+        <!-- Background -->
+        <rect width="1000" height="1750" fill="#f8fafc" rx="20"/>
+
+        <!-- Title -->
+        <text x="500" y="60" class="section-title" style="font-size: 36px; fill: #1e293b; font-weight: 800; letter-spacing: -0.5px;">ArchitectAI</text>
+        <text x="500" y="90" style="font-size: 18px; fill: #64748b; text-anchor: middle; font-family: var(--font-family); font-weight: 500;">Construction Management Workflow</text>
+
+        <!-- ===== AUTHENTICATION & AUTHORIZATION ===== -->
+        <g class="section-card">
+          <rect x="80" y="120" width="840" height="150" rx="16" fill="url(#authGradient)" opacity="0.95"/>
+          <rect x="80" y="120" width="840" height="150" rx="16" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+          <text x="500" y="155" class="section-title">AUTHENTICATION & AUTHORIZATION</text>
+          
+          <!-- Modern Icons -->
+          <g class="icon-group" transform="translate(150, 180)">
+            <circle cx="0" cy="0" r="18" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+            <circle cx="0" cy="-6" r="5" fill="white"/>
+            <path d="M -10 8 Q -10 4 0 4 Q 10 4 10 8" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          </g>
+          
+          <text x="220" y="175" class="section-text" style="fill: white; font-weight: 600;">• Email/Password Login</text>
+          <text x="220" y="200" class="section-text" style="fill: rgba(255,255,255,0.9);">• Role-Based Access (Admin/Supervisor/User)</text>
+          <text x="220" y="225" class="section-text" style="fill: rgba(255,255,255,0.9);">• Session Management</text>
+          
+          <text x="550" y="175" class="section-text" style="fill: white; font-weight: 600;">• Supabase Auth</text>
+          <text x="550" y="200" class="section-text" style="fill: rgba(255,255,255,0.9);">• RLS Policy Enforcement</text>
+          <text x="550" y="225" class="section-text" style="fill: rgba(255,255,255,0.9);">• Protected Routes</text>
+          
+          <g class="icon-group" transform="translate(850, 180)">
+            <rect x="-14" y="-14" width="28" height="28" rx="6" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+            <line x1="-7" y1="0" x2="7" y2="0" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="0" y1="-7" x2="0" y2="7" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+          </g>
+        </g>
+
+        <path d="M 500 270 L 500 320" class="arrow" marker-end="url(#arrowhead)"/>
+
+        <!-- ===== PROJECT CREATION & MANAGEMENT ===== -->
+        <g class="section-card">
+          <rect x="80" y="320" width="840" height="170" rx="16" fill="url(#projectGradient)" opacity="0.95"/>
+          <rect x="80" y="320" width="840" height="170" rx="16" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+          <text x="500" y="355" class="section-title">PROJECT CREATION & MANAGEMENT</text>
+          
+          <g class="icon-group" transform="translate(130, 380)">
+            <rect x="0" y="0" width="40" height="40" rx="8" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+            <line x1="10" y1="12" x2="30" y2="12" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="10" y1="20" x2="30" y2="20" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="10" y1="28" x2="25" y2="28" stroke="white" stroke-width="3" stroke-linecap="round"/>
+          </g>
+          
+          <text x="220" y="375" class="section-text" style="fill: white; font-weight: 600;">Create Project</text>
+          <text x="220" y="400" class="section-text" style="fill: rgba(255,255,255,0.9);">(Name, Description, Template)</text>
+          
+          <g class="icon-group" transform="translate(480, 380)">
+            <rect x="0" y="0" width="40" height="40" rx="8" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+            <circle cx="20" cy="15" r="8" fill="none" stroke="white" stroke-width="2.5"/>
+            <line x1="20" y1="23" x2="20" y2="32" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+          </g>
+          
+          <text x="570" y="375" class="section-text" style="fill: white; font-weight: 600;">Team Management</text>
+          <text x="570" y="400" class="section-text" style="fill: rgba(255,255,255,0.9);">(Add members, Assign roles)</text>
+          
+          <g class="icon-group" transform="translate(800, 380)">
+            <rect x="-14" y="-14" width="28" height="28" rx="6" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+            <circle cx="0" cy="0" r="7" fill="white"/>
+          </g>
+          
+          <text x="220" y="440" class="section-text" style="fill: white; font-weight: 600;">Project Status Tracking</text>
+          <text x="220" y="465" class="section-text" style="fill: rgba(255,255,255,0.9);">(Active, Completed, Archived)</text>
+          
+          <text x="570" y="440" class="section-text" style="fill: white; font-weight: 600;">Search & Filter</text>
+          <text x="570" y="465" class="section-text" style="fill: rgba(255,255,255,0.9);">(By status, date, budget)</text>
+        </g>
+
+        <path d="M 500 490 L 500 540" class="arrow" marker-end="url(#arrowhead)"/>
+
+        <!-- ===== BUDGET & EXPENSE MANAGEMENT ===== -->
+        <g class="section-card">
+          <rect x="80" y="540" width="840" height="150" rx="16" fill="url(#budgetGradient)" opacity="0.95"/>
+          <rect x="80" y="540" width="840" height="150" rx="16" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+          <text x="500" y="575" class="section-title">BUDGET & EXPENSE MANAGEMENT</text>
+          
+          <g class="icon-group" transform="translate(150, 600)">
+            <circle cx="0" cy="0" r="20" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.5)" stroke-width="2.5"/>
+            <text x="0" y="7" style="font-size: 24px; text-anchor: middle; font-weight: 700; fill: white;">$</text>
+          </g>
+          
+          <text x="220" y="595" class="section-text" style="fill: white; font-weight: 600;">Set Estimated Budget</text>
+          <text x="220" y="620" class="section-text" style="fill: rgba(255,255,255,0.9);">Track Actual Costs</text>
+          
+          <text x="550" y="595" class="section-text" style="fill: white; font-weight: 600;">Add Expenses (Material/Labour)</text>
+          <text x="550" y="620" class="section-text" style="fill: rgba(255,255,255,0.9);">Automatic Budget Calculation</text>
+          
+          <g class="icon-group" transform="translate(850, 600)">
+            <rect x="-12" y="-12" width="24" height="24" rx="5" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+            <line x1="-6" y1="0" x2="6" y2="0" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="0" y1="-6" x2="0" y2="6" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+          </g>
+          
+          <text x="220" y="655" class="section-text" style="fill: white; font-weight: 600;">Budget Alerts</text>
+          <text x="220" y="680" class="section-text" style="fill: rgba(255,255,255,0.9);">(Threshold exceeded notifications)</text>
+          
+          <text x="550" y="655" class="section-text" style="fill: white; font-weight: 600;">Visual Analytics</text>
+          <text x="550" y="680" class="section-text" style="fill: rgba(255,255,255,0.9);">(Charts, Reports, Trends)</text>
+        </g>
+
+        <path d="M 500 690 L 500 740" class="arrow" marker-end="url(#arrowhead)"/>
+
+        <!-- ===== DOCUMENT & FILE MANAGEMENT ===== -->
+        <g class="section-card">
+          <rect x="80" y="740" width="840" height="170" rx="16" fill="url(#docGradient)" opacity="0.95"/>
+          <rect x="80" y="740" width="840" height="170" rx="16" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+          <text x="500" y="775" class="section-title">DOCUMENT & FILE MANAGEMENT</text>
+          
+          <g class="icon-group" transform="translate(130, 810)">
+            <rect x="0" y="0" width="35" height="42" rx="6" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+            <line x1="10" y1="12" x2="25" y2="12" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="10" y1="20" x2="25" y2="20" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="10" y1="28" x2="22" y2="28" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+          </g>
+          
+          <text x="220" y="805" class="section-text" style="fill: white; font-weight: 600;">Upload Documents</text>
+          <text x="220" y="830" class="section-text" style="fill: rgba(255,255,255,0.9);">(PDFs, Images, Files)</text>
+          
+          <g class="icon-group" transform="translate(480, 810)">
+            <circle cx="0" cy="0" r="18" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.5)" stroke-width="2.5"/>
+            <circle cx="0" cy="0" r="10" fill="none" stroke="white" stroke-width="2"/>
+            <circle cx="0" cy="0" r="4" fill="white"/>
+          </g>
+          
+          <text x="570" y="805" class="section-text" style="fill: white; font-weight: 600;">Progress Photos</text>
+          <text x="570" y="830" class="section-text" style="fill: rgba(255,255,255,0.9);">(Gallery with captions)</text>
+          
+          <g class="icon-group" transform="translate(800, 810)">
+            <rect x="-12" y="-14" width="24" height="28" rx="4" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+            <line x1="-6" y1="-6" x2="6" y2="6" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="-6" y1="6" x2="6" y2="-6" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+          </g>
+          
+          <text x="220" y="870" class="section-text" style="fill: white; font-weight: 600;">Supabase Storage</text>
+          <text x="220" y="895" class="section-text" style="fill: rgba(255,255,255,0.9);">(Organized by project/category)</text>
+          
+          <text x="570" y="870" class="section-text" style="fill: white; font-weight: 600;">AI Analysis (Placeholder)</text>
+          <text x="570" y="895" class="section-text" style="fill: rgba(255,255,255,0.9);">(Progress detection, Material usage)</text>
+          
+          <text x="800" y="870" class="section-text" style="fill: white; font-weight: 600;">3D Model Viewer</text>
+          <text x="800" y="895" class="section-text" style="fill: rgba(255,255,255,0.9);">(GLB/GLTF files)</text>
+        </g>
+
+        <path d="M 500 910 L 500 960" class="arrow" marker-end="url(#arrowhead)"/>
+
+        <!-- ===== ISSUE TRACKING & RESOLUTION ===== -->
+        <g class="section-card">
+          <rect x="80" y="960" width="840" height="150" rx="16" fill="url(#issueGradient)" opacity="0.95"/>
+          <rect x="80" y="960" width="840" height="150" rx="16" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+          <text x="500" y="995" class="section-title">ISSUE TRACKING & RESOLUTION</text>
+          
+          <g class="icon-group" transform="translate(150, 1020)">
+            <circle cx="0" cy="0" r="18" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.5)" stroke-width="2.5"/>
+            <path d="M 0 -10 L 0 10 M -10 0 L 10 0" stroke="white" stroke-width="3" stroke-linecap="round"/>
+          </g>
+          
+          <text x="220" y="1015" class="section-text" style="fill: white; font-weight: 600;">Create Issues</text>
+          <text x="220" y="1040" class="section-text" style="fill: rgba(255,255,255,0.9);">(Title, Description, Priority, Photo)</text>
+          
+          <text x="550" y="1015" class="section-text" style="fill: white; font-weight: 600;">Status Management</text>
+          <text x="550" y="1040" class="section-text" style="fill: rgba(255,255,255,0.9);">(Open → In Progress → Resolved)</text>
+          
+          <g class="icon-group" transform="translate(850, 1020)">
+            <rect x="-12" y="-12" width="24" height="24" rx="5" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+            <line x1="-6" y1="-6" x2="6" y2="6" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+          </g>
+          
+          <text x="220" y="1085" class="section-text" style="fill: white; font-weight: 600;">Priority Levels</text>
+          <text x="220" y="1110" class="section-text" style="fill: rgba(255,255,255,0.9);">(Low, Medium, High)</text>
+          
+          <text x="550" y="1085" class="section-text" style="fill: white; font-weight: 600;">Issue Comments</text>
+          <text x="550" y="1110" class="section-text" style="fill: rgba(255,255,255,0.9);">(Team collaboration)</text>
+        </g>
+
+        <path d="M 500 1110 L 500 1160" class="arrow" marker-end="url(#arrowhead)"/>
+
+        <!-- ===== TIMELINE & TASK MANAGEMENT ===== -->
+        <g class="section-card">
+          <rect x="80" y="1160" width="840" height="150" rx="16" fill="url(#timelineGradient)" opacity="0.95"/>
+          <rect x="80" y="1160" width="840" height="150" rx="16" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+          <text x="500" y="1195" class="section-title">TIMELINE & TASK MANAGEMENT</text>
+          
+          <g class="icon-group" transform="translate(130, 1220)">
+            <circle cx="0" cy="0" r="18" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.5)" stroke-width="2.5"/>
+            <line x1="0" y1="-12" x2="0" y2="0" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="0" y1="0" x2="10" y2="10" stroke="white" stroke-width="3" stroke-linecap="round"/>
+          </g>
+          
+          <text x="220" y="1215" class="section-text" style="fill: white; font-weight: 600;">Create Tasks</text>
+          <text x="220" y="1240" class="section-text" style="fill: rgba(255,255,255,0.9);">(Name, Start/End dates, Status)</text>
+          
+          <g class="icon-group" transform="translate(480, 1220)">
+            <rect x="-14" y="-14" width="28" height="28" rx="5" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+            <line x1="-7" y1="0" x2="7" y2="0" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="0" y1="-7" x2="0" y2="7" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+          </g>
+          
+          <text x="570" y="1215" class="section-text" style="fill: white; font-weight: 600;">Gantt Chart Visualization</text>
+          <text x="570" y="1240" class="section-text" style="fill: rgba(255,255,255,0.9);">(Frappe Gantt library)</text>
+          
+          <g class="icon-group" transform="translate(800, 1220)">
+            <rect x="-12" y="-14" width="24" height="28" rx="4" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+            <line x1="-6" y1="-6" x2="6" y2="6" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="-6" y1="6" x2="6" y2="-6" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+          </g>
+          
+          <text x="220" y="1275" class="section-text" style="fill: white; font-weight: 600;">Task Status</text>
+          <text x="220" y="1300" class="section-text" style="fill: rgba(255,255,255,0.9);">(Pending, In Progress, Completed)</text>
+          
+          <text x="570" y="1275" class="section-text" style="fill: white; font-weight: 600;">Calendar Integration</text>
+          <text x="570" y="1300" class="section-text" style="fill: rgba(255,255,255,0.9);">(FullCalendar - Month/Week/Day views)</text>
+        </g>
+
+        <path d="M 500 1310 L 500 1360" class="arrow" marker-end="url(#arrowhead)"/>
+
+        <!-- ===== INVENTORY & BLUEPRINT MANAGEMENT ===== -->
+        <g class="section-card">
+          <rect x="80" y="1360" width="840" height="170" rx="16" fill="url(#inventoryGradient)" opacity="0.95"/>
+          <rect x="80" y="1360" width="840" height="170" rx="16" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+          <text x="500" y="1395" class="section-title">INVENTORY & BLUEPRINT MANAGEMENT</text>
+          
+          <g class="icon-group" transform="translate(130, 1430)">
+            <rect x="-12" y="-12" width="24" height="24" rx="5" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+            <line x1="-6" y1="0" x2="6" y2="0" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="0" y1="-6" x2="0" y2="6" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+          </g>
+          
+          <text x="220" y="1425" class="section-text" style="fill: white; font-weight: 600;">Inventory Tracking</text>
+          <text x="220" y="1450" class="section-text" style="fill: rgba(255,255,255,0.9);">(Items, Quantity, Unit, Category)</text>
+          
+          <g class="icon-group" transform="translate(480, 1430)">
+            <rect x="-14" y="-14" width="28" height="28" rx="5" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+            <line x1="-7" y1="-7" x2="7" y2="7" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="-7" y1="7" x2="7" y2="-7" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+          </g>
+          
+          <text x="570" y="1425" class="section-text" style="fill: white; font-weight: 600;">Blueprint Sketcher</text>
+          <text x="570" y="1450" class="section-text" style="fill: rgba(255,255,255,0.9);">(Canvas drawing - Lines, Rectangles)</text>
+          
+          <g class="icon-group" transform="translate(800, 1430)">
+            <polygon points="0,-14 14,-6 14,10 -14,10 -14,-6" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+            <line x1="-4" y1="0" x2="4" y2="0" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            <line x1="0" y1="-4" x2="0" y2="4" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          </g>
+          
+          <text x="220" y="1490" class="section-text" style="fill: white; font-weight: 600;">CRUD Operations</text>
+          <text x="220" y="1515" class="section-text" style="fill: rgba(255,255,255,0.9);">(Add, Edit, Delete items)</text>
+          
+          <text x="570" y="1490" class="section-text" style="fill: white; font-weight: 600;">Save/Load Blueprints</text>
+          <text x="570" y="1515" class="section-text" style="fill: rgba(255,255,255,0.9);">(PNG + JSON format)</text>
+          
+          <text x="800" y="1490" class="section-text" style="fill: white; font-weight: 600;">Export & Download</text>
+          <text x="800" y="1515" class="section-text" style="fill: rgba(255,255,255,0.9);">(PDF reports, Blueprints)</text>
+        </g>
+
+        <path d="M 500 1530 L 500 1580" class="arrow" marker-end="url(#arrowhead)"/>
+
+        <!-- ===== OUTPUT & COLLABORATION ===== -->
+        <g class="section-card">
+          <rect x="80" y="1580" width="840" height="60" rx="16" fill="url(#outputGradient)" opacity="0.95"/>
+          <rect x="80" y="1580" width="840" height="60" rx="16" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+          <text x="500" y="1615" class="section-title" style="font-size: 16px;">OUTPUT: Dashboard, Reports, Team Collaboration, Activity Logs</text>
+        </g>
+
+        <!-- Feedback Loop Arrow -->
+        <path d="M 100 1360 Q 30 1230 80 1100" class="loop-arrow" marker-end="url(#arrowhead-primary)"/>
+        <text x="35" y="1210" style="font-size: 13px; fill: #3b82f6; font-weight: 700; font-family: var(--font-family);">Continuous Updates</text>
+
+        <!-- Legend -->
+        <g>
+          <rect x="80" y="1660" width="840" height="90" fill="#ffffff" stroke="#e2e8f0" stroke-width="2" rx="16" opacity="0.95"/>
+          <text x="100" y="1685" style="font-weight: 700; font-size: 15px; fill: #1e293b; font-family: var(--font-family);">Key Features:</text>
+          
+          <text x="100" y="1710" style="font-size: 12px; fill: #64748b; font-family: var(--font-family);">✓ Role-based access control (Admin/Supervisor/User)  |  ✓ Real-time budget tracking with alerts  |  ✓ Multi-language support (EN/HI/TE)</text>
+          <text x="100" y="1730" style="font-size: 12px; fill: #64748b; font-family: var(--font-family);">✓ Gantt timeline visualization  |  ✓ Issue tracking with photos  |  ✓ Document &amp; file management  |  ✓ Team collaboration</text>
+          <text x="100" y="1750" style="font-size: 12px; fill: #64748b; font-family: var(--font-family);">✓ Inventory management  |  ✓ Blueprint sketching  |  ✓ Progress photo gallery  |  ✓ Calendar integration  |  ✓ Activity logging</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; 2024 ArchitectAI. Construction Management Platform.</p>
+  </footer>
+
+  <script>
+    // Add interactive hover effects
+    document.querySelectorAll('.section-card').forEach(card => {
+      card.addEventListener('mouseenter', function() {
+        this.style.opacity = '1';
+      });
+      card.addEventListener('mouseleave', function() {
+        this.style.opacity = '0.95';
+      });
+    });
+
+    // Smooth scroll on arrow click
+    document.querySelectorAll('.arrow').forEach(arrow => {
+      arrow.addEventListener('click', function() {
+        const nextCard = this.parentElement.nextElementSibling?.querySelector('.section-card');
+        if (nextCard) {
+          nextCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
