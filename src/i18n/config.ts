@@ -10,11 +10,24 @@ const resources = {
   te: { translation: teTranslations },
 }
 
+// Get initial language safely (SSR-compatible)
+const getInitialLanguage = (): string => {
+  if (typeof window !== 'undefined') {
+    try {
+      return localStorage.getItem('language') || 'en'
+    } catch (error) {
+      // localStorage might not be available (e.g., in private browsing)
+      return 'en'
+    }
+  }
+  return 'en' // Default for SSR environments
+}
+
 i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: localStorage.getItem('language') || 'en',
+    lng: getInitialLanguage(),
     fallbackLng: 'en',
     interpolation: {
       escapeValue: false,

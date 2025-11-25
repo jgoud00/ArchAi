@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import { useToast } from '@/hooks/useToast'
 // @ts-ignore - frappe-gantt doesn't have TypeScript definitions
-// @ts-ignore - frappe-gantt doesn't have TypeScript definitions
 import Gantt from 'frappe-gantt'
 
 export const Timeline = () => {
@@ -48,8 +47,8 @@ export const Timeline = () => {
 
   useEffect(() => {
     // Clear previous instance
-    if (ganttInstance) {
-      ganttRef.current!.innerHTML = ''
+    if (ganttRef.current) {
+      ganttRef.current.innerHTML = ''
     }
 
     if (ganttRef.current && tasks.length > 0) {
@@ -82,7 +81,17 @@ export const Timeline = () => {
         console.error('Error initializing Gantt chart:', error)
       }
     }
-  }, [tasks, ganttInstance])
+    
+    // Cleanup function to destroy gantt instance
+    return () => {
+      if (ganttInstance) {
+        if (ganttRef.current) {
+          ganttRef.current.innerHTML = ''
+        }
+        setGanttInstance(null)
+      }
+    }
+  }, [tasks]) // Removed ganttInstance from dependencies to prevent infinite loops
 
   if (loading) {
     return (

@@ -112,48 +112,64 @@ export const getUserProjects = async (userId: string): Promise<Project[]> => {
     })
   }
 
-  // Transform data and get counts
-  const transformedProjects: Project[] = []
-
-  for (const project of allProjects) {
-    // Get scan count
-    const { count: scanCount } = await supabase
-      .from('scans')
-      .select('*', { count: 'exact', head: true })
-      .eq('project_id', project.id)
-
-    // Get member count
-    const { count: memberCount } = await supabase
-      .from('team_members')
-      .select('*', { count: 'exact', head: true })
-      .eq('project_id', project.id)
-
-    // Get file count
-    const { count: fileCount } = await supabase
-      .from('project_files')
-      .select('*', { count: 'exact', head: true })
-      .eq('project_id', project.id)
-
-    // Get comment count
-    const { count: commentCount } = await supabase
-      .from('project_comments')
-      .select('*', { count: 'exact', head: true })
-      .eq('project_id', project.id)
-
-    transformedProjects.push({
-      id: project.id,
-      name: project.name,
-      description: project.description,
-      ownerId: project.owner_id,
-      status: project.status,
-      createdAt: new Date(project.created_at),
-      updatedAt: new Date(project.updated_at),
-      scanCount: scanCount || 0,
-      memberCount: memberCount || 0,
-      fileCount: fileCount || 0,
-      commentCount: commentCount || 0,
-    })
+  // Transform data and get counts efficiently (batch queries instead of N+1)
+  const projectIdArray = Array.from(projectIds)
+  if (projectIdArray.length === 0) {
+    return []
   }
+
+  // Batch fetch all counts in parallel (4 queries total instead of 4*N queries)
+  const [scanCountsData, memberCountsData, fileCountsData, commentCountsData] = await Promise.all([
+    // Get all scan counts
+    supabase
+      .from('scans')
+      .select('project_id')
+      .in('project_id', projectIdArray),
+    // Get all member counts
+    supabase
+      .from('team_members')
+      .select('project_id')
+      .in('project_id', projectIdArray),
+    // Get all file counts
+    supabase
+      .from('project_files')
+      .select('project_id')
+      .in('project_id', projectIdArray),
+    // Get all comment counts
+    supabase
+      .from('project_comments')
+      .select('project_id')
+      .in('project_id', projectIdArray),
+  ])
+
+  // Count occurrences per project
+  const countByProjectId = (data: any[]): Record<string, number> => {
+    const counts: Record<string, number> = {}
+    data?.forEach((item) => {
+      counts[item.project_id] = (counts[item.project_id] || 0) + 1
+    })
+    return counts
+  }
+
+  const scanCounts = countByProjectId(scanCountsData.data || [])
+  const memberCounts = countByProjectId(memberCountsData.data || [])
+  const fileCounts = countByProjectId(fileCountsData.data || [])
+  const commentCounts = countByProjectId(commentCountsData.data || [])
+
+  // Transform projects with counts
+  const transformedProjects: Project[] = allProjects.map((project) => ({
+    id: project.id,
+    name: project.name,
+    description: project.description,
+    ownerId: project.owner_id,
+    status: project.status,
+    createdAt: new Date(project.created_at),
+    updatedAt: new Date(project.updated_at),
+    scanCount: scanCounts[project.id] || 0,
+    memberCount: memberCounts[project.id] || 0,
+    fileCount: fileCounts[project.id] || 0,
+    commentCount: commentCounts[project.id] || 0,
+  }))
 
   return transformedProjects
 }

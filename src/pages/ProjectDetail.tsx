@@ -201,6 +201,9 @@ export const ProjectDetail = () => {
         return
       }
 
+      // Use role from form, default to 'viewer' if not provided
+      const memberRole = (data.role || 'viewer') as 'editor' | 'viewer'
+
       // Add to team
       const { error: teamError } = await supabase
         .from('team_members')
@@ -208,7 +211,7 @@ export const ProjectDetail = () => {
           project_id: id,
           user_id: userData.id,
           email: data.email,
-          role: 'member',
+          role: memberRole,
         })
 
       if (teamError) {
@@ -580,7 +583,7 @@ export const ProjectDetail = () => {
         <form onSubmit={inviteForm.handleSubmit(handleInviteMember)} className="space-y-4">
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">
-              Email
+              Email *
             </label>
             <Input
               id="email"
@@ -591,6 +594,25 @@ export const ProjectDetail = () => {
             {inviteForm.formState.errors.email && (
               <p className="text-sm text-destructive">
                 {inviteForm.formState.errors.email.message}
+              </p>
+            )}
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="role" className="text-sm font-medium">
+              Role
+            </label>
+            <select
+              id="role"
+              {...inviteForm.register('role')}
+              className="w-full px-3 py-2 border border-input rounded-md bg-background text-sm"
+              defaultValue="viewer"
+            >
+              <option value="viewer">Viewer</option>
+              <option value="editor">Editor</option>
+            </select>
+            {inviteForm.formState.errors.role && (
+              <p className="text-sm text-destructive">
+                {inviteForm.formState.errors.role.message}
               </p>
             )}
           </div>

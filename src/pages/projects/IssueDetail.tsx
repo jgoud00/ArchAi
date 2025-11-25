@@ -28,7 +28,12 @@ export const IssueDetail = () => {
     try {
       setLoading(true)
       const issueData = await getIssue(issueId)
-      setIssue(issueData)
+      if (issueData) {
+        setIssue(issueData)
+        // Initialize state from loaded issue
+        setStatus(issueData.status)
+        setPriority(issueData.priority)
+      }
     } catch (error: any) {
       showToast(error.message || 'Failed to load issue', 'error')
     } finally {

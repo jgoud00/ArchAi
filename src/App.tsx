@@ -31,6 +31,7 @@ import { Calendar } from './pages/Calendar'
 import { Home } from './pages/Home'
 import { ConfigError } from './components/ConfigError'
 import { isSupabaseConfigured } from './services/supabase'
+import { ErrorBoundary } from './components/ErrorBoundary'
 
 function App() {
   const { initializeAuth, user } = useAuthStore()
@@ -53,13 +54,14 @@ function App() {
   // The router will handle auth state properly via ProtectedRoute
 
   return (
-    <BrowserRouter
-      future={{
-        v7_startTransition: true,
-        v7_relativeSplatPath: true,
-      }}
-    >
-      <Routes>
+    <ErrorBoundary>
+      <BrowserRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true,
+        }}
+      >
+        <Routes>
         {/* Public routes */}
         <Route path="/" element={<Home />} />
         <Route
@@ -112,8 +114,9 @@ function App() {
 
         {/* Catch all */}
         <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </BrowserRouter>
+        </Routes>
+      </BrowserRouter>
+    </ErrorBoundary>
   )
 }
 

@@ -24,7 +24,7 @@ export const inviteMemberSchema = z.object({
   email: z.string().email('Invalid email address'),
   role: z.enum(['editor', 'viewer'], {
     errorMap: () => ({ message: 'Role must be editor or viewer' }),
-  }),
+  }).optional().default('viewer'),
 })
 
 export const passwordResetSchema = z.object({

@@ -261,8 +261,13 @@ export const getCurrentUser = async (userId: string): Promise<User | null> => {
  * The email contains a link to reset the password.
  */
 export const requestPasswordReset = async (email: string): Promise<void> => {
+  // Guard for SSR - use environment variable or fallback
+  const origin = typeof window !== 'undefined' 
+    ? window.location.origin 
+    : (import.meta.env.VITE_APP_URL || 'https://your-domain.com')
+  
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/reset-password`,
+    redirectTo: `${origin}/reset-password`,
   })
 
   if (error) {

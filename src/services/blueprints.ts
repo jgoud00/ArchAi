@@ -124,13 +124,57 @@ export const saveBlueprint = async (
 
 export const loadBlueprintJson = async (jsonUrl: string): Promise<string> => {
   try {
-    const response = await fetch(jsonUrl)
-    if (!response.ok) {
-      throw new Error('Failed to load blueprint JSON')
+    // Validate URL
+    if (!jsonUrl || typeof jsonUrl !== 'string') {
+      throw new Error('Invalid JSON URL provided')
     }
+
+    // Guard for SSR - fetch only in browser
+    if (typeof window === 'undefined') {
+      throw new Error('Cannot fetch in server-side environment')
+    }
+
+    // Validate URL format
+    let url: URL
+    try {
+      url = new URL(jsonUrl)
+    } catch {
+      throw new Error('Invalid URL format')
+    }
+
+    // Ensure it's HTTP/HTTPS
+    if (!['http:', 'https:'].includes(url.protocol)) {
+      throw new Error('Only HTTP/HTTPS URLs are allowed')
+    }
+
+    // Create timeout controller for fetch
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
+
+    const response = await fetch(jsonUrl, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json, text/plain, */*',
+      },
+      signal: controller.signal,
+    }).finally(() => {
+      clearTimeout(timeoutId)
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to load blueprint JSON: ${response.status} ${response.statusText}`)
+    }
+
     return await response.text()
-  } catch (error) {
-    throw new Error('Failed to load blueprint JSON')
+  } catch (error: any) {
+    // Provide more specific error messages
+    if (error.name === 'AbortError') {
+      throw new Error('Request timeout: Failed to load blueprint JSON')
+    }
+    if (error.message) {
+      throw error
+    }
+    throw new Error('Failed to load blueprint JSON: Network error')
   }
 }
 

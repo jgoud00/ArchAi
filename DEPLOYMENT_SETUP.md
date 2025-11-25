@@ -193,23 +193,64 @@ This serves the `dist/` folder locally for testing.
    - `VITE_SUPABASE_ANON_KEY`
 6. Click **Deploy**
 
-### Vercel Configuration File (Optional)
+### Vercel Configuration File (Required for SPA Routing)
 
-Create `vercel.json` in project root:
+**Important**: A `vercel.json` file is already included in the project root to ensure proper SPA routing.
+
+The configuration includes:
+- **Build Command**: `npm run build`
+- **Output Directory**: `dist`
+- **SPA Rewrites**: All routes redirect to `/index.html` for React Router to handle client-side routing
+- **Asset Caching**: Optimized cache headers for static assets
 
 ```json
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "framework": "vite",
+  "framework": null,
   "rewrites": [
     {
       "source": "/(.*)",
       "destination": "/index.html"
     }
+  ],
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
   ]
 }
 ```
+
+**Common Vercel Deployment Issues & Solutions**:
+
+1. **404 Errors on Routes**: Ensure `vercel.json` is present with the rewrites configuration above.
+
+2. **Environment Variables Not Working**: 
+   - Variables MUST start with `VITE_` prefix to be exposed to client
+   - After adding variables, trigger a new deployment
+   - Verify in Vercel Dashboard → Settings → Environment Variables
+
+3. **Build Fails with TypeScript Errors**:
+   - Run `npm run build` locally first to catch errors
+   - Ensure Node.js version is 18.x or higher (set in Vercel Dashboard)
+
+4. **Blank Page After Deployment**:
+   - Check browser console for errors
+   - Verify Supabase environment variables are set
+   - Ensure `public/logo.svg` exists (for favicon)
+   - Check that build completed successfully
+
+5. **CORS Errors**:
+   - Verify Supabase project URL is correct
+   - Check Supabase project is active (not paused)
+   - Verify RLS policies allow access
 
 ---
 
@@ -431,16 +472,72 @@ npm install
 
 #### Vercel: Build Fails
 
-- Check Node.js version (should be 18.x)
+- Check Node.js version (should be 18.x) - set in Vercel Dashboard → Settings → Node.js Version
 - Verify build command: `npm run build`
 - Check build logs for specific errors
+- Ensure all dependencies are in `package.json` (not just `devDependencies`)
+- Clear build cache: Vercel Dashboard → Settings → General → Clear Build Cache
+
+#### Vercel: 404 on Routes / Routes Not Working
+
+- **Problem**: React Router routes show 404 after deployment
+- **Solution**: Ensure `vercel.json` exists with SPA rewrites configuration (see Vercel Configuration File section above)
+- Verify `rewrites` section redirects all routes to `/index.html`
+
+#### Vercel: Blank Page / White Screen
+
+- **Problem**: App builds successfully but shows blank page
+- **Solutions**:
+  1. Check browser console for JavaScript errors
+  2. Verify Supabase environment variables are set correctly
+  3. Check that `public/logo.svg` exists (may cause issues if referenced but missing)
+  4. Verify build output directory is `dist`
+  5. Check that `index.html` exists in `dist/` folder
+
+#### Vercel: Environment Variables Not Working
+
+- **Problem**: Environment variables are undefined in production
+- **Solutions**:
+  1. Variables MUST start with `VITE_` prefix to be exposed to client
+  2. Add variables in Vercel Dashboard → Settings → Environment Variables
+  3. After adding variables, trigger a new deployment
+  4. Verify variable names match exactly (case-sensitive): `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
+  5. For production: Set variables in Production environment (not just Preview/Development)
+
+#### Vercel: Configuration Error Page
+
+- **Problem**: Shows "Configuration Error" page after deployment
+- **Solution**: Supabase environment variables are missing or incorrect
+  1. Go to Vercel Dashboard → Settings → Environment Variables
+  2. Verify `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are set
+  3. Check that values are correct (no extra spaces, quotes, etc.)
+  4. Redeploy after adding/fixing variables
+
+#### Vercel: Infinite Loops / Performance Issues
+
+- **Problem**: App freezes or renders infinitely
+- **Solutions**:
+  1. Check useEffect dependencies - all callbacks should be wrapped in `useCallback`
+  2. Verify no functions in dependency arrays that change on each render
+  3. Review console for React warnings about dependencies
+  4. Check for infinite re-renders in React DevTools
+
+#### Vercel: CORS Errors / Network Failures
+
+- **Problem**: "Failed to fetch" or CORS errors in console
+- **Solutions**:
+  1. Verify Supabase URL is correct in environment variables
+  2. Check Supabase project is active (not paused)
+  3. Verify RLS policies allow access from your domain
+  4. Check Supabase Dashboard → Settings → API → CORS settings
+  5. Ensure API URL matches exactly (no trailing slashes)
 
 #### Netlify: 404 on Routes
 
 - Add `netlify.toml` with redirect rules (see above)
 - Verify publish directory is `dist`
 
-#### Environment Variables Not Working
+#### Environment Variables Not Working (General)
 
 - **Vercel**: Variables must start with `VITE_` to be exposed to client
 - **Netlify**: Same requirement
@@ -459,10 +556,14 @@ Before deploying to production, verify:
 - [ ] All routes work correctly
 - [ ] Authentication flow works
 - [ ] Protected routes redirect properly
+- [ ] No infinite loops in useEffect hooks (all callbacks are stable)
+- [ ] SSR guards in place for `document` and `window` access
 
 ### Configuration
 
-- [ ] Environment variables set in hosting platform
+- [ ] Environment variables set in hosting platform (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`)
+- [ ] `vercel.json` file exists with SPA routing configuration
+- [ ] `public/logo.svg` exists (for favicon)
 - [ ] Supabase project configured
 - [ ] Database migrations run
 - [ ] Storage buckets created
@@ -476,6 +577,7 @@ Before deploying to production, verify:
 - [ ] Test file uploads
 - [ ] Test project creation
 - [ ] Test on mobile devices (responsive)
+- [ ] Test production build locally (`npm run build && npm run preview`)
 
 ### Security
 
@@ -483,12 +585,23 @@ Before deploying to production, verify:
 - [ ] `.env.local` in `.gitignore`
 - [ ] RLS policies configured correctly
 - [ ] CORS settings correct in Supabase
+- [ ] Only `VITE_` prefixed variables exposed to client
 
 ### Performance
 
 - [ ] Production build size is reasonable
 - [ ] Images optimized
 - [ ] Lazy loading implemented where needed
+- [ ] Asset caching configured in `vercel.json`
+
+### Vercel-Specific
+
+- [ ] `vercel.json` includes SPA rewrites
+- [ ] Build command set to `npm run build`
+- [ ] Output directory set to `dist`
+- [ ] Node.js version set to 18.x or higher
+- [ ] Environment variables added in Vercel Dashboard
+- [ ] Build logs reviewed for warnings
 
 ---
 
@@ -498,7 +611,8 @@ Before deploying to production, verify:
 DTI/
 ├── dist/                    # Production build output (generated)
 ├── node_modules/            # Dependencies (generated)
-├── public/                  # Static assets (if any)
+├── public/                  # Static assets (logo.svg, favicon, etc.)
+│   └── logo.svg            # Logo file for favicon and static references
 ├── src/
 │   ├── api/                 # Public API endpoints
 │   ├── components/          # React components
@@ -524,6 +638,7 @@ DTI/
 ├── tailwind.config.js      # Tailwind configuration
 ├── tsconfig.json           # TypeScript configuration
 ├── vite.config.ts          # Vite configuration
+├── vercel.json             # Vercel deployment configuration (SPA routing)
 └── DEPLOYMENT_SETUP.md     # This file
 ```
 
@@ -533,8 +648,10 @@ DTI/
 - **`vite.config.ts`**: Build configuration
 - **`tsconfig.json`**: TypeScript compiler options
 - **`tailwind.config.js`**: Tailwind CSS configuration
+- **`vercel.json`**: Vercel deployment configuration (SPA routing, caching)
 - **`src/services/supabase.ts`**: Supabase client setup
 - **`src/App.tsx`**: Main application router
+- **`src/main.tsx`**: Application entry point (includes SSR guards)
 
 ---
 
@@ -580,6 +697,36 @@ netlify deploy --prod  # Deploy to Netlify
 VITE_SUPABASE_URL=https://xxxxx.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
+
+---
+
+## Quick Vercel Deployment Checklist
+
+### Before First Deployment
+
+1. ✅ Verify `vercel.json` exists in project root
+2. ✅ Ensure `public/logo.svg` exists
+3. ✅ Run `npm run build` locally - must succeed without errors
+4. ✅ Test production build: `npm run preview`
+5. ✅ Set environment variables in Vercel Dashboard:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+
+### After Deployment
+
+1. ✅ Verify all routes work (no 404 errors)
+2. ✅ Check browser console for errors
+3. ✅ Test authentication flow (signup/login)
+4. ✅ Test protected routes
+5. ✅ Verify Supabase connection works
+6. ✅ Check environment variables are loaded correctly
+
+### Common First-Time Issues
+
+- **404 on Routes**: Ensure `vercel.json` has rewrites configuration
+- **Blank Page**: Check environment variables are set correctly
+- **CORS Errors**: Verify Supabase URL is correct
+- **Config Error Page**: Supabase variables are missing or incorrect
 
 ---
 
