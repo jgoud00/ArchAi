@@ -1,4 +1,4 @@
-export type UserRole = 'admin' | 'supervisor' | 'user'
+export type UserRole = 'admin' | 'user'
 
 export interface User {
   uid: string
@@ -113,7 +113,6 @@ export interface AuthStore {
   // Role-based helpers
   userRole: UserRole | null
   isAdmin: () => boolean
-  isSupervisor: () => boolean
   isUser: () => boolean
   hasPermission: (requiredRole: UserRole | UserRole[]) => boolean
 }

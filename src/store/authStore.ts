@@ -15,7 +15,6 @@ interface AuthStore {
   // Role-based helpers
   userRole: UserRole | null
   isAdmin: () => boolean
-  isSupervisor: () => boolean
   isUser: () => boolean
   hasPermission: (requiredRole: UserRole | UserRole[]) => boolean
 }
@@ -65,10 +64,6 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     return get().user?.role === 'admin'
   },
 
-  isSupervisor: () => {
-    return get().user?.role === 'supervisor' || get().user?.role === 'admin'
-  },
-
   isUser: () => {
     return get().user?.role === 'user'
   },
@@ -78,9 +73,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
    * @param requiredRole - Single role or array of roles that are allowed
    * @returns true if user has one of the required roles
    * 
-   * Role hierarchy: admin > supervisor > user
+   * Role hierarchy: admin > user
    * - If requiredRole is 'user', all roles can access
-   * - If requiredRole is 'supervisor', admin and supervisor can access
    * - If requiredRole is 'admin', only admin can access
    */
   hasPermission: (requiredRole: UserRole | UserRole[]) => {
@@ -96,9 +90,6 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     // Role hierarchy: admin can access everything
     if (userRole === 'admin') return true
 
-    // Supervisor can access user-level permissions
-    if (userRole === 'supervisor' && roles.includes('user')) return true
-
     return false
   },
 
@@ -106,15 +97,13 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
    * Initialize authentication state
    * 
    * Flow:
-   * 1. Set loading to false immediately to unblock UI
-   * 2. Check for existing session synchronously
-   * 3. Set up listener for future auth changes (only once)
+   * 1. Check for existing session
+   * 2. Set up listener for future auth changes (only once)
    */
   initializeAuth: async () => {
-    // Step 1: Unblock UI immediately
-    set({ loading: false, user: null, userRole: null })
-    
-    // Step 2: Check for existing session
+    // Keep UI in loading state until session check concludes
+    set({ loading: true })
+
     try {
       const { data: { session }, error } = await supabase.auth.getSession()
       
@@ -142,6 +131,11 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       }
     } catch (error) {
       console.error('[Auth Store] Error checking session:', error)
+    } finally {
+      set((state) => ({
+        ...state,
+        loading: false,
+      }))
     }
 
     // Step 3: Set up listener for future auth state changes (only once)

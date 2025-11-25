@@ -21,9 +21,8 @@ interface RoleGuardProps {
  * @param fallback - Optional custom component to show if access denied
  * @param redirectTo - Optional redirect path (defaults to /dashboard)
  * 
- * Role hierarchy: admin > supervisor > user
+ * Role hierarchy: admin > user
  * - Admin can access everything
- * - Supervisor can access supervisor and user level
  * - User can only access user level
  */
 export const RoleGuard: React.FC<RoleGuardProps> = ({

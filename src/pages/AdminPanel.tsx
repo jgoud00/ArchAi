@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Shield, User, Users, AlertCircle } from 'lucide-react'
+import { Shield, Users, AlertCircle } from 'lucide-react'
 import { getAllUsers, updateUserRole } from '@/services/userManagement'
 import { useAuthStore } from '@/store/authStore'
 import { User as UserType, UserRole } from '@/types'
@@ -72,14 +72,12 @@ export const AdminPanel = () => {
   const getRoleBadgeVariant = (role: UserRole) => {
     switch (role) {
       case 'admin': return 'default'
-      case 'supervisor': return 'secondary'
       default: return 'outline'
     }
   }
 
   const roleCounts = {
     admin: users.filter(u => u.role === 'admin').length,
-    supervisor: users.filter(u => u.role === 'supervisor').length,
     user: users.filter(u => u.role === 'user').length,
   }
 
@@ -120,17 +118,6 @@ export const AdminPanel = () => {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm font-medium text-muted-foreground">Supervisors</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-2">
-                <User className="h-5 w-5 text-muted-foreground" />
-                <span className="text-2xl font-bold">{roleCounts.supervisor}</span>
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Users List */}
@@ -209,12 +196,10 @@ export const AdminPanel = () => {
                     className="w-full px-3 py-2 border border-input rounded-md bg-background"
                   >
                     <option value="user">User</option>
-                    <option value="supervisor">Supervisor</option>
                     <option value="admin">Admin</option>
                   </select>
                   <p className="text-xs text-muted-foreground mt-1">
                     {newRole === 'admin' && 'Full system access'}
-                    {newRole === 'supervisor' && 'Can manage projects and oversee users'}
                     {newRole === 'user' && 'Standard user access'}
                   </p>
                 </div>

@@ -15,7 +15,6 @@ import {
   AlertTriangle,
   X,
 } from 'lucide-react'
-import { ShowIfHasRole } from '@/components/RoleGuard'
 import {
   getProject,
   getProjectScans,
@@ -358,13 +357,10 @@ export const ProjectDetail = () => {
                       <UserPlus className="h-4 w-4 mr-2" />
                       Invite Member
                     </Button>
-                    {/* Only admins and supervisors can delete projects */}
-                    <ShowIfHasRole requiredRole={['admin', 'supervisor']}>
-                      <Button variant="destructive" onClick={() => setDeleteConfirmOpen(true)}>
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete Project
-                      </Button>
-                    </ShowIfHasRole>
+                    <Button variant="destructive" onClick={() => setDeleteConfirmOpen(true)}>
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete Project
+                    </Button>
                   </>
                 )}
               </div>

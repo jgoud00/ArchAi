@@ -1,38 +1,46 @@
--- Storage Bucket Policies for project-files bucket
+-- Secure Storage Policies for project-files bucket
 
--- Enable public access for authenticated users
--- Note: You can make the bucket public or use these policies
+-- Helper functions defined in migrations:
+-- - public.project_id_from_storage_path(text)
+-- - public.user_can_access_storage_object(text, uuid)
 
--- Policy: Allow public read access to files
-CREATE POLICY "Public Access"
+-- Policy: Authenticated users with project access can read objects
+CREATE POLICY "Project files read access"
 ON storage.objects FOR SELECT
-USING (bucket_id = 'project-files');
+USING (
+  bucket_id = 'project-files'
+  AND auth.role() = 'authenticated'
+  AND public.user_can_access_storage_object(name, auth.uid())
+);
 
--- Policy: Allow authenticated users to upload files
-CREATE POLICY "Authenticated Upload"
+-- Policy: Authenticated users with project access can upload
+CREATE POLICY "Project files insert access"
 ON storage.objects FOR INSERT
 WITH CHECK (
-  bucket_id = 'project-files' 
+  bucket_id = 'project-files'
   AND auth.role() = 'authenticated'
+  AND public.user_can_access_storage_object(name, auth.uid())
 );
 
--- Policy: Allow authenticated users to update their own files
-CREATE POLICY "Authenticated Update"
+-- Policy: Authenticated users with project access can update
+CREATE POLICY "Project files update access"
 ON storage.objects FOR UPDATE
 USING (
-  bucket_id = 'project-files' 
+  bucket_id = 'project-files'
   AND auth.role() = 'authenticated'
+  AND public.user_can_access_storage_object(name, auth.uid())
 )
 WITH CHECK (
-  bucket_id = 'project-files' 
+  bucket_id = 'project-files'
   AND auth.role() = 'authenticated'
+  AND public.user_can_access_storage_object(name, auth.uid())
 );
 
--- Policy: Allow authenticated users to delete files
--- You may want to restrict this further to only project owners
-CREATE POLICY "Authenticated Delete"
+-- Policy: Authenticated users with project access can delete
+CREATE POLICY "Project files delete access"
 ON storage.objects FOR DELETE
 USING (
-  bucket_id = 'project-files' 
+  bucket_id = 'project-files'
   AND auth.role() = 'authenticated'
+  AND public.user_can_access_storage_object(name, auth.uid())
 );

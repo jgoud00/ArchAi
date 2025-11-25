@@ -3,6 +3,26 @@ import { Issue } from '../types'
 
 const STORAGE_BUCKET = 'project-files'
 
+const extractStoragePath = (fileUrl?: string | null): string | null => {
+  if (!fileUrl) return null
+  try {
+    const url = new URL(fileUrl)
+    const parts = url.pathname.split('/').filter(Boolean)
+    const bucketIndex = parts.indexOf('project-files')
+    if (bucketIndex === -1) return null
+    return parts.slice(bucketIndex + 1).join('/')
+  } catch {
+    return null
+  }
+}
+
+const deleteFromStorage = async (path: string): Promise<void> => {
+  const { error } = await supabase.storage.from(STORAGE_BUCKET).remove([path])
+  if (error) {
+    throw new Error(error.message || 'Failed to delete issue file from storage')
+  }
+}
+
 export const getProjectIssues = async (projectId: string): Promise<Issue[]> => {
   const { data, error } = await supabase
     .from('issues')
@@ -10,7 +30,11 @@ export const getProjectIssues = async (projectId: string): Promise<Issue[]> => {
     .eq('project_id', projectId)
     .order('created_at', { ascending: false })
 
-  if (error || !data) {
+  if (error) {
+    throw new Error(error.message || 'Failed to load issues')
+  }
+
+  if (!data) {
     return []
   }
 
@@ -35,7 +59,11 @@ export const getIssue = async (issueId: string): Promise<Issue | null> => {
     .eq('id', issueId)
     .single()
 
-  if (error || !data) {
+  if (error) {
+    throw new Error(error.message || 'Failed to load issue')
+  }
+
+  if (!data) {
     return null
   }
 
@@ -135,17 +163,11 @@ export const updateIssue = async (
     if (issue) {
       // Delete old photo if exists
       if (issue.photo_url) {
-        try {
-          const url = new URL(issue.photo_url)
-          const pathParts = url.pathname.split('/')
-          const bucketIndex = pathParts.indexOf('project-files')
-          if (bucketIndex !== -1) {
-            const filePath = pathParts.slice(bucketIndex + 1).join('/')
-            await supabase.storage.from(STORAGE_BUCKET).remove([filePath])
-          }
-        } catch (e) {
-          // Ignore deletion errors
+        const filePath = extractStoragePath(issue.photo_url)
+        if (!filePath) {
+          throw new Error('Unable to resolve existing issue photo path for deletion')
         }
+        await deleteFromStorage(filePath)
       }
 
       // Upload new photo
@@ -192,17 +214,11 @@ export const deleteIssue = async (issueId: string): Promise<void> => {
 
   // Delete photo if exists
   if (issue?.photo_url) {
-    try {
-      const url = new URL(issue.photo_url)
-      const pathParts = url.pathname.split('/')
-      const bucketIndex = pathParts.indexOf('project-files')
-      if (bucketIndex !== -1) {
-        const filePath = pathParts.slice(bucketIndex + 1).join('/')
-        await supabase.storage.from(STORAGE_BUCKET).remove([filePath])
-      }
-    } catch (e) {
-      // Ignore deletion errors
+    const filePath = extractStoragePath(issue.photo_url)
+    if (!filePath) {
+      throw new Error('Unable to resolve issue photo path for deletion')
     }
+    await deleteFromStorage(filePath)
   }
 
   const { error } = await supabase

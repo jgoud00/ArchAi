@@ -3,6 +3,26 @@ import { Document } from '../types'
 
 const STORAGE_BUCKET = 'project-files'
 
+const extractStoragePath = (fileUrl?: string | null): string | null => {
+  if (!fileUrl) return null
+  try {
+    const url = new URL(fileUrl)
+    const parts = url.pathname.split('/').filter(Boolean)
+    const bucketIndex = parts.indexOf('project-files')
+    if (bucketIndex === -1) return null
+    return parts.slice(bucketIndex + 1).join('/')
+  } catch {
+    return null
+  }
+}
+
+const deleteFromStorage = async (path: string): Promise<void> => {
+  const { error } = await supabase.storage.from(STORAGE_BUCKET).remove([path])
+  if (error) {
+    throw new Error(error.message || 'Failed to delete file from storage')
+  }
+}
+
 export const getProjectDocuments = async (projectId: string): Promise<Document[]> => {
   const { data, error } = await supabase
     .from('documents')
@@ -10,7 +30,11 @@ export const getProjectDocuments = async (projectId: string): Promise<Document[]
     .eq('project_id', projectId)
     .order('uploaded_at', { ascending: false })
 
-  if (error || !data) {
+  if (error) {
+    throw new Error(error.message || 'Failed to load documents')
+  }
+
+  if (!data) {
     return []
   }
 
@@ -94,17 +118,11 @@ export const deleteDocument = async (documentId: string): Promise<void> => {
 
   // Delete file from storage
   if (doc?.file_url) {
-    try {
-      const url = new URL(doc.file_url)
-      const pathParts = url.pathname.split('/')
-      const bucketIndex = pathParts.indexOf('project-files')
-      if (bucketIndex !== -1) {
-        const filePath = pathParts.slice(bucketIndex + 1).join('/')
-        await supabase.storage.from(STORAGE_BUCKET).remove([filePath])
-      }
-    } catch (e) {
-      // Ignore deletion errors
+    const filePath = extractStoragePath(doc.file_url)
+    if (!filePath) {
+      throw new Error('Unable to resolve document file path for deletion')
     }
+    await deleteFromStorage(filePath)
   }
 
   const { error } = await supabase

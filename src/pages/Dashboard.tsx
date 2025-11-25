@@ -141,8 +141,8 @@ export const Dashboard = () => {
           <h1 className="text-3xl font-bold">Your Projects</h1>
           <p className="text-muted-foreground mt-1">Manage your construction projects</p>
         </div>
-        {/* Only users, supervisors, and admins can create projects */}
-        <ShowIfHasRole requiredRole={['user', 'supervisor', 'admin']}>
+        {/* All authenticated users can create projects */}
+        <ShowIfHasRole requiredRole={['user', 'admin']}>
           <Button onClick={() => setCreateModalOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
             New Project

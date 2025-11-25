@@ -59,7 +59,7 @@ export const Home = () => {
     {
       icon: Users,
       title: 'Role-Based Access',
-      description: 'Supervisor and Admin roles with granular permissions for team collaboration.',
+      description: 'Admin roles with granular permissions for team collaboration.',
       color: 'text-cyan-600'
     },
   ]
@@ -114,7 +114,7 @@ export const Home = () => {
               Smart Construction. Smarter Decisions.
             </p>
             <p className="text-lg text-muted-foreground mb-16 max-w-3xl mx-auto animate-slide-in-up leading-relaxed" style={{ animationDelay: '0.6s' }}>
-              The all-in-one construction management platform for architects, engineers, and supervisors.
+              The all-in-one construction management platform for architects, engineers, and construction teams.
               Manage projects, track progress, and collaborate seamlessly.
             </p>
             
@@ -289,7 +289,7 @@ export const Home = () => {
             Ready to Transform Your Construction Management?
           </h2>
           <p className="text-xl text-muted-foreground mb-12 leading-relaxed">
-            Join architects, engineers, and supervisors who trust ArchitectAI for their projects.
+            Join architects, engineers, and construction teams who trust ArchitectAI for their projects.
           </p>
           {user ? (
             <Button 

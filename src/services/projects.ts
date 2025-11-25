@@ -1,6 +1,41 @@
 import { supabase } from './supabase'
 import { Project, Scan, TeamMember } from '../types'
 
+const STORAGE_BUCKET = 'project-files'
+
+const extractStoragePath = (fileUrl?: string | null): string | null => {
+  if (!fileUrl) return null
+  try {
+    const url = new URL(fileUrl)
+    const parts = url.pathname.split('/').filter(Boolean)
+    const bucketIndex = parts.indexOf('project-files')
+    if (bucketIndex === -1) return null
+    return parts.slice(bucketIndex + 1).join('/')
+  } catch {
+    return null
+  }
+}
+
+const chunkArray = <T>(items: T[], size: number): T[][] => {
+  const chunks: T[][] = []
+  for (let i = 0; i < items.length; i += size) {
+    chunks.push(items.slice(i, i + size))
+  }
+  return chunks
+}
+
+const deleteStorageObjects = async (paths: string[]): Promise<void> => {
+  const uniquePaths = Array.from(new Set(paths.filter(Boolean)))
+  if (uniquePaths.length === 0) return
+
+  for (const batch of chunkArray(uniquePaths, 50)) {
+    const { error } = await supabase.storage.from(STORAGE_BUCKET).remove(batch)
+    if (error) {
+      throw new Error(error.message || 'Failed to remove project files from storage')
+    }
+  }
+}
+
 export const createProject = async (
   name: string,
   description: string,
@@ -43,8 +78,8 @@ export const createProject = async (
     })
 
   if (teamError) {
-    console.error('Error adding owner to team:', teamError)
-    // Continue anyway - project is created
+    await supabase.from('projects').delete().eq('id', projectData.id)
+    throw new Error(teamError.message || 'Failed to add project owner to team')
   }
 
   return projectData.id
@@ -196,6 +231,67 @@ export const updateProject = async (
 }
 
 export const deleteProject = async (projectId: string): Promise<void> => {
+  // Gather storage paths before cascading deletes run
+  const [documents, progressPhotos, issues, scans, projectFiles, blueprints] = await Promise.all([
+    supabase.from('documents').select('file_url').eq('project_id', projectId),
+    supabase.from('progress_photos').select('photo_url').eq('project_id', projectId),
+    supabase.from('issues').select('photo_url').eq('project_id', projectId),
+    supabase.from('scans').select('url').eq('project_id', projectId),
+    supabase.from('project_files').select('file_url').eq('project_id', projectId),
+    supabase.from('blueprints').select('png_url, json_url').eq('project_id', projectId).maybeSingle(),
+  ])
+
+  const queryErrors = [
+    documents.error,
+    progressPhotos.error,
+    issues.error,
+    scans.error,
+    projectFiles.error,
+    blueprints.error,
+  ].filter(Boolean)
+
+  if (queryErrors.length > 0) {
+    throw new Error('Failed to load related project assets for deletion')
+  }
+
+  const storagePaths: string[] = []
+
+  documents.data?.forEach((doc) => {
+    const path = extractStoragePath(doc.file_url)
+    if (path) storagePaths.push(path)
+  })
+
+  progressPhotos.data?.forEach((photo) => {
+    const path = extractStoragePath(photo.photo_url)
+    if (path) storagePaths.push(path)
+  })
+
+  issues.data?.forEach((issue) => {
+    const path = extractStoragePath(issue.photo_url)
+    if (path) storagePaths.push(path)
+  })
+
+  scans.data?.forEach((scan) => {
+    const path = extractStoragePath(scan.url)
+    if (path) storagePaths.push(path)
+  })
+
+  projectFiles.data?.forEach((file) => {
+    const path = extractStoragePath(file.file_url)
+    if (path) storagePaths.push(path)
+  })
+
+  const blueprintRecord = blueprints.data
+  if (blueprintRecord) {
+    const pngPath = extractStoragePath(blueprintRecord.png_url)
+    const jsonPath = extractStoragePath(blueprintRecord.json_url)
+    if (pngPath) storagePaths.push(pngPath)
+    if (jsonPath) storagePaths.push(jsonPath)
+  }
+
+  // Remove storage assets first to avoid orphaned files
+  await deleteStorageObjects(storagePaths)
+
   const { error } = await supabase
     .from('projects')
     .delete()

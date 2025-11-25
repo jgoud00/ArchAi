@@ -3,6 +3,26 @@ import { ProgressPhoto } from '../types'
 
 const STORAGE_BUCKET = 'project-files'
 
+const extractStoragePath = (fileUrl?: string | null): string | null => {
+  if (!fileUrl) return null
+  try {
+    const url = new URL(fileUrl)
+    const parts = url.pathname.split('/').filter(Boolean)
+    const bucketIndex = parts.indexOf('project-files')
+    if (bucketIndex === -1) return null
+    return parts.slice(bucketIndex + 1).join('/')
+  } catch {
+    return null
+  }
+}
+
+const deleteFromStorage = async (path: string): Promise<void> => {
+  const { error } = await supabase.storage.from(STORAGE_BUCKET).remove([path])
+  if (error) {
+    throw new Error(error.message || 'Failed to delete photo from storage')
+  }
+}
+
 export const getProjectProgressPhotos = async (projectId: string): Promise<ProgressPhoto[]> => {
   const { data, error } = await supabase
     .from('progress_photos')
@@ -10,7 +30,11 @@ export const getProjectProgressPhotos = async (projectId: string): Promise<Progr
     .eq('project_id', projectId)
     .order('uploaded_at', { ascending: false })
 
-  if (error || !data) {
+  if (error) {
+    throw new Error(error.message || 'Failed to load progress photos')
+  }
+
+  if (!data) {
     return []
   }
 
@@ -90,17 +114,11 @@ export const deleteProgressPhoto = async (photoId: string): Promise<void> => {
 
   // Delete file from storage
   if (photo?.photo_url) {
-    try {
-      const url = new URL(photo.photo_url)
-      const pathParts = url.pathname.split('/')
-      const bucketIndex = pathParts.indexOf('project-files')
-      if (bucketIndex !== -1) {
-        const filePath = pathParts.slice(bucketIndex + 1).join('/')
-        await supabase.storage.from(STORAGE_BUCKET).remove([filePath])
-      }
-    } catch (e) {
-      // Ignore deletion errors
+    const filePath = extractStoragePath(photo.photo_url)
+    if (!filePath) {
+      throw new Error('Unable to resolve progress photo path for deletion')
     }
+    await deleteFromStorage(filePath)
   }
 
   const { error } = await supabase
