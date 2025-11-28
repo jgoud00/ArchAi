@@ -46,6 +46,7 @@ export const getProjectDocuments = async (projectId: string): Promise<Document[]
     fileType: doc.file_type,
     uploadedBy: doc.uploaded_by,
     uploadedAt: new Date(doc.uploaded_at),
+    updatedAt: new Date(doc.uploaded_at), // Fallback to uploaded_at if updated_at is missing
   }))
 }
 

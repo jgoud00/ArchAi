@@ -166,12 +166,12 @@ export const loadBlueprintJson = async (jsonUrl: string): Promise<string> => {
     }
 
     return await response.text()
-  } catch (error: any) {
+  } catch (error) {
     // Provide more specific error messages
-    if (error.name === 'AbortError') {
-      throw new Error('Request timeout: Failed to load blueprint JSON')
-    }
-    if (error.message) {
+    if (error instanceof Error) {
+      if (error.name === 'AbortError') {
+        throw new Error('Request timeout: Failed to load blueprint JSON')
+      }
       throw error
     }
     throw new Error('Failed to load blueprint JSON: Network error')

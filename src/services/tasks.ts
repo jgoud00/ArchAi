@@ -77,7 +77,7 @@ export const updateTask = async (
   taskId: string,
   updates: Partial<Pick<Task, 'taskName' | 'startDate' | 'endDate' | 'status'>>
 ): Promise<void> => {
-  const updateData: any = {}
+  const updateData: Record<string, any> = {}
 
   if (updates.taskName !== undefined) updateData.task_name = updates.taskName
   if (updates.startDate !== undefined) updateData.start_date = updates.startDate.toISOString().split('T')[0]

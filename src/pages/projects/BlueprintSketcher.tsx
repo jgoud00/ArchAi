@@ -5,10 +5,7 @@ import {
   MiniMap,
   Controls,
   Background,
-  addEdge,
   BackgroundVariant,
-  Connection,
-  Edge,
   Node,
   ReactFlowProvider,
   ReactFlowInstance,
@@ -16,8 +13,8 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
-import { Save, Download, RotateCcw, Undo, Redo, History } from 'lucide-react';
-import { getProjectBlueprint, saveBlueprint, saveBlueprintVersion, getBlueprintVersions } from '@/services/blueprints';
+import { Save, Download, RotateCcw, Undo, Redo } from 'lucide-react';
+import { getProjectBlueprint, saveBlueprint, saveBlueprintVersion } from '@/services/blueprints';
 import { getProject } from '@/services/projects';
 import { Project } from '@/types';
 import { Button } from '@/components/ui/Button';
@@ -55,7 +52,6 @@ const BlueprintSketcherContent = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [rfInstance, setRfInstance] = useState<ReactFlowInstance | null>(null);
-  const [showHistory, setShowHistory] = useState(false);
 
   // Zustand Store
   const {
@@ -71,7 +67,6 @@ const BlueprintSketcherContent = () => {
   } = useBlueprintStore();
 
   // Zundo History (Undo/Redo)
-  const { undo, redo, past, future } = useBlueprintStore.temporal.getState();
   // Subscribe to temporal state updates
   const pastStates = useStore(useBlueprintStore.temporal, (state) => state.pastStates);
   const futureStates = useStore(useBlueprintStore.temporal, (state) => state.futureStates);
@@ -93,8 +88,9 @@ const BlueprintSketcherContent = () => {
           setEdges(flow.edges || []);
         }
       }
-    } catch (error: any) {
-      showToast(error.message || 'Failed to load blueprint', 'error');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to load blueprint';
+      showToast(message, 'error');
     } finally {
       setLoading(false);
     }
@@ -172,7 +168,7 @@ const BlueprintSketcherContent = () => {
         showToast('Blueprint saved successfully', 'success');
       }, 'image/png');
 
-    } catch (error: any) {
+    } catch (error) {
       console.error(error);
       showToast('Failed to save blueprint', 'error');
     } finally {
@@ -223,7 +219,7 @@ const BlueprintSketcherContent = () => {
               variant="ghost"
               size="icon"
               onClick={() => useBlueprintStore.temporal.getState().undo()}
-              disabled={pastStates === 0}
+              disabled={pastStates.length === 0}
               title="Undo"
               className="h-8 w-8"
             >
@@ -233,7 +229,7 @@ const BlueprintSketcherContent = () => {
               variant="ghost"
               size="icon"
               onClick={() => useBlueprintStore.temporal.getState().redo()}
-              disabled={futureStates === 0}
+              disabled={futureStates.length === 0}
               title="Redo"
               className="h-8 w-8"
             >

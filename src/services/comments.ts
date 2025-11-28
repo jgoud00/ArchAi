@@ -45,10 +45,10 @@ export const addComment = async (
     updatedAt: new Date(data.updated_at),
     user: userData
       ? {
-          displayName: userData.display_name || userData.email,
-          email: userData.email,
-          avatar: userData.avatar || undefined,
-        }
+        displayName: userData.display_name || userData.email,
+        email: userData.email,
+        avatar: userData.avatar || undefined,
+      }
       : undefined,
   }
 }
@@ -74,7 +74,7 @@ export const getProjectComments = async (projectId: string): Promise<ProjectComm
     return []
   }
 
-  return data.map((comment: any) => ({
+  return data.map((comment) => ({
     id: comment.id,
     projectId: comment.project_id,
     userId: comment.user_id,
@@ -83,10 +83,10 @@ export const getProjectComments = async (projectId: string): Promise<ProjectComm
     updatedAt: new Date(comment.updated_at),
     user: comment.users
       ? {
-          displayName: comment.users.display_name || comment.users.email,
-          email: comment.users.email,
-          avatar: comment.users.avatar || undefined,
-        }
+        displayName: comment.users.display_name || comment.users.email,
+        email: comment.users.email,
+        avatar: comment.users.avatar || undefined,
+      }
       : undefined,
   }))
 }

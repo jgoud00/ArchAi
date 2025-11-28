@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Bell, AlertTriangle, UserPlus, CheckCircle2, Info, FileText, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/Tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/Tabs';
 import { Badge } from '@/components/ui/Badge';
 import { cn } from '@/utils/cn';
 import { formatDistanceToNow } from 'date-fns';

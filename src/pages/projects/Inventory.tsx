@@ -14,7 +14,7 @@ export const Inventory = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { showToast } = useToast()
-  
+
   const [project, setProject] = useState<Project | null>(null)
   const [inventory, setInventory] = useState<InventoryItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -93,7 +93,7 @@ export const Inventory = () => {
         </Card>
       ) : (
         <div className="space-y-6">
-          {Object.entries(groupedByCategory).map(([category, items]) => (
+          {Object.entries(groupedByCategory).map(([category, items]: [string, InventoryItem[]]) => (
             <Card key={category}>
               <CardHeader>
                 <CardTitle>{category}</CardTitle>

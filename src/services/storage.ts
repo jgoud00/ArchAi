@@ -75,7 +75,7 @@ export const deleteScanFile = async (fileUrl: string): Promise<void> => {
     const url = new URL(fileUrl)
     const pathParts = url.pathname.split('/')
     const bucketIndex = pathParts.indexOf('project-files')
-    
+
     if (bucketIndex === -1) {
       throw new Error('Invalid file URL')
     }
@@ -89,8 +89,9 @@ export const deleteScanFile = async (fileUrl: string): Promise<void> => {
     if (error) {
       throw new Error(error.message)
     }
-  } catch (error: any) {
-    throw new Error(`Failed to delete file: ${error.message}`)
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    throw new Error(`Failed to delete file: ${message}`)
   }
 }
 
@@ -99,6 +100,6 @@ export const getPublicUrl = (filePath: string): string => {
   const { data } = supabase.storage
     .from(STORAGE_BUCKET)
     .getPublicUrl(filePath)
-  
+
   return data.publicUrl
 }

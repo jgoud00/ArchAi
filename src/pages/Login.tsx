@@ -11,7 +11,7 @@ import { ToastContainer } from '@/components/ui/Toast'
 import { Spinner } from '@/components/ui/Spinner'
 import { Logo } from '@/components/Logo'
 import { z } from 'zod'
-import { CheckCircle2, Quote } from 'lucide-react'
+import { Quote } from 'lucide-react'
 
 type LoginFormData = z.infer<typeof loginSchema>
 

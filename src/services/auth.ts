@@ -108,7 +108,7 @@ export const login = async (email: string, password: string): Promise<User> => {
   // Step 3: Create profile if it doesn't exist (trigger might not have fired)
   if (profileError || !userProfile) {
     console.warn('[Auth] User profile not found, creating...', profileError)
-    
+
     const { error: createError } = await supabase
       .from('users')
       .insert({
@@ -182,7 +182,7 @@ export const getCurrentUser = async (userId: string): Promise<User | null> => {
   try {
     // First get auth user info
     const { data: { user: authUser }, error: authError } = await supabase.auth.getUser()
-    
+
     if (authError || !authUser) {
       console.error('Error getting auth user:', authError)
       return null
@@ -198,7 +198,7 @@ export const getCurrentUser = async (userId: string): Promise<User | null> => {
     // If profile doesn't exist, create it (might happen if trigger didn't fire)
     if (profileError || !userProfile) {
       console.warn('User profile not found, creating...', profileError)
-      
+
       const { error: createError } = await supabase
         .from('users')
         .insert({
@@ -262,10 +262,10 @@ export const getCurrentUser = async (userId: string): Promise<User | null> => {
  */
 export const requestPasswordReset = async (email: string): Promise<void> => {
   // Guard for SSR - use environment variable or fallback
-  const origin = typeof window !== 'undefined' 
-    ? window.location.origin 
+  const origin = typeof window !== 'undefined'
+    ? window.location.origin
     : (import.meta.env.VITE_APP_URL || 'https://your-domain.com')
-  
+
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${origin}/reset-password`,
   })
@@ -304,7 +304,7 @@ export const updateProfile = async (
     throw new Error('Not authenticated')
   }
 
-  const updateData: any = {}
+  const updateData: Record<string, any> = {}
   if (updates.displayName !== undefined) {
     updateData.display_name = updates.displayName
   }
@@ -390,7 +390,7 @@ export const uploadAvatar = async (file: File): Promise<string> => {
 export const onAuthChange = (callback: (user: User | null) => void) => {
   // Don't call callback immediately - let initializeAuth handle initial state
   // Only listen to future auth state changes
-  
+
   // Listen to auth state changes
   const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
     if (session?.user) {

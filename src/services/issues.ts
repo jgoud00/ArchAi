@@ -145,7 +145,7 @@ export const updateIssue = async (
   updates: Partial<Pick<Issue, 'title' | 'description' | 'priority' | 'status'>>,
   photoFile?: File
 ): Promise<void> => {
-  const updateData: any = {}
+  const updateData: Record<string, any> = {}
 
   if (updates.title !== undefined) updateData.title = updates.title
   if (updates.description !== undefined) updateData.description = updates.description

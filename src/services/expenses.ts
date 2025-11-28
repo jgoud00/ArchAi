@@ -21,6 +21,7 @@ export const getProjectExpenses = async (projectId: string): Promise<Expense[]> 
     amount: parseFloat(expense.amount || '0'),
     date: new Date(expense.date),
     createdAt: new Date(expense.created_at),
+    updatedAt: new Date(expense.created_at), // Fallback to created_at
   }))
 }
 
@@ -43,6 +44,7 @@ export const getExpense = async (expenseId: string): Promise<Expense | null> => 
     amount: parseFloat(data.amount || '0'),
     date: new Date(data.date),
     createdAt: new Date(data.created_at),
+    updatedAt: new Date(data.created_at), // Fallback to created_at
   }
 }
 
@@ -82,7 +84,7 @@ export const updateExpense = async (
   expenseId: string,
   updates: Partial<Pick<Expense, 'type' | 'name' | 'amount' | 'date'>>
 ): Promise<void> => {
-  const updateData: any = {}
+  const updateData: Record<string, any> = {}
 
   if (updates.type !== undefined) updateData.type = updates.type
   if (updates.name !== undefined) updateData.name = updates.name

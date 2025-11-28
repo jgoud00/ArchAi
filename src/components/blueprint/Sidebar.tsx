@@ -1,5 +1,5 @@
 import { DragEvent } from 'react';
-import { Square, Box, DoorOpen, Maximize2, Armchair, Circle, Triangle, Type, Bed, Monitor, Table, Bath } from 'lucide-react';
+import { Square, DoorOpen, Maximize2, Armchair, Circle, Triangle, Type, Bed, Monitor, Table, Bath } from 'lucide-react';
 import { cn } from '@/utils/cn';
 
 export const Sidebar = () => {

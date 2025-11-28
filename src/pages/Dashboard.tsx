@@ -15,7 +15,7 @@ import { projectSchema } from '@/utils/validators'
 import { useToast } from '@/hooks/useToast'
 import { ToastContainer } from '@/components/ui/Toast'
 import { z } from 'zod'
-import { Project, BudgetAlert } from '@/types'
+import { Project, BudgetAlert, SearchFilters } from '@/types'
 import { Spinner } from '@/components/ui/Spinner'
 import { ShowIfHasRole } from '@/components/RoleGuard'
 import { Badge } from '@/components/ui/Badge'
@@ -54,13 +54,13 @@ export const Dashboard = () => {
 
   const loadProjects = useCallback(async () => {
     if (!user?.uid) return
-    
+
     try {
       setLoading(true)
       const userProjects = await getUserProjects(user.uid)
       setProjects(userProjects)
       setFilteredProjects(userProjects)
-    } catch (error: any) {
+    } catch (error) {
       showToast('Failed to load projects. Please try again.', 'error')
     } finally {
       setLoading(false)
@@ -76,7 +76,7 @@ export const Dashboard = () => {
     }
   }, [user, loadProjects, loadBudgetAlerts])
 
-  const handleSearch = (query: string, filters: any) => {
+  const handleSearch = (query: string, filters: SearchFilters) => {
     let filtered = [...projects]
 
     // Text search
@@ -84,7 +84,7 @@ export const Dashboard = () => {
       const lowerQuery = query.toLowerCase()
       filtered = filtered.filter(
         p => p.name.toLowerCase().includes(lowerQuery) ||
-        p.description.toLowerCase().includes(lowerQuery)
+          p.description.toLowerCase().includes(lowerQuery)
       )
     }
 
@@ -95,10 +95,12 @@ export const Dashboard = () => {
 
     // Date filters
     if (filters.dateFrom) {
-      filtered = filtered.filter(p => new Date(p.createdAt) >= new Date(filters.dateFrom))
+      const dateFrom = new Date(filters.dateFrom)
+      filtered = filtered.filter(p => new Date(p.createdAt) >= dateFrom)
     }
     if (filters.dateTo) {
-      filtered = filtered.filter(p => new Date(p.createdAt) <= new Date(filters.dateTo))
+      const dateTo = new Date(filters.dateTo)
+      filtered = filtered.filter(p => new Date(p.createdAt) <= dateTo)
     }
 
     setFilteredProjects(filtered)
@@ -115,8 +117,9 @@ export const Dashboard = () => {
       reset()
       await loadProjects()
       navigate(`/projects/${projectId}`)
-    } catch (error: any) {
-      showToast(error.message || 'Failed to create project. Please try again.', 'error')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to create project. Please try again.'
+      showToast(message, 'error')
     } finally {
       setCreating(false)
     }

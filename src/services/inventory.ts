@@ -75,7 +75,7 @@ export const updateInventoryItem = async (
   itemId: string,
   updates: Partial<Pick<InventoryItem, 'itemName' | 'quantity' | 'unit' | 'category'>>
 ): Promise<void> => {
-  const updateData: any = {}
+  const updateData: Record<string, any> = {}
 
   if (updates.itemName !== undefined) updateData.item_name = updates.itemName
   if (updates.quantity !== undefined) updateData.quantity = updates.quantity

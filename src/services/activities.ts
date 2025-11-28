@@ -32,7 +32,7 @@ export const getProjectActivities = async (
     return []
   }
 
-  return data.map((activity: any) => ({
+  return data.map((activity) => ({
     id: activity.id,
     projectId: activity.project_id,
     userId: activity.user_id,
@@ -42,10 +42,10 @@ export const getProjectActivities = async (
     createdAt: new Date(activity.created_at),
     user: activity.users
       ? {
-          displayName: activity.users.display_name || activity.users.email,
-          email: activity.users.email,
-          avatar: activity.users.avatar || undefined,
-        }
+        displayName: activity.users.display_name || activity.users.email,
+        email: activity.users.email,
+        avatar: activity.users.avatar || undefined,
+      }
       : undefined,
   }))
 }

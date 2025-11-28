@@ -1,27 +1,24 @@
-import React, { useState } from 'react';
-import { 
-  DndContext, 
-  DragEndEvent, 
-  useDraggable, 
+import { useState } from 'react';
+import {
+  DndContext,
+  DragEndEvent,
+  useDraggable,
   useDroppable,
   useSensor,
   useSensors,
   PointerSensor
 } from '@dnd-kit/core';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { 
-  MoreHorizontal, 
-  MessageSquare, 
-  Paperclip, 
-  Calendar, 
+import {
+  MoreHorizontal,
+  MessageSquare,
+  Paperclip,
   Plus,
   Filter,
   ArrowUpCircle,
   ArrowRightCircle,
-  ArrowDownCircle,
-  CheckCircle2
+  ArrowDownCircle
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 
@@ -135,10 +132,10 @@ const DraggableIssueCard = ({ issue }: { issue: Issue }) => {
   } : undefined;
 
   return (
-    <div 
-      ref={setNodeRef} 
-      style={style} 
-      {...listeners} 
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...listeners}
       {...attributes}
       className={cn(
         "group relative bg-card border border-border rounded-lg p-3 shadow-sm hover:shadow-md transition-all cursor-grab active:cursor-grabbing",
@@ -152,9 +149,9 @@ const DraggableIssueCard = ({ issue }: { issue: Issue }) => {
           <MoreHorizontal className="h-4 w-4" />
         </Button>
       </div>
-      
+
       <h4 className="font-medium text-sm mb-3 line-clamp-2">{issue.title}</h4>
-      
+
       {issue.photoUrl && (
         <div className="mb-3 rounded-md overflow-hidden h-24 w-full relative">
           <img src={issue.photoUrl} alt="Issue attachment" className="w-full h-full object-cover" />
@@ -164,7 +161,7 @@ const DraggableIssueCard = ({ issue }: { issue: Issue }) => {
 
       <div className="flex items-center justify-between mt-3">
         <PriorityBadge priority={issue.priority} />
-        
+
         <div className="flex items-center gap-2">
           {issue.attachments > 0 && (
             <div className="flex items-center text-muted-foreground text-xs">
@@ -187,18 +184,18 @@ const DraggableIssueCard = ({ issue }: { issue: Issue }) => {
   );
 };
 
-const DroppableColumn = ({ 
-  id, 
-  title, 
-  count, 
-  issues, 
-  color 
-}: { 
-  id: IssueStatus, 
-  title: string, 
-  count: number, 
+const DroppableColumn = ({
+  id,
+  title,
+  count,
+  issues,
+  color
+}: {
+  id: IssueStatus,
+  title: string,
+  count: number,
   issues: Issue[],
-  color: string 
+  color: string
 }) => {
   const { setNodeRef, isOver } = useDroppable({
     id: id
@@ -219,7 +216,7 @@ const DroppableColumn = ({
         </Button>
       </div>
 
-      <div 
+      <div
         ref={setNodeRef}
         className={cn(
           "flex-1 bg-muted/30 rounded-xl p-2 space-y-3 transition-colors border-2 border-transparent border-dashed",
@@ -241,7 +238,7 @@ const DroppableColumn = ({
 
 export default function IssuesKanban() {
   const [issues, setIssues] = useState<Issue[]>(INITIAL_ISSUES);
-  
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -258,10 +255,10 @@ export default function IssuesKanban() {
       const newStatus = over.id as IssueStatus;
 
       // Optimistic update
-      setIssues((prev) => 
-        prev.map(issue => 
-          issue.id === issueId 
-            ? { ...issue, status: newStatus } 
+      setIssues((prev) =>
+        prev.map(issue =>
+          issue.id === issueId
+            ? { ...issue, status: newStatus }
             : issue
         )
       );
@@ -294,24 +291,24 @@ export default function IssuesKanban() {
 
       <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
-          <DroppableColumn 
-            id="Open" 
-            title="Open" 
-            count={getIssuesByStatus('Open').length} 
+          <DroppableColumn
+            id="Open"
+            title="Open"
+            count={getIssuesByStatus('Open').length}
             issues={getIssuesByStatus('Open')}
             color="bg-gray-400"
           />
-          <DroppableColumn 
-            id="In Progress" 
-            title="In Progress" 
-            count={getIssuesByStatus('In Progress').length} 
+          <DroppableColumn
+            id="In Progress"
+            title="In Progress"
+            count={getIssuesByStatus('In Progress').length}
             issues={getIssuesByStatus('In Progress')}
             color="bg-blue-500"
           />
-          <DroppableColumn 
-            id="Resolved" 
-            title="Resolved" 
-            count={getIssuesByStatus('Resolved').length} 
+          <DroppableColumn
+            id="Resolved"
+            title="Resolved"
+            count={getIssuesByStatus('Resolved').length}
             issues={getIssuesByStatus('Resolved')}
             color="bg-green-500"
           />

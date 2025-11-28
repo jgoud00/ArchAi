@@ -4,14 +4,8 @@ import { Input } from './ui/Input'
 import { Button } from './ui/Button'
 import { Card } from './ui/Card'
 import { Badge } from './ui/Badge'
-import { Project } from '@/types'
+import { Project, SearchFilters } from '@/types'
 
-interface SearchFilters {
-  status?: 'active' | 'completed' | 'archived'
-  dateFrom?: string
-  dateTo?: string
-  budgetUsage?: 'under' | 'over' | 'all'
-}
 
 interface SearchBarProps {
   onSearch: (query: string, filters: SearchFilters) => void

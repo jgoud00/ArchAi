@@ -320,6 +320,8 @@ export const getProjectScans = async (projectId: string): Promise<Scan[]> => {
     type: scan.type,
     uploadedBy: scan.uploaded_by,
     uploadedAt: new Date(scan.uploaded_at),
+    createdAt: new Date(scan.uploaded_at), // Fallback
+    updatedAt: new Date(scan.uploaded_at), // Fallback
     projectId: scan.project_id,
   }))
 }
@@ -349,9 +351,9 @@ export const getProjectTeam = async (projectId: string): Promise<TeamMember[]> =
     joinedAt: new Date(member.joined_at),
     user: member.users
       ? {
-          displayName: member.users.display_name || member.email,
-          avatar: member.users.avatar || undefined,
-        }
+        displayName: member.users.display_name || member.email,
+        avatar: member.users.avatar || undefined,
+      }
       : undefined,
   }))
 }

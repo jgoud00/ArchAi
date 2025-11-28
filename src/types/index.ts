@@ -28,33 +28,14 @@ export interface Scan {
   name: string
   url: string
   type: 'image' | 'video'
-  uploadedBy: string
-  uploadedAt: Date
   projectId: string
-}
-
-export interface ProjectFile {
-  id: string
-  projectId: string
-  name: string
-  fileUrl: string
-  fileType: string
-  fileSize: number
   uploadedBy: string
-  category?: string
-  description?: string
   uploadedAt: Date
   createdAt: Date
   updatedAt: Date
-}
-
-export interface ProjectComment {
-  id: string
-  projectId: string
-  userId: string
-  content: string
-  createdAt: Date
-  updatedAt: Date
+  // Optional fields for compatibility if needed
+  userId?: string
+  content?: string
   user?: {
     displayName: string
     email: string
@@ -165,6 +146,11 @@ export interface Expense {
   amount: number
   date: Date
   createdAt: Date
+  updatedAt: Date
+  // Optional fields for compatibility
+  startDate?: Date
+  endDate?: Date
+  status?: 'pending' | 'in_progress' | 'completed'
 }
 
 export interface Document {
@@ -174,6 +160,23 @@ export interface Document {
   fileUrl: string
   fileType: string
   uploadedBy: string
+  category?: string
+  updatedAt: Date
+  uploadedAt: Date
+}
+
+export interface Blueprint {
+  projectId: string
+  pngUrl?: string
+  jsonUrl?: string
+  data?: string
+  updatedAt: Date
+}
+
+export interface InventoryItem {
+  id: string
+  projectId: string
+  itemName: string
   quantity: number
   unit: string
   category?: string
@@ -189,4 +192,40 @@ export interface Task {
   status: 'pending' | 'in_progress' | 'completed'
   createdAt: Date
   updatedAt: Date
+}
+
+export interface ProjectFile {
+  id: string
+  projectId: string
+  name: string
+  fileUrl: string
+  fileType: string
+  fileSize: number
+  uploadedBy: string
+  category?: string
+  description?: string
+  uploadedAt: Date
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface ProjectComment {
+  id: string
+  projectId: string
+  userId: string
+  content: string
+  createdAt: Date
+  updatedAt: Date
+  user?: {
+    displayName: string
+    email: string
+    avatar?: string
+  }
+}
+
+export interface SearchFilters {
+  status?: 'active' | 'completed' | 'archived'
+  dateFrom?: string
+  dateTo?: string
+  budgetUsage?: 'under' | 'over' | 'all'
 }
