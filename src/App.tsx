@@ -5,6 +5,7 @@ import { MainLayout } from './components/layout/MainLayout'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
+import { Logout } from './pages/Logout'
 import { ForgotPassword } from './pages/ForgotPassword'
 import { ResetPassword } from './pages/ResetPassword'
 import { Dashboard } from './pages/Dashboard'
@@ -110,6 +111,7 @@ function App() {
             <Route path="templates" element={<Templates />} />
             <Route path="documentation" element={<Documentation />} />
             <Route path="settings" element={<Settings />} />
+            <Route path="logout" element={<Logout />} />
           </Route>
 
           {/* Catch all */}

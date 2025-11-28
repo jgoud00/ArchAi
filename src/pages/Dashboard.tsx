@@ -1,12 +1,11 @@
+
 import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, FolderOpen, Image as ImageIcon, Users, AlertTriangle } from 'lucide-react'
+import { Plus, Folder, Users, LayoutDashboard, TrendingUp, Home as HomeIcon } from 'lucide-react'
 import { getUserProjects, createProject } from '@/services/projects'
-import { getBudgetAlerts } from '@/services/budgets'
 import { useAuthStore } from '@/store/authStore'
 import { ProjectCard } from '@/components/ProjectCard'
 import { Button } from '@/components/ui/Button'
-import { Card, CardContent } from '@/components/ui/Card'
 import { Modal } from '@/components/ui/Modal'
 import { Input } from '@/components/ui/Input'
 import { useForm } from 'react-hook-form'
@@ -15,24 +14,46 @@ import { projectSchema } from '@/utils/validators'
 import { useToast } from '@/hooks/useToast'
 import { ToastContainer } from '@/components/ui/Toast'
 import { z } from 'zod'
-import { Project, BudgetAlert, SearchFilters } from '@/types'
+import { Project, DashboardKPIs, ChartDataPoint } from '@/types'
 import { Spinner } from '@/components/ui/Spinner'
-import { ShowIfHasRole } from '@/components/RoleGuard'
-import { Badge } from '@/components/ui/Badge'
-import { SearchBar } from '@/components/SearchBar'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
 type ProjectFormData = z.infer<typeof projectSchema>
+
+const KPICard: React.FC<{ title: string; value: string | number; change?: string; icon: React.ReactNode }> = ({ title, value, change, icon }) => (
+  <div className="bg-slate-900/50 backdrop-blur-sm border border-white/10 p-6 rounded-xl flex items-center justify-between transition-all duration-300 hover:shadow-cyan-500/30 hover:shadow-lg group">
+    <div>
+      <p className="text-sm text-slate-400 group-hover:text-slate-300 transition-colors">{title}</p>
+      <h3 className="text-3xl font-bold text-white mt-1">{value}</h3>
+      {change && (
+        <p className="text-xs text-green-400 mt-2 flex items-center">
+          <TrendingUp className="h-4 w-4 mr-1" /> {change} this month
+        </p>
+      )}
+    </div>
+    <div className="text-cyan-400 opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300">
+      {icon}
+    </div>
+  </div>
+)
 
 export const Dashboard = () => {
   const navigate = useNavigate()
   const { user } = useAuthStore()
   const { toasts, showToast, dismissToast } = useToast()
   const [projects, setProjects] = useState<Project[]>([])
-  const [filteredProjects, setFilteredProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
   const [createModalOpen, setCreateModalOpen] = useState(false)
   const [creating, setCreating] = useState(false)
-  const [budgetAlerts, setBudgetAlerts] = useState<BudgetAlert[]>([])
+
+  // State for KPIs and Chart
+  const [kpiData, setKpiData] = useState<DashboardKPIs>({
+    totalProjects: 0,
+    activeBuilds: 0,
+    tasksPending: 0,
+    teamMembers: 0
+  })
+  const [chartData, setChartData] = useState<ChartDataPoint[]>([])
 
   const {
     register,
@@ -43,15 +64,6 @@ export const Dashboard = () => {
     resolver: zodResolver(projectSchema),
   })
 
-  const loadBudgetAlerts = useCallback(async () => {
-    try {
-      const alerts = await getBudgetAlerts()
-      setBudgetAlerts(alerts)
-    } catch (error) {
-      console.error('Failed to load budget alerts:', error)
-    }
-  }, [])
-
   const loadProjects = useCallback(async () => {
     if (!user?.uid) return
 
@@ -59,7 +71,45 @@ export const Dashboard = () => {
       setLoading(true)
       const userProjects = await getUserProjects(user.uid)
       setProjects(userProjects)
-      setFilteredProjects(userProjects)
+
+      // Calculate KPIs from real data where possible
+      const activeCount = userProjects.filter(p => p.status === 'active').length
+      const memberCount = userProjects.reduce((sum, p) => sum + (p.memberCount || 0), 0)
+
+      setKpiData({
+        totalProjects: userProjects.length,
+        activeBuilds: activeCount,
+        tasksPending: 0, // Placeholder as we don't have tasks API yet
+        teamMembers: memberCount
+      })
+
+      // Calculate chart data (last 6 months)
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      const today = new Date()
+      const last6Months = Array.from({ length: 6 }, (_, i) => {
+        const d = new Date(today.getFullYear(), today.getMonth() - 5 + i, 1)
+        return {
+          name: months[d.getMonth()],
+          monthIndex: d.getMonth(),
+          year: d.getFullYear()
+        }
+      })
+
+      const newChartData = last6Months.map(month => {
+        const projectsInMonth = userProjects.filter(p => {
+          const d = new Date(p.createdAt)
+          return d.getMonth() === month.monthIndex && d.getFullYear() === month.year
+        }).length
+
+        return {
+          name: month.name,
+          projects: projectsInMonth,
+          tasks: Math.floor(Math.random() * 10) // Placeholder for tasks
+        }
+      })
+
+      setChartData(newChartData)
+
     } catch (error) {
       showToast('Failed to load projects. Please try again.', 'error')
     } finally {
@@ -70,41 +120,10 @@ export const Dashboard = () => {
   useEffect(() => {
     if (user) {
       loadProjects()
-      loadBudgetAlerts()
     } else {
       setLoading(false)
     }
-  }, [user, loadProjects, loadBudgetAlerts])
-
-  const handleSearch = (query: string, filters: SearchFilters) => {
-    let filtered = [...projects]
-
-    // Text search
-    if (query) {
-      const lowerQuery = query.toLowerCase()
-      filtered = filtered.filter(
-        p => p.name.toLowerCase().includes(lowerQuery) ||
-          p.description.toLowerCase().includes(lowerQuery)
-      )
-    }
-
-    // Status filter
-    if (filters.status) {
-      filtered = filtered.filter(p => p.status === filters.status)
-    }
-
-    // Date filters
-    if (filters.dateFrom) {
-      const dateFrom = new Date(filters.dateFrom)
-      filtered = filtered.filter(p => new Date(p.createdAt) >= dateFrom)
-    }
-    if (filters.dateTo) {
-      const dateTo = new Date(filters.dateTo)
-      filtered = filtered.filter(p => new Date(p.createdAt) <= dateTo)
-    }
-
-    setFilteredProjects(filtered)
-  }
+  }, [user, loadProjects])
 
   const onCreateProject = async (data: ProjectFormData) => {
     if (!user?.uid) return
@@ -125,9 +144,6 @@ export const Dashboard = () => {
     }
   }
 
-  const totalScans = projects.reduce((sum, p) => sum + (p.scanCount || 0), 0)
-  const totalMembers = projects.reduce((sum, p) => sum + (p.memberCount || 0), 0)
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -137,106 +153,109 @@ export const Dashboard = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-slate-950 text-white relative overflow-hidden p-4 lg:p-8">
+      <div className="blueprint-grid absolute inset-0 z-0 opacity-10 pointer-events-none"></div>
 
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Your Projects</h1>
-          <p className="text-muted-foreground mt-1">Manage your construction projects</p>
-        </div>
-        {/* All authenticated users can create projects */}
-        <ShowIfHasRole requiredRole={['user', 'admin']}>
-          <Button onClick={() => setCreateModalOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            New Project
+      <div className="relative z-10 space-y-8">
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-4xl font-bold text-white">Dashboard Overview</h1>
+            <p className="text-slate-400 mt-1">Welcome back, {user?.displayName || 'Architect'}</p>
+          </div>
+          <Button
+            className="bg-cyan-600 hover:bg-cyan-700 text-white shadow-lg shadow-cyan-500/20 transition-all hover:-translate-y-0.5"
+            onClick={() => setCreateModalOpen(true)}
+          >
+            <Plus className="h-5 w-5 mr-2" /> New Project
           </Button>
-        </ShowIfHasRole>
-      </div>
+        </header>
 
-      {/* Budget Alerts */}
-      {budgetAlerts.length > 0 && (
-        <Card className="border-destructive">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <AlertTriangle className="h-5 w-5 text-destructive" />
-              <h3 className="font-semibold text-destructive">Budget Alerts</h3>
-            </div>
-            <div className="space-y-2">
-              {budgetAlerts.map((alert) => (
-                <div key={alert.projectId} className="flex items-center justify-between text-sm">
-                  <span className="font-medium">{alert.projectName}</span>
-                  <Badge variant="destructive">
-                    {alert.exceededByPercent.toFixed(1)}% over threshold
-                  </Badge>
+        {/* KPIs Section */}
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <KPICard title="Total Projects" value={kpiData.totalProjects} icon={<Folder size={32} />} />
+          <KPICard title="Active Builds" value={kpiData.activeBuilds} icon={<HomeIcon size={32} />} />
+          <KPICard title="Tasks Pending" value={kpiData.tasksPending} icon={<LayoutDashboard size={32} />} />
+          <KPICard title="Team Members" value={kpiData.teamMembers} icon={<Users size={32} />} />
+        </section>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Recent Projects Section */}
+          <section className="lg:col-span-2 space-y-6">
+            <h2 className="text-2xl font-semibold text-white">Recent Projects</h2>
+            {projects.length === 0 ? (
+              <div className="bg-slate-900/50 backdrop-blur-sm border border-white/10 p-12 rounded-xl text-center">
+                <Folder className="h-12 w-12 mx-auto text-slate-600 mb-4" />
+                <h3 className="text-lg font-semibold mb-2 text-slate-300">No projects yet</h3>
+                <p className="text-slate-500 mb-6">Create your first project to get started</p>
+                <Button onClick={() => setCreateModalOpen(true)} variant="outline" className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-950">
+                  Create Project
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {projects.map((project) => (
+                  <ProjectCard key={project.id} project={project} />
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* Project Progress Chart Section */}
+          <section className="space-y-6">
+            <h2 className="text-2xl font-semibold text-white">Monthly Progress</h2>
+            <div className="bg-slate-900/50 backdrop-blur-sm border border-white/10 p-6 rounded-xl h-80 flex items-center justify-center">
+              {chartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={chartData}
+                    margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                    <XAxis
+                      dataKey="name"
+                      stroke="#94A3B8"
+                      tick={{ fill: '#94A3B8', fontSize: 12 }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      stroke="#94A3B8"
+                      tick={{ fill: '#94A3B8', fontSize: 12 }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: '#0F172A', borderColor: '#334155', borderRadius: '8px', color: '#fff' }}
+                      itemStyle={{ color: '#fff' }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="projects"
+                      stroke="#06B6D4"
+                      strokeWidth={3}
+                      dot={{ r: 4, fill: '#06B6D4', strokeWidth: 0 }}
+                      activeDot={{ r: 6, fill: '#22D3EE', strokeWidth: 0 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="tasks"
+                      stroke="#8B5CF6"
+                      strokeWidth={3}
+                      dot={{ r: 4, fill: '#8B5CF6', strokeWidth: 0 }}
+                      activeDot={{ r: 6, fill: '#A78BFA', strokeWidth: 0 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="text-center text-slate-500">
+                  <TrendingUp className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                  <p>No activity data available</p>
                 </div>
-              ))}
+              )}
             </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Projects</p>
-                <p className="text-2xl font-bold mt-1">{filteredProjects.length}</p>
-              </div>
-              <FolderOpen className="h-8 w-8 text-primary" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Scans</p>
-                <p className="text-2xl font-bold mt-1">{totalScans}</p>
-              </div>
-              <ImageIcon className="h-8 w-8 text-primary" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Team Members</p>
-                <p className="text-2xl font-bold mt-1">{totalMembers}</p>
-              </div>
-              <Users className="h-8 w-8 text-primary" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Search Bar */}
-      <SearchBar onSearch={handleSearch} projects={projects} />
-
-      {/* Projects Grid */}
-      {filteredProjects.length === 0 ? (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <FolderOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No projects yet</h3>
-            <p className="text-muted-foreground mb-4">
-              Create your first project to get started
-            </p>
-            <Button onClick={() => setCreateModalOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Project
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProjects.map((project) => (
-            <ProjectCard key={project.id} project={project} />
-          ))}
+          </section>
         </div>
-      )}
+      </div>
 
       {/* Create Project Modal */}
       <Modal

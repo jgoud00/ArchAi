@@ -229,3 +229,16 @@ export interface SearchFilters {
   dateTo?: string
   budgetUsage?: 'under' | 'over' | 'all'
 }
+
+export interface DashboardKPIs {
+  totalProjects: number
+  activeBuilds: number
+  tasksPending: number
+  teamMembers: number
+}
+
+export interface ChartDataPoint {
+  name: string
+  projects: number
+  tasks: number
+}
