@@ -1,331 +1,112 @@
-import { useNavigate } from 'react-router-dom'
-import { useAuthStore } from '@/store/authStore'
-import { Button } from '@/components/ui/Button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
-import { Logo } from '@/components/Logo'
-import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
-import { 
-  LayoutDashboard, 
-  FileText, 
-  Camera, 
-  Package, 
-  FolderOpen, 
-  Users, 
-  Shield,
-  ArrowRight,
-  CheckCircle2
-} from 'lucide-react'
+import React from 'react';
+import { Canvas } from '@react-three/fiber';
+import { Box, MeshDistortMaterial, OrbitControls } from '@react-three/drei';
+import { Button } from '../components/ui/Button';
+import { ArrowRight, Zap, Code, Shield } from 'lucide-react';
 
-export const Home = () => {
-  const navigate = useNavigate()
-  const { user } = useAuthStore()
+const FeatureCard: React.FC<{ icon: React.ReactNode; title: string; description: string }> = ({ icon, title, description }) => (
+  <div className="group relative p-6 rounded-xl overflow-hidden glass transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/30">
+    <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"></div>
+    <div className="relative z-10 flex flex-col items-start space-y-4">
+      <div className="text-cyan-400 group-hover:text-cyan-300 transition-colors duration-300">
+        {icon}
+      </div>
+      <h3 className="text-xl font-bold text-white">{title}</h3>
+      <p className="text-slate-300">{description}</p>
+      <Button variant="ghost" className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-900/20">
+        Learn More <ArrowRight className="ml-2 h-4 w-4" />
+      </Button>
+    </div>
+  </div>
+);
 
-  const { elementRef: heroObserverRef, isVisible: heroVisible } = useIntersectionObserver({ triggerOnce: true })
-  const { elementRef: featuresObserverRef, isVisible: featuresVisible } = useIntersectionObserver({ triggerOnce: true })
-  const { elementRef: benefitsObserverRef, isVisible: benefitsVisible } = useIntersectionObserver({ triggerOnce: true })
-  const { elementRef: ctaObserverRef, isVisible: ctaVisible } = useIntersectionObserver({ triggerOnce: true })
-
-  const features = [
-    {
-      icon: FileText,
-      title: 'Blueprint Sketcher',
-      description: 'Create and edit architectural blueprints with precision tools and real-time collaboration.',
-      color: 'text-blue-600'
-    },
-    {
-      icon: Camera,
-      title: 'Drone Scan Processor',
-      description: 'Upload and analyze drone scans with AI-powered progress tracking and issue detection.',
-      color: 'text-cyan-600'
-    },
-    {
-      icon: Package,
-      title: 'Inventory Manager',
-      description: 'Track materials, equipment, and resources across all your construction projects.',
-      color: 'text-indigo-600'
-    },
-    {
-      icon: FolderOpen,
-      title: 'Document Manager',
-      description: 'Centralized document storage with version control and secure access management.',
-      color: 'text-slate-600'
-    },
-    {
-      icon: LayoutDashboard,
-      title: 'Project Dashboard',
-      description: 'Real-time project overview with budgets, timelines, and progress tracking.',
-      color: 'text-blue-600'
-    },
-    {
-      icon: Users,
-      title: 'Role-Based Access',
-      description: 'Admin roles with granular permissions for team collaboration.',
-      color: 'text-cyan-600'
-    },
-  ]
-
-  const benefits = [
-    'Streamlined project management',
-    'Real-time collaboration',
-    'AI-powered insights',
-    'Secure cloud storage',
-    'Mobile-responsive design',
-    'Comprehensive reporting'
-  ]
-
+const Home: React.FC = () => {
   return (
-    <div className="min-h-screen bg-background relative">
-      {/* Subtle animated blueprint grid background for entire page */}
-      <div className="fixed inset-0 blueprint-grid pointer-events-none z-0" style={{ opacity: 0.3 }} />
+    <div className="min-h-screen bg-slate-950 text-white relative overflow-hidden">
+      <div className="blueprint-grid absolute inset-0 z-0 opacity-20"></div>
+
       {/* Hero Section */}
-      <section 
-        ref={heroObserverRef}
-        className="relative overflow-hidden border-b border-border/50 z-10"
-      >
-        {/* Premium gradient background */}
-        <div className="absolute inset-0 hero-gradient" />
-        
-        {/* Animated blueprint grid background - subtle and slow */}
-        <div className="absolute inset-0 blueprint-grid" />
-        
-        {/* Subtle parallax overlay */}
-        <div 
-          className="absolute inset-0 opacity-[0.02]"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%231e40af' fill-opacity='1'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20.5zM0 20h2v20H0V20zm4 0h2v20H4V20zm4 0h2v20H8V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20zm4 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2z'/%3E%3C/g%3E%3C/svg%3E")`,
-            backgroundSize: '40px 40px',
-            animation: 'parallax 25s ease-in-out infinite alternate'
-          }}
-        />
-        
-        <div className={`relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-40 ${heroVisible ? 'animate-fade-in' : 'opacity-0'}`}>
-          <div className="text-center hero-glow">
-            {/* Logo with float animation */}
-            <div className="flex justify-center mb-12">
-              <div className="icon-float">
-                <Logo size="lg" />
-              </div>
-            </div>
-            
-            <h1 className="text-5xl lg:text-7xl font-bold text-foreground mb-10 animate-slide-in-up tracking-tight text-glow" style={{ animationDelay: '0.2s' }}>
-              Architect<span className="text-[#00E5FF]">AI</span>
-            </h1>
-            <p className="text-xl lg:text-2xl text-muted-foreground mb-12 max-w-2xl mx-auto animate-slide-in-up font-medium" style={{ animationDelay: '0.4s' }}>
-              Smart Construction. Smarter Decisions.
-            </p>
-            <p className="text-lg text-muted-foreground mb-16 max-w-3xl mx-auto animate-slide-in-up leading-relaxed" style={{ animationDelay: '0.6s' }}>
-              The all-in-one construction management platform for architects, engineers, and construction teams.
-              Manage projects, track progress, and collaborate seamlessly.
-            </p>
-            
-            <div className={`flex flex-col sm:flex-row gap-5 justify-center animate-slide-in-up`} style={{ animationDelay: '0.8s' }}>
-              {user ? (
-                <>
-                  <Button 
-                    size="lg" 
-                    className="btn-primary-enhanced text-lg px-10 py-7 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-lg font-semibold"
-                    onClick={() => navigate('/dashboard')}
-                    aria-label="Navigate to dashboard"
-                  >
-                    <LayoutDashboard className="h-5 w-5 mr-2" aria-hidden="true" />
-                    Go to Dashboard
-                  </Button>
-                  <Button 
-                    size="lg" 
-                    variant="outline"
-                    className="btn-outline-enhanced text-lg px-10 py-7 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-lg font-semibold"
-                    onClick={() => navigate('/dashboard')}
-                    aria-label="Create a new project"
-                  >
-                    Create Project
-                    <ArrowRight className="h-5 w-5 ml-2" aria-hidden="true" />
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button 
-                    size="lg" 
-                    className="btn-primary-enhanced text-lg px-10 py-7 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-lg font-semibold"
-                    onClick={() => navigate('/login')}
-                    aria-label="Get started with ArchitectAI"
-                  >
-                    Get Started
-                    <ArrowRight className="h-5 w-5 ml-2" aria-hidden="true" />
-                  </Button>
-                  <Button 
-                    size="lg" 
-                    variant="outline"
-                    className="btn-outline-enhanced text-lg px-10 py-7 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-lg font-semibold"
-                    onClick={() => navigate('/signup')}
-                    aria-label="Sign up for a new account"
-                  >
-                    Sign Up
-                  </Button>
-                </>
-              )}
-            </div>
+      <section className="relative z-10 flex flex-col lg:flex-row items-center justify-center min-h-[calc(100vh-80px)] p-8 md:p-16 bg-gradient-to-br from-slate-950 to-primary/20">
+        <div className="lg:w-1/2 text-center lg:text-left mb-12 lg:mb-0 animate-fade-in-left">
+          <h1 className="text-5xl md:text-6xl font-extrabold leading-tight text-white mb-6">
+            Build Smarter with <span className="text-cyan-400">AI</span>
+          </h1>
+          <p className="text-xl md:text-2xl text-slate-300 mb-8 max-w-lg mx-auto lg:mx-0">
+            Revolutionizing construction and architecture through intelligent design and automation.
+          </p>
+          <div className="flex justify-center lg:justify-start space-x-4">
+            <Button size="lg" className="bg-cyan-600 hover:bg-cyan-700 text-white hover-lift">
+              Get Started <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+            <Button size="lg" variant="outline" className="border-cyan-600 text-cyan-400 hover:bg-cyan-900/30 hover-lift">
+              View Demo
+            </Button>
           </div>
+        </div>
+
+        <div className="lg:w-1/2 h-80 lg:h-[600px] flex items-center justify-center animate-fade-in-right">
+          <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
+            <ambientLight intensity={0.5} />
+            <pointLight position={[10, 10, 10]} intensity={1} color="cyan" />
+            <OrbitControls enableZoom={false} autoRotate autoRotateSpeed={2} />
+            <Box args={[2.5, 2.5, 2.5]}>
+              <MeshDistortMaterial
+                color="#06B6D4" // cyan-500
+                factor={0.5}
+                speed={2}
+                distort={0.8}
+                roughness={0.5}
+                metalness={0.8}
+                transmission={0.9}
+                iridescence={0.8}
+                iridescenceIOR={1.5}
+                iridescenceThicknessRange={[0, 1000]}
+              />
+            </Box>
+          </Canvas>
         </div>
       </section>
 
       {/* Features Section */}
-      <section 
-        ref={featuresObserverRef}
-        className={`relative py-24 lg:py-36 bg-background z-10 ${featuresVisible ? 'fade-in-on-scroll visible' : 'fade-in-on-scroll'}`}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl lg:text-5xl font-bold text-foreground mb-5 tracking-tight">
-              Powerful Features
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Everything you need to manage construction projects from start to finish
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-            {features.map((feature, index) => {
-              const Icon = feature.icon
-              return (
-                <Card 
-                  key={index} 
-                  className="glass hover-lift border-border/50 shadow-soft cursor-pointer group focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 rounded-xl overflow-hidden"
-                  tabIndex={0}
-                  role="article"
-                  aria-label={feature.title}
-                  style={{ 
-                    animationDelay: `${index * 0.1}s`,
-                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
-                  }}
-                >
-                  <CardHeader className="pb-4">
-                    <div className={`inline-flex p-4 rounded-xl bg-gradient-to-br from-accent to-accent/50 mb-5 ${feature.color} group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-soft`}>
-                      <Icon className="h-6 w-6 stroke-[1.5]" aria-hidden="true" />
-                    </div>
-                    <CardTitle className="text-xl font-semibold leading-tight mb-2">{feature.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription className="text-base leading-relaxed text-muted-foreground">
-                      {feature.description}
-                    </CardDescription>
-                  </CardContent>
-                </Card>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Benefits Section */}
-      <section 
-        ref={benefitsObserverRef}
-        className={`relative py-24 lg:py-36 bg-gradient-to-b from-accent/20 to-background border-t border-border/50 z-10 ${benefitsVisible ? 'fade-in-on-scroll visible' : 'fade-in-on-scroll'}`}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <h2 className="text-4xl lg:text-5xl font-bold text-foreground mb-7 tracking-tight">
-                Why Choose ArchitectAI?
-              </h2>
-              <p className="text-lg text-muted-foreground mb-10 leading-relaxed">
-                Built specifically for construction professionals, ArchitectAI combines powerful project management 
-                tools with intuitive design to help you stay on top of every aspect of your projects.
-              </p>
-              <ul className="space-y-6">
-                {benefits.map((benefit, index) => (
-                  <li key={index} className="flex items-start gap-4 group">
-                    <div className="mt-0.5 flex-shrink-0">
-                      <CheckCircle2 className="h-6 w-6 text-[#00E5FF] stroke-[1.5] group-hover:scale-110 transition-transform duration-300" />
-                    </div>
-                    <span className="text-lg text-foreground font-medium leading-relaxed">{benefit}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="relative">
-              <div className="glass-dark rounded-2xl p-10 shadow-soft-xl">
-                <div className="space-y-8">
-                  <div className="flex items-center gap-5 group">
-                    <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-[#00E5FF]/10 to-[#00E5FF]/5 flex items-center justify-center shadow-soft group-hover:scale-110 transition-transform duration-300">
-                      <Shield className="h-7 w-7 text-[#00E5FF] stroke-[1.5]" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg mb-1">Secure & Reliable</h3>
-                      <p className="text-muted-foreground leading-relaxed">Enterprise-grade security for your projects</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-5 group">
-                    <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-[#00E5FF]/10 to-[#00E5FF]/5 flex items-center justify-center shadow-soft group-hover:scale-110 transition-transform duration-300">
-                      <Users className="h-7 w-7 text-[#00E5FF] stroke-[1.5]" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg mb-1">Team Collaboration</h3>
-                      <p className="text-muted-foreground leading-relaxed">Work together seamlessly with role-based access</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-5 group">
-                    <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-[#00E5FF]/10 to-[#00E5FF]/5 flex items-center justify-center shadow-soft group-hover:scale-110 transition-transform duration-300">
-                      <LayoutDashboard className="h-7 w-7 text-[#00E5FF] stroke-[1.5]" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg mb-1">Real-Time Insights</h3>
-                      <p className="text-muted-foreground leading-relaxed">Make data-driven decisions with live analytics</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section 
-        ref={ctaObserverRef}
-        className={`relative py-24 lg:py-36 bg-background border-t border-border/50 z-10 ${ctaVisible ? 'fade-in-on-scroll visible' : 'fade-in-on-scroll'}`}
-      >
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl lg:text-5xl font-bold text-foreground mb-7 tracking-tight">
-            Ready to Transform Your Construction Management?
-          </h2>
-          <p className="text-xl text-muted-foreground mb-12 leading-relaxed">
-            Join architects, engineers, and construction teams who trust ArchitectAI for their projects.
-          </p>
-          {user ? (
-            <Button 
-              size="lg" 
-              className="btn-primary-enhanced text-lg px-10 py-7 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-lg font-semibold"
-              onClick={() => navigate('/dashboard')}
-              aria-label="Navigate to dashboard"
-            >
-              Go to Dashboard
-              <ArrowRight className="h-5 w-5 ml-2" aria-hidden="true" />
-            </Button>
-          ) : (
-            <div className="flex flex-col sm:flex-row gap-5 justify-center">
-              <Button 
-                size="lg" 
-                className="btn-primary-enhanced text-lg px-10 py-7 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-lg font-semibold"
-                onClick={() => navigate('/signup')}
-                aria-label="Start free trial"
-              >
-                Start Free Trial
-                <ArrowRight className="h-5 w-5 ml-2" aria-hidden="true" />
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline"
-                className="btn-outline-enhanced text-lg px-10 py-7 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-lg font-semibold"
-                onClick={() => navigate('/login')}
-                aria-label="Sign in to your account"
-              >
-                Sign In
-              </Button>
-            </div>
-          )}
+      <section className="relative z-10 py-20 px-8 md:px-16 bg-slate-950">
+        <h2 className="text-4xl font-bold text-center text-white mb-16">
+          Key Features
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <FeatureCard
+            icon={<Zap size={36} />}
+            title="AI-Powered Design"
+            description="Generate intricate architectural designs with intelligent algorithms, optimizing for efficiency and aesthetics."
+          />
+          <FeatureCard
+            icon={<Code size={36} />}
+            title="Automated Blueprints"
+            description="Seamlessly convert conceptual designs into detailed, executable blueprints ready for construction."
+          />
+          <FeatureCard
+            icon={<Shield size={36} />}
+            title="Real-time Analytics"
+            description="Monitor project progress, resource allocation, and potential issues with real-time, data-driven insights."
+          />
+          <FeatureCard
+            icon={<ArrowRight size={36} />} // Placeholder icon, replace with relevant Lucide icon
+            title="Collaborative Platform"
+            description="Bring your team together with a shared workspace for streamlined communication and project management."
+          />
+          <FeatureCard
+            icon={<ArrowRight size={36} />} // Placeholder icon
+            title="Sustainable Solutions"
+            description="Incorporate eco-friendly materials and energy-efficient designs, guided by AI recommendations."
+          />
+          <FeatureCard
+            icon={<ArrowRight size={36} />} // Placeholder icon
+            title="Modular Construction"
+            description="Design and manage modular building components for faster, more cost-effective construction."
+          />
         </div>
       </section>
     </div>
-  )
-}
+  );
+};
 
+export default Home;
