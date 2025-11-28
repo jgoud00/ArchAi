@@ -178,3 +178,32 @@ export const loadBlueprintJson = async (jsonUrl: string): Promise<string> => {
   }
 }
 
+export const saveBlueprintVersion = async (
+  projectId: string,
+  data: any
+): Promise<void> => {
+  const { error } = await supabase
+    .from('blueprint_versions')
+    .insert({
+      project_id: projectId,
+      data: data,
+    })
+
+  if (error) {
+    throw new Error(`Failed to save version: ${error.message}`)
+  }
+}
+
+export const getBlueprintVersions = async (projectId: string): Promise<any[]> => {
+  const { data, error } = await supabase
+    .from('blueprint_versions')
+    .select('*')
+    .eq('project_id', projectId)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    throw new Error(`Failed to fetch versions: ${error.message}`)
+  }
+
+  return data || []
+}

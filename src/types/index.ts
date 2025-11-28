@@ -66,20 +66,20 @@ export interface ProjectActivity {
   id: string
   projectId: string
   userId: string
-  activityType: 
-    | 'project_created'
-    | 'project_updated'
-    | 'project_deleted'
-    | 'file_uploaded'
-    | 'file_deleted'
-    | 'member_added'
-    | 'member_removed'
-    | 'member_role_changed'
-    | 'comment_added'
-    | 'comment_updated'
-    | 'comment_deleted'
-    | 'scan_uploaded'
-    | 'scan_deleted'
+  activityType:
+  | 'project_created'
+  | 'project_updated'
+  | 'project_deleted'
+  | 'file_uploaded'
+  | 'file_deleted'
+  | 'member_added'
+  | 'member_removed'
+  | 'member_role_changed'
+  | 'comment_added'
+  | 'comment_updated'
+  | 'comment_deleted'
+  | 'scan_uploaded'
+  | 'scan_deleted'
   description: string
   metadata?: Record<string, any>
   createdAt: Date
@@ -174,20 +174,6 @@ export interface Document {
   fileUrl: string
   fileType: string
   uploadedBy: string
-  uploadedAt: Date
-}
-
-export interface Blueprint {
-  projectId: string
-  pngUrl?: string
-  jsonUrl?: string
-  updatedAt: Date
-}
-
-export interface InventoryItem {
-  id: string
-  projectId: string
-  itemName: string
   quantity: number
   unit: string
   category?: string

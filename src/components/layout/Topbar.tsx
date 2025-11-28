@@ -1,7 +1,8 @@
-import { Search, Bell, Menu } from 'lucide-react'
+import { Search, Menu } from 'lucide-react'
 import { Input } from '../ui/Input'
 import { Button } from '../ui/Button'
 import { Logo } from '../Logo'
+import { NotificationCenter } from '../NotificationCenter'
 
 interface TopbarProps {
   onMenuClick?: () => void
@@ -35,13 +36,7 @@ export const Topbar = ({ onMenuClick }: TopbarProps) => {
       </div>
 
       <div className="flex items-center gap-2 lg:gap-4">
-        <Button 
-          variant="ghost" 
-          size="icon"
-          aria-label="Notifications"
-        >
-          <Bell className="h-5 w-5" />
-        </Button>
+        <NotificationCenter />
       </div>
     </div>
   )
