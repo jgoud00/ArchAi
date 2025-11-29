@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Shield, Users, AlertCircle } from 'lucide-react'
 import { getAllUsers, updateUserRole } from '@/services/userManagement'
 import { useAuthStore } from '@/store/authStore'
@@ -15,7 +15,7 @@ import { format } from 'date-fns'
 export const AdminPanel = () => {
   const { user, isAdmin } = useAuthStore()
   const { showToast } = useToast()
-  
+
   const [users, setUsers] = useState<UserType[]>([])
   const [loading, setLoading] = useState(true)
   const [editModalOpen, setEditModalOpen] = useState(false)
@@ -23,23 +23,24 @@ export const AdminPanel = () => {
   const [newRole, setNewRole] = useState<UserRole>('user')
   const [saving, setSaving] = useState(false)
 
-  useEffect(() => {
-    if (isAdmin()) {
-      loadUsers()
-    }
-  }, [isAdmin])
-
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     try {
       setLoading(true)
       const usersData = await getAllUsers()
       setUsers(usersData)
-    } catch (error: any) {
-      showToast(error.message || 'Failed to load users', 'error')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to load users'
+      showToast(message, 'error')
     } finally {
       setLoading(false)
     }
-  }
+  }, [showToast])
+
+  useEffect(() => {
+    if (isAdmin()) {
+      loadUsers()
+    }
+  }, [isAdmin, loadUsers])
 
   const handleEditRole = (userToEdit: UserType) => {
     setSelectedUser(userToEdit)
@@ -57,13 +58,14 @@ export const AdminPanel = () => {
       setEditModalOpen(false)
       setSelectedUser(null)
       loadUsers()
-      
+
       // If updating own role, reload auth
       if (selectedUser.uid === user?.uid) {
         window.location.reload()
       }
-    } catch (error: any) {
-      showToast(error.message || 'Failed to update role', 'error')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to update role'
+      showToast(message, 'error')
     } finally {
       setSaving(false)
     }

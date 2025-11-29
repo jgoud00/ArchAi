@@ -17,7 +17,7 @@ export const BudgetPage = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { showToast } = useToast()
-  
+
   const [project, setProject] = useState<Project | null>(null)
   const [budget, setBudget] = useState<Budget | null>(null)
   const [expenses, setExpenses] = useState<Expense[]>([])
@@ -38,8 +38,9 @@ export const BudgetPage = () => {
       setBudget(budgetData)
       setExpenses(expensesData)
       setEstimatedCost(budgetData?.estimatedCost.toString() || '0')
-    } catch (error: any) {
-      showToast(error.message || 'Failed to load budget', 'error')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to load budget'
+      showToast(message, 'error')
     } finally {
       setLoading(false)
     }
@@ -59,8 +60,9 @@ export const BudgetPage = () => {
       showToast('Budget updated successfully', 'success')
       setEditModalOpen(false)
       loadData()
-    } catch (error: any) {
-      showToast(error.message || 'Failed to update budget', 'error')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to update budget'
+      showToast(message, 'error')
     }
   }
 
@@ -159,7 +161,7 @@ export const BudgetPage = () => {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={(props: any) => {
+                  label={(props: { name?: string; percent?: number }) => {
                     const name = props.name || ''
                     const percent = props.percent || 0
                     return `${name} ${(percent * 100).toFixed(0)}%`

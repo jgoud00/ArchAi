@@ -62,7 +62,7 @@ export interface ProjectActivity {
   | 'scan_uploaded'
   | 'scan_deleted'
   description: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
   createdAt: Date
   user?: {
     displayName: string

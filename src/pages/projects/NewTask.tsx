@@ -53,8 +53,9 @@ export const NewTask = () => {
       )
       showToast('Task created successfully', 'success')
       navigate(`/projects/${id}/timeline`)
-    } catch (error: any) {
-      showToast(error.message || 'Failed to create task', 'error')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to create task'
+      showToast(message, 'error')
     } finally {
       setLoading(false)
     }

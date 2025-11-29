@@ -3,7 +3,7 @@ import { Handle, Position, NodeResizer } from '@xyflow/react';
 import { cn } from '@/utils/cn';
 import { Armchair, Bed, DoorOpen, Bath, Monitor, Table } from 'lucide-react';
 
-const icons: Record<string, any> = {
+const icons: Record<string, React.ElementType> = {
     armchair: Armchair,
     bed: Bed,
     door: DoorOpen,
@@ -12,7 +12,11 @@ const icons: Record<string, any> = {
     table: Table,
 };
 
-const FurnitureNode = ({ data, selected }: { data: any, selected: boolean }) => {
+interface FurnitureNodeData {
+    furnitureType?: string;
+}
+
+const FurnitureNode = ({ data, selected }: { data: FurnitureNodeData, selected: boolean }) => {
     const type = data.furnitureType || 'armchair';
     const Icon = icons[type] || Armchair;
 

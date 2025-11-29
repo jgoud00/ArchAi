@@ -41,8 +41,9 @@ export const AddExpense = () => {
       await createExpense(id, data.type, data.name, data.amount, new Date(data.date))
       showToast('Expense added successfully', 'success')
       navigate(`/projects/${id}/budget`)
-    } catch (error: any) {
-      showToast(error.message || 'Failed to add expense', 'error')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to add expense'
+      showToast(message, 'error')
     } finally {
       setLoading(false)
     }

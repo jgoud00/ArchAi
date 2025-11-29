@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import { useToast } from '@/hooks/useToast'
-// @ts-ignore - frappe-gantt doesn't have TypeScript definitions
+// @ts-expect-error Frappe Gantt missing types - frappe-gantt doesn't have TypeScript definitions
 import Gantt from 'frappe-gantt'
 
 export const Timeline = () => {
@@ -16,8 +16,8 @@ export const Timeline = () => {
   const navigate = useNavigate()
   const { showToast } = useToast()
   const ganttRef = useRef<SVGSVGElement>(null)
-  const [ganttInstance, setGanttInstance] = useState<Gantt | null>(null)
-  
+  const ganttInstanceRef = useRef<Gantt | null>(null)
+
   const [project, setProject] = useState<Project | null>(null)
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
@@ -32,8 +32,9 @@ export const Timeline = () => {
       ])
       setProject(projectData)
       setTasks(tasksData)
-    } catch (error: any) {
-      showToast(error.message || 'Failed to load timeline', 'error')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to load timeline'
+      showToast(message, 'error')
     } finally {
       setLoading(false)
     }
@@ -51,7 +52,9 @@ export const Timeline = () => {
       ganttRef.current.innerHTML = ''
     }
 
-    if (ganttRef.current && tasks.length > 0) {
+    const ganttContainer = ganttRef.current
+
+    if (ganttContainer && tasks.length > 0) {
       const ganttData = tasks.map((task) => ({
         id: task.id,
         name: task.taskName,
@@ -62,7 +65,7 @@ export const Timeline = () => {
       }))
 
       try {
-        const gantt = new Gantt(ganttRef.current, ganttData, {
+        const gantt = new Gantt(ganttContainer, ganttData, {
           view_mode: 'Month',
           language: 'en',
           on_click: () => {
@@ -71,27 +74,27 @@ export const Timeline = () => {
           on_date_change: () => {
             // Handle date change
           },
-          on_progress_change: (_task: any, _progress: number) => {
+          on_progress_change: (_task: unknown, _progress: number) => {
             // Handle progress change
           },
         })
 
-        setGanttInstance(gantt)
+        ganttInstanceRef.current = gantt
       } catch (error) {
         console.error('Error initializing Gantt chart:', error)
       }
     }
-    
+
     // Cleanup function to destroy gantt instance
     return () => {
-      if (ganttInstance) {
-        if (ganttRef.current) {
-          ganttRef.current.innerHTML = ''
+      if (ganttInstanceRef.current) {
+        if (ganttContainer) {
+          ganttContainer.innerHTML = ''
         }
-        setGanttInstance(null)
+        ganttInstanceRef.current = null
       }
     }
-  }, [tasks]) // Removed ganttInstance from dependencies to prevent infinite loops
+  }, [tasks])
 
   if (loading) {
     return (
@@ -149,11 +152,10 @@ export const Timeline = () => {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={`px-2 py-1 rounded text-xs ${
-                    task.status === 'completed' ? 'bg-green-100 text-green-800' :
-                    task.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
-                    'bg-gray-100 text-gray-800'
-                  }`}>
+                  <span className={`px-2 py-1 rounded text-xs ${task.status === 'completed' ? 'bg-green-100 text-green-800' :
+                    task.status === 'in_progress' ? 'bg-primary/10 text-primary' :
+                      'bg-muted text-muted-foreground'
+                    }`}>
                     {task.status.replace('_', ' ')}
                   </span>
                 </div>

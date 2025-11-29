@@ -61,7 +61,7 @@ export const logActivity = async (
   userId: string,
   activityType: ProjectActivity['activityType'],
   description: string,
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 ): Promise<void> => {
   const { error } = await supabase
     .from('project_activities')

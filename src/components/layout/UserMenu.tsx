@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { LogOut, User, Settings, ChevronDown } from 'lucide-react'
+import { LogOut, User, ChevronDown } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { cn } from '@/utils/cn'
 
@@ -53,36 +53,14 @@ export const UserMenu = () => {
             </button>
 
             {isOpen && (
-                <div className="absolute right-0 mt-2 w-56 rounded-lg border border-slate-800 bg-slate-900 shadow-lg py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
-                    <div className="px-3 py-2 border-b border-slate-800 md:hidden">
-                        <p className="text-sm font-medium text-white">
-                            {user.displayName || 'User'}
-                        </p>
-                        <p className="text-xs text-slate-400">
-                            {user.email}
-                        </p>
-                    </div>
-
-                    <div className="p-1">
-                        <button
-                            onClick={() => {
-                                navigate('/settings')
-                                setIsOpen(false)
-                            }}
-                            className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-slate-300 hover:bg-slate-800 hover:text-cyan-300 transition-colors"
-                        >
-                            <Settings className="h-4 w-4" />
-                            Settings
-                        </button>
-
-                        <button
-                            onClick={handleLogout}
-                            className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-red-400 hover:bg-red-500/10 transition-colors"
-                        >
-                            <LogOut className="h-4 w-4" />
-                            Logout
-                        </button>
-                    </div>
+                <div className="absolute right-0 mt-2 w-48 bg-card border border-border rounded-lg shadow-lg py-1 z-50 animate-fade-in-up">
+                    <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
+                    >
+                        <LogOut className="h-4 w-4" />
+                        Logout
+                    </button>
                 </div>
             )}
         </div>

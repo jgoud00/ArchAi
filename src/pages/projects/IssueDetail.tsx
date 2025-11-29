@@ -15,7 +15,7 @@ export const IssueDetail = () => {
   const { id, issueId } = useParams<{ id: string; issueId: string }>()
   const navigate = useNavigate()
   const { showToast } = useToast()
-  
+
   const [issue, setIssue] = useState<Issue | null>(null)
   const [loading, setLoading] = useState(true)
   const [editModalOpen, setEditModalOpen] = useState(false)
@@ -34,8 +34,9 @@ export const IssueDetail = () => {
         setStatus(issueData.status)
         setPriority(issueData.priority)
       }
-    } catch (error: any) {
-      showToast(error.message || 'Failed to load issue', 'error')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to load issue'
+      showToast(message, 'error')
     } finally {
       setLoading(false)
     }
@@ -54,8 +55,9 @@ export const IssueDetail = () => {
       showToast('Issue updated successfully', 'success')
       setEditModalOpen(false)
       loadIssue()
-    } catch (error: any) {
-      showToast(error.message || 'Failed to update issue', 'error')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to update issue'
+      showToast(message, 'error')
     }
   }
 
@@ -65,8 +67,9 @@ export const IssueDetail = () => {
       await deleteIssue(issue.id)
       showToast('Issue deleted successfully', 'success')
       navigate(`/projects/${id}/issues`)
-    } catch (error: any) {
-      showToast(error.message || 'Failed to delete issue', 'error')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to delete issue'
+      showToast(message, 'error')
     }
   }
 
@@ -172,7 +175,7 @@ export const IssueDetail = () => {
             <label className="text-sm font-medium mb-2 block">Status</label>
             <select
               value={status}
-              onChange={(e) => setStatus(e.target.value as any)}
+              onChange={(e) => setStatus(e.target.value as 'open' | 'in_progress' | 'resolved')}
               className="w-full px-3 py-2 border border-input rounded-md bg-background"
             >
               <option value="open">Open</option>
@@ -184,7 +187,7 @@ export const IssueDetail = () => {
             <label className="text-sm font-medium mb-2 block">Priority</label>
             <select
               value={priority}
-              onChange={(e) => setPriority(e.target.value as any)}
+              onChange={(e) => setPriority(e.target.value as 'low' | 'medium' | 'high')}
               className="w-full px-3 py-2 border border-input rounded-md bg-background"
             >
               <option value="low">Low</option>

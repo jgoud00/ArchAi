@@ -45,7 +45,7 @@ export const ModelViewer = () => {
     } finally {
       setLoading(false)
     }
-  }, [id, showToast])
+  }, [id])
 
   useEffect(() => {
     if (id) {
@@ -97,8 +97,9 @@ export const ModelViewer = () => {
 
       setModelUrl(urlData.publicUrl)
       showToast('3D model uploaded successfully!', 'success')
-    } catch (error: any) {
-      showToast(error.message || 'Failed to upload model', 'error')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to upload model'
+      showToast(message, 'error')
     } finally {
       setUploading(false)
       if (fileInputRef.current) {

@@ -19,21 +19,21 @@ export const Calendar = () => {
 
   const loadTasks = useCallback(async () => {
     if (!user?.uid) return
-    
+
     try {
       setLoading(true)
       // Get all projects user has access to
       const userProjects = await getUserProjects(user.uid)
-      
+
       // Get tasks from all projects
       const allTasks: Task[] = []
       for (const project of userProjects) {
         const projectTasks = await getProjectTasks(project.id)
         allTasks.push(...projectTasks)
       }
-      
+
       setTasks(allTasks)
-    } catch (error: any) {
+    } catch (error: unknown) {
       showToast('Failed to load tasks', 'error')
     } finally {
       setLoading(false)

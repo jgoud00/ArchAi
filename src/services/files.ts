@@ -170,7 +170,7 @@ export const updateFile = async (
   projectId: string,
   updates: { name?: string; description?: string; category?: string }
 ): Promise<void> => {
-  const updateData: Record<string, any> = {}
+  const updateData: Record<string, unknown> = {}
   if (updates.name !== undefined) updateData.name = updates.name
   if (updates.description !== undefined) updateData.description = updates.description
   if (updates.category !== undefined) updateData.category = updates.category

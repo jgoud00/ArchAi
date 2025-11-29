@@ -38,8 +38,9 @@ export const ForgotPassword = () => {
       setEmail(data.email)
       setEmailSent(true)
       showToast('Password reset email sent! Check your inbox.', 'success')
-    } catch (error: any) {
-      showToast(error.message || 'Failed to send reset email. Please try again.', 'error')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to send reset email. Please try again.'
+      showToast(message, 'error')
       setLoading(false)
     }
   }
@@ -49,8 +50,8 @@ export const ForgotPassword = () => {
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
-              <Mail className="h-6 w-6 text-blue-600" />
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+              <Mail className="h-6 w-6 text-primary" />
             </div>
             <CardTitle className="text-2xl font-bold">Check Your Email</CardTitle>
             <CardDescription>

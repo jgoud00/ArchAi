@@ -1,5 +1,6 @@
 import { supabase } from './supabase'
 import { User, UserRole } from '../types'
+import { USER_ROLES, STORAGE_BUCKETS, MAX_AVATAR_SIZE, AVATAR_CACHE_CONTROL } from '../constants'
 
 export const signup = async (
   email: string,
@@ -36,7 +37,7 @@ export const signup = async (
       id: authData.user.id,
       email: authData.user.email || email,
       display_name: displayName,
-      role: 'user', // Default role for new users
+      role: USER_ROLES.USER, // Default role for new users
     })
 
   if (profileError) {
@@ -56,7 +57,7 @@ export const signup = async (
     email: createdUser?.email || authData.user.email || email,
     displayName: createdUser?.display_name || displayName,
     avatar: createdUser?.avatar || undefined,
-    role: (createdUser?.role as UserRole) || 'user',
+    role: (createdUser?.role as UserRole) || USER_ROLES.USER,
     createdAt: createdUser ? new Date(createdUser.created_at) : new Date(),
   }
 }
@@ -115,7 +116,7 @@ export const login = async (email: string, password: string): Promise<User> => {
         id: authData.user.id,
         email: authData.user.email || email,
         display_name: authData.user.user_metadata?.display_name || authData.user.email || email,
-        role: 'user', // Default role
+        role: USER_ROLES.USER, // Default role
       })
 
     if (createError) {
@@ -126,7 +127,7 @@ export const login = async (email: string, password: string): Promise<User> => {
         email: authData.user.email || email,
         displayName: authData.user.user_metadata?.display_name || email,
         avatar: undefined,
-        role: 'user' as UserRole,
+        role: USER_ROLES.USER as UserRole,
         createdAt: new Date(),
       }
     }
@@ -144,7 +145,7 @@ export const login = async (email: string, password: string): Promise<User> => {
         email: newProfile.email,
         displayName: newProfile.display_name || newProfile.email,
         avatar: newProfile.avatar || undefined,
-        role: (newProfile.role as UserRole) || 'user',
+        role: (newProfile.role as UserRole) || USER_ROLES.USER,
         createdAt: new Date(newProfile.created_at),
       }
     }
@@ -155,7 +156,7 @@ export const login = async (email: string, password: string): Promise<User> => {
       email: authData.user.email || email,
       displayName: authData.user.user_metadata?.display_name || email,
       avatar: undefined,
-      role: 'user' as UserRole,
+      role: USER_ROLES.USER as UserRole,
       createdAt: new Date(),
     }
   }
@@ -166,7 +167,7 @@ export const login = async (email: string, password: string): Promise<User> => {
     email: userProfile.email,
     displayName: userProfile.display_name || userProfile.email,
     avatar: userProfile.avatar || undefined,
-    role: (userProfile.role as UserRole) || 'user',
+    role: (userProfile.role as UserRole) || USER_ROLES.USER,
     createdAt: new Date(userProfile.created_at),
   }
 }
@@ -205,7 +206,7 @@ export const getCurrentUser = async (userId: string): Promise<User | null> => {
           id: authUser.id,
           email: authUser.email || '',
           display_name: authUser.user_metadata?.display_name || authUser.email || '',
-          role: 'user', // Default role
+          role: USER_ROLES.USER, // Default role
         })
 
       if (createError) {
@@ -215,7 +216,7 @@ export const getCurrentUser = async (userId: string): Promise<User | null> => {
           uid: authUser.id,
           email: authUser.email || '',
           displayName: authUser.user_metadata?.display_name || authUser.email || '',
-          role: 'user' as UserRole,
+          role: USER_ROLES.USER as UserRole,
           createdAt: new Date(),
         }
       }
@@ -233,7 +234,7 @@ export const getCurrentUser = async (userId: string): Promise<User | null> => {
           email: newProfile.email,
           displayName: newProfile.display_name || newProfile.email,
           avatar: newProfile.avatar || undefined,
-          role: (newProfile.role as UserRole) || 'user',
+          role: (newProfile.role as UserRole) || USER_ROLES.USER,
           createdAt: new Date(newProfile.created_at),
         }
       }
@@ -245,7 +246,7 @@ export const getCurrentUser = async (userId: string): Promise<User | null> => {
       email: userProfile.email,
       displayName: userProfile.display_name || userProfile.email,
       avatar: userProfile.avatar || undefined,
-      role: (userProfile.role as UserRole) || 'user',
+      role: (userProfile.role as UserRole) || USER_ROLES.USER,
       createdAt: new Date(userProfile.created_at),
     }
   } catch (error) {
@@ -304,7 +305,7 @@ export const updateProfile = async (
     throw new Error('Not authenticated')
   }
 
-  const updateData: Record<string, any> = {}
+  const updateData: { display_name?: string; avatar?: string } = {}
   if (updates.displayName !== undefined) {
     updateData.display_name = updates.displayName
   }
@@ -355,7 +356,7 @@ export const uploadAvatar = async (file: File): Promise<string> => {
   }
 
   // Validate file size (max 5MB)
-  if (file.size > 5 * 1024 * 1024) {
+  if (file.size > MAX_AVATAR_SIZE) {
     throw new Error('Image must be less than 5MB')
   }
 
@@ -365,9 +366,9 @@ export const uploadAvatar = async (file: File): Promise<string> => {
 
   // Upload to storage
   const { error: uploadError } = await supabase.storage
-    .from('avatars')
+    .from(STORAGE_BUCKETS.AVATAR_IMAGES)
     .upload(fileName, file, {
-      cacheControl: '3600',
+      cacheControl: AVATAR_CACHE_CONTROL,
       upsert: false,
     })
 
@@ -377,7 +378,7 @@ export const uploadAvatar = async (file: File): Promise<string> => {
 
   // Get public URL
   const { data: urlData } = supabase.storage
-    .from('avatars')
+    .from(STORAGE_BUCKETS.AVATAR_IMAGES)
     .getPublicUrl(fileName)
 
   if (!urlData?.publicUrl) {

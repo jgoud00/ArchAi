@@ -1,20 +1,9 @@
 import { supabase } from './supabase'
 import { Issue } from '../types'
+import { STORAGE_BUCKETS, ISSUE_STATUS } from '../constants'
+import { extractStoragePath } from '../utils/storageUtils'
 
-const STORAGE_BUCKET = 'project-files'
-
-const extractStoragePath = (fileUrl?: string | null): string | null => {
-  if (!fileUrl) return null
-  try {
-    const url = new URL(fileUrl)
-    const parts = url.pathname.split('/').filter(Boolean)
-    const bucketIndex = parts.indexOf('project-files')
-    if (bucketIndex === -1) return null
-    return parts.slice(bucketIndex + 1).join('/')
-  } catch {
-    return null
-  }
-}
+const STORAGE_BUCKET = STORAGE_BUCKETS.PROJECT_FILES
 
 const deleteFromStorage = async (path: string): Promise<void> => {
   const { error } = await supabase.storage.from(STORAGE_BUCKET).remove([path])
@@ -126,7 +115,7 @@ export const createIssue = async (
       title,
       description: description || null,
       priority,
-      status: 'open',
+      status: ISSUE_STATUS.OPEN,
       photo_url: photoUrl || null,
       created_by: createdBy,
     })
@@ -145,7 +134,13 @@ export const updateIssue = async (
   updates: Partial<Pick<Issue, 'title' | 'description' | 'priority' | 'status'>>,
   photoFile?: File
 ): Promise<void> => {
-  const updateData: Record<string, any> = {}
+  const updateData: {
+    title?: string
+    description?: string | null
+    priority?: 'low' | 'medium' | 'high'
+    status?: 'open' | 'in_progress' | 'resolved'
+    photo_url?: string
+  } = {}
 
   if (updates.title !== undefined) updateData.title = updates.title
   if (updates.description !== undefined) updateData.description = updates.description
@@ -163,7 +158,7 @@ export const updateIssue = async (
     if (issue) {
       // Delete old photo if exists
       if (issue.photo_url) {
-        const filePath = extractStoragePath(issue.photo_url)
+        const filePath = extractStoragePath(issue.photo_url, STORAGE_BUCKET)
         if (!filePath) {
           throw new Error('Unable to resolve existing issue photo path for deletion')
         }
@@ -214,7 +209,7 @@ export const deleteIssue = async (issueId: string): Promise<void> => {
 
   // Delete photo if exists
   if (issue?.photo_url) {
-    const filePath = extractStoragePath(issue.photo_url)
+    const filePath = extractStoragePath(issue.photo_url, STORAGE_BUCKET)
     if (!filePath) {
       throw new Error('Unable to resolve issue photo path for deletion')
     }
@@ -230,4 +225,3 @@ export const deleteIssue = async (issueId: string): Promise<void> => {
     throw new Error(error.message)
   }
 }
-

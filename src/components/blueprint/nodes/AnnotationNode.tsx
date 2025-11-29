@@ -2,7 +2,11 @@ import { memo, useState } from 'react';
 import { NodeResizer } from '@xyflow/react';
 import { cn } from '@/utils/cn';
 
-const AnnotationNode = ({ data, selected }: { data: any, selected: boolean }) => {
+interface AnnotationNodeData {
+    text?: string;
+}
+
+const AnnotationNode = ({ data, selected }: { data: AnnotationNodeData, selected: boolean }) => {
     const [text, setText] = useState(data.text || 'Add note...');
 
     return (

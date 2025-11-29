@@ -36,3 +36,46 @@ export const MAX_ACTIVITY_LIMIT = 200
 export const MAX_SEARCH_RESULTS = 100
 export const DEBOUNCE_DELAY_MS = 300 // 300ms debounce for search
 
+
+// Storage Buckets
+export const STORAGE_BUCKETS = {
+    PROJECT_FILES: 'project-files',
+    AVATAR_IMAGES: 'avatars',
+}
+
+// Batch Operations
+export const BATCH_SIZES = {
+    DELETE_OPERATIONS: 50,
+}
+
+// Routes
+export const APP_ROUTES = {
+    LOGIN: '/login',
+    DASHBOARD: '/dashboard',
+    HOME: '/',
+}
+
+// User Roles
+export const USER_ROLES = {
+    ADMIN: 'admin',
+    USER: 'user',
+} as const
+
+// Issue Constants
+export const ISSUE_STATUS = {
+    OPEN: 'open',
+    IN_PROGRESS: 'in_progress',
+    RESOLVED: 'resolved',
+} as const
+
+export const ISSUE_PRIORITY = {
+    LOW: 'low',
+    MEDIUM: 'medium',
+    HIGH: 'high',
+} as const
+
+// File Types
+export const FILE_TYPES = {
+    IMAGE: 'image',
+    VIDEO: 'video',
+} as const

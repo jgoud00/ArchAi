@@ -40,8 +40,9 @@ export const NewInventoryItem = () => {
       await createInventoryItem(id, data.itemName, data.quantity, data.unit, data.category)
       showToast('Item added successfully', 'success')
       navigate(`/projects/${id}/inventory`)
-    } catch (error: any) {
-      showToast(error.message || 'Failed to add item', 'error')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to add item'
+      showToast(message, 'error')
     } finally {
       setLoading(false)
     }

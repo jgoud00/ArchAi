@@ -2,7 +2,13 @@ import { memo } from 'react';
 import { Handle, Position, NodeResizer } from '@xyflow/react';
 import { cn } from '@/utils/cn';
 
-const RoomNode = ({ data, selected }: { data: any, selected: boolean }) => {
+interface RoomNodeData {
+    label?: string;
+    width?: number;
+    height?: number;
+}
+
+const RoomNode = ({ data, selected }: { data: RoomNodeData, selected: boolean }) => {
     return (
         <>
             <NodeResizer

@@ -16,7 +16,7 @@ export const Documents = () => {
   const { id } = useParams<{ id: string }>()
   const { user } = useAuthStore()
   const { showToast } = useToast()
-  
+
   const [project, setProject] = useState<Project | null>(null)
   const [documents, setDocuments] = useState<Document[]>([])
   const [loading, setLoading] = useState(true)
@@ -34,8 +34,9 @@ export const Documents = () => {
       ])
       setProject(projectData)
       setDocuments(documentsData)
-    } catch (error: any) {
-      showToast(error.message || 'Failed to load documents', 'error')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to load documents'
+      showToast(message, 'error')
     } finally {
       setLoading(false)
     }
@@ -57,8 +58,9 @@ export const Documents = () => {
       setUploadModalOpen(false)
       setDocFile(null)
       loadData()
-    } catch (error: any) {
-      showToast(error.message || 'Failed to upload document', 'error')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to upload document'
+      showToast(message, 'error')
     } finally {
       setUploading(false)
     }
@@ -69,8 +71,9 @@ export const Documents = () => {
       await deleteDocument(docId)
       showToast('Document deleted successfully', 'success')
       loadData()
-    } catch (error: any) {
-      showToast(error.message || 'Failed to delete document', 'error')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to delete document'
+      showToast(message, 'error')
     }
   }
 

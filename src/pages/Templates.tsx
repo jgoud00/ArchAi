@@ -101,7 +101,7 @@ export const Templates = () => {
           startDate.setDate(startDate.getDate() + i * 7)
           const endDate = new Date(startDate)
           endDate.setDate(endDate.getDate() + 7)
-          
+
           await createTask(
             projectId,
             template.defaultTasks[i],
@@ -114,8 +114,9 @@ export const Templates = () => {
 
       showToast('Project created from template successfully!', 'success')
       navigate(`/projects/${projectId}`)
-    } catch (error: any) {
-      showToast(error.message || 'Failed to create project from template', 'error')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to create project from template'
+      showToast(message, 'error')
     } finally {
       setCreating(null)
     }

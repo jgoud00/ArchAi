@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { useDropzone } from 'react-dropzone'
+import { useDropzone, FileRejection } from 'react-dropzone'
 import { Upload, X } from 'lucide-react'
 import { cn } from '@/utils/cn'
 import { Button } from './ui/Button'
@@ -33,7 +33,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     setError(null)
   }, [])
 
-  const onDropRejected = useCallback((rejectedFiles: any[]) => {
+  const onDropRejected = useCallback((rejectedFiles: FileRejection[]) => {
     const rejection = rejectedFiles[0]
     if (rejection.errors[0]?.code === 'file-too-large') {
       setError('File size must be less than 50MB')
@@ -62,8 +62,9 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       await onUpload(selectedFile, (prog) => setProgress(prog))
       setSelectedFile(null)
       setProgress(0)
-    } catch (err: any) {
-      setError(err.message || 'Upload failed. Please try again.')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Upload failed. Please try again.'
+      setError(message)
     } finally {
       setUploading(false)
     }

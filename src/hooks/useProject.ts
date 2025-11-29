@@ -25,8 +25,9 @@ export const useProject = (projectId: string | undefined) => {
       setError(null)
       const projectData = await getProject(projectId)
       setProject(projectData)
-    } catch (err: any) {
-      setError(err.message || 'Failed to load project')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to load project'
+      setError(message)
     } finally {
       setLoading(false)
     }

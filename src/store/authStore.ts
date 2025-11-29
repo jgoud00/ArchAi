@@ -3,7 +3,14 @@ import { User, UserRole } from '../types'
 import * as authService from '../services/auth'
 import { onAuthChange } from '../services/auth'
 import { supabase } from '../services/supabase'
+import { USER_ROLES } from '../constants'
 
+/**
+ * Architecture Note:
+ * This store manages the global authentication state using Zustand.
+ * It integrates with Supabase Auth and provides role-based access control helpers.
+ * The initializeAuth function ensures the session is restored on app load.
+ */
 interface AuthStore {
   user: User | null
   loading: boolean
@@ -26,7 +33,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   user: null,
   loading: true,
   userRole: null,
-  
+
   login: async (email: string, password: string) => {
     try {
       const user = await authService.login(email, password)
@@ -48,12 +55,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   },
 
   logout: async () => {
-    try {
-      await authService.logout()
-      set({ user: null, userRole: null })
-    } catch (error) {
-      throw error
-    }
+    await authService.logout()
+    set({ user: null, userRole: null })
   },
 
   setUser: (user: User | null) => {
@@ -61,11 +64,11 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   },
 
   isAdmin: () => {
-    return get().user?.role === 'admin'
+    return get().user?.role === USER_ROLES.ADMIN
   },
 
   isUser: () => {
-    return get().user?.role === 'user'
+    return get().user?.role === USER_ROLES.USER
   },
 
   /**
@@ -88,7 +91,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     if (roles.includes(userRole)) return true
 
     // Role hierarchy: admin can access everything
-    if (userRole === 'admin') return true
+    if (userRole === USER_ROLES.ADMIN) return true
 
     return false
   },
@@ -106,7 +109,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
     try {
       const { data: { session }, error } = await supabase.auth.getSession()
-      
+
       if (error) {
         console.error('[Auth Store] Error getting session:', error)
         // Set up listener even if session check fails
@@ -117,7 +120,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         }
         return
       }
-      
+
       // If session exists, load user profile with role
       if (session?.user) {
         try {

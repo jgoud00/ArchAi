@@ -17,7 +17,7 @@ export const ProgressPhotos = () => {
   const { id } = useParams<{ id: string }>()
   const { user } = useAuthStore()
   const { showToast } = useToast()
-  
+
   const [project, setProject] = useState<Project | null>(null)
   const [photos, setPhotos] = useState<ProgressPhoto[]>([])
   const [loading, setLoading] = useState(true)
@@ -37,8 +37,9 @@ export const ProgressPhotos = () => {
       ])
       setProject(projectData)
       setPhotos(photosData)
-    } catch (error: any) {
-      showToast(error.message || 'Failed to load photos', 'error')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to load photos'
+      showToast(message, 'error')
     } finally {
       setLoading(false)
     }
@@ -61,8 +62,9 @@ export const ProgressPhotos = () => {
       setPhotoFile(null)
       setCaption('')
       loadData()
-    } catch (error: any) {
-      showToast(error.message || 'Failed to upload photo', 'error')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to upload photo'
+      showToast(message, 'error')
     } finally {
       setUploading(false)
     }
@@ -73,8 +75,9 @@ export const ProgressPhotos = () => {
       await deleteProgressPhoto(photoId)
       showToast('Photo deleted successfully', 'success')
       loadData()
-    } catch (error: any) {
-      showToast(error.message || 'Failed to delete photo', 'error')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to delete photo'
+      showToast(message, 'error')
     }
   }
 

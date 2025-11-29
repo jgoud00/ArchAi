@@ -31,8 +31,9 @@ export const Inventory = () => {
       ])
       setProject(projectData)
       setInventory(inventoryData)
-    } catch (error: any) {
-      showToast(error.message || 'Failed to load inventory', 'error')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to load inventory'
+      showToast(message, 'error')
     } finally {
       setLoading(false)
     }
@@ -52,8 +53,9 @@ export const Inventory = () => {
       setDeleteModalOpen(false)
       setItemToDelete(null)
       loadData()
-    } catch (error: any) {
-      showToast(error.message || 'Failed to delete item', 'error')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to delete item'
+      showToast(message, 'error')
     }
   }
 
@@ -93,6 +95,7 @@ export const Inventory = () => {
         </Card>
       ) : (
         <div className="space-y-6">
+          {/* Consider integrating react-window or another virtualization library if list size grows significantly. */}
           {Object.entries(groupedByCategory).map(([category, items]: [string, InventoryItem[]]) => (
             <Card key={category}>
               <CardHeader>

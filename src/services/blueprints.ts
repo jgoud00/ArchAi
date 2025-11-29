@@ -180,7 +180,7 @@ export const loadBlueprintJson = async (jsonUrl: string): Promise<string> => {
 
 export const saveBlueprintVersion = async (
   projectId: string,
-  data: any
+  data: Record<string, unknown>
 ): Promise<void> => {
   const { error } = await supabase
     .from('blueprint_versions')
@@ -194,7 +194,7 @@ export const saveBlueprintVersion = async (
   }
 }
 
-export const getBlueprintVersions = async (projectId: string): Promise<any[]> => {
+export const getBlueprintVersions = async (projectId: string): Promise<Record<string, unknown>[]> => {
   const { data, error } = await supabase
     .from('blueprint_versions')
     .select('*')

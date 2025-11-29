@@ -16,7 +16,7 @@ export const IssuesList = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { showToast } = useToast()
-  
+
   const [project, setProject] = useState<Project | null>(null)
   const [issues, setIssues] = useState<Issue[]>([])
   const [loading, setLoading] = useState(true)
@@ -33,8 +33,9 @@ export const IssuesList = () => {
       ])
       setProject(projectData)
       setIssues(issuesData)
-    } catch (error: any) {
-      showToast(error.message || 'Failed to load issues', 'error')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to load issues'
+      showToast(message, 'error')
     } finally {
       setLoading(false)
     }
@@ -54,8 +55,9 @@ export const IssuesList = () => {
       setDeleteModalOpen(false)
       setIssueToDelete(null)
       loadData()
-    } catch (error: any) {
-      showToast(error.message || 'Failed to delete issue', 'error')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to delete issue'
+      showToast(message, 'error')
     }
   }
 
@@ -106,6 +108,7 @@ export const IssuesList = () => {
         </Card>
       ) : (
         <div className="grid gap-4">
+          {/* Consider integrating react-window or another virtualization library if list size grows significantly. */}
           {issues.map((issue) => (
             <Card key={issue.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate(`/projects/${id}/issues/${issue.id}`)}>
               <CardHeader>

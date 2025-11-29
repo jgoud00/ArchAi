@@ -3,7 +3,7 @@ import { Square, DoorOpen, Maximize2, Armchair, Circle, Triangle, Type, Bed, Mon
 import { cn } from '@/utils/cn';
 
 export const Sidebar = () => {
-    const onDragStart = (event: DragEvent, nodeType: string, label: string, data?: any) => {
+    const onDragStart = (event: DragEvent, nodeType: string, label: string, data?: Record<string, unknown>) => {
         event.dataTransfer.setData('application/reactflow', nodeType);
         event.dataTransfer.setData('application/reactflow-label', label);
         if (data) {
@@ -12,7 +12,7 @@ export const Sidebar = () => {
         event.dataTransfer.effectAllowed = 'move';
     };
 
-    const DraggableItem = ({ type, label, icon: Icon, data }: { type: string, label: string, icon: any, data?: any }) => (
+    const DraggableItem = ({ type, label, icon: Icon, data }: { type: string, label: string, icon: React.ElementType, data?: Record<string, unknown> }) => (
         <div
             className={cn(
                 "flex items-center gap-3 p-3 rounded-lg border border-border bg-card hover:bg-accent/50 cursor-grab active:cursor-grabbing transition-colors shadow-sm",

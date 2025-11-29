@@ -2,7 +2,13 @@ import { memo } from 'react';
 import { Handle, Position, NodeResizer } from '@xyflow/react';
 import { cn } from '@/utils/cn';
 
-const ShapeNode = ({ data, selected }: { data: any, selected: boolean }) => {
+interface ShapeNodeData {
+    shape?: string;
+    color?: string;
+    label?: string;
+}
+
+const ShapeNode = ({ data, selected }: { data: ShapeNodeData, selected: boolean }) => {
     const shape = data.shape || 'rectangle';
     const color = data.color || '#3b82f6'; // Default primary blue
 

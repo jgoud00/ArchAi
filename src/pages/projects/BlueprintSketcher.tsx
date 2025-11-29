@@ -208,7 +208,7 @@ const BlueprintSketcherContent = () => {
   return (
     <div className="h-[calc(100vh-4rem)] flex flex-col">
       {/* Toolbar */}
-      <div className="h-16 border-b border-border bg-background px-6 flex items-center justify-between shrink-0">
+      <div className="h-16 border-b border-border/50 bg-background/80 backdrop-blur-md px-6 flex items-center justify-between shrink-0 relative z-10">
         <div>
           <h1 className="text-xl font-bold">{project?.name} - CAD Editor</h1>
           <p className="text-xs text-muted-foreground">Professional Design Tool</p>
@@ -276,7 +276,7 @@ const BlueprintSketcherContent = () => {
             <MiniMap className="!bg-card !border-border" maskColor="rgba(0,0,0,0.1)" />
             <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
 
-            <Panel position="top-right" className="bg-card/80 backdrop-blur p-2 rounded-lg border border-border shadow-sm text-xs text-muted-foreground flex gap-4">
+            <Panel position="top-right" className="glass-dark p-2 rounded-lg text-xs text-muted-foreground flex gap-4">
               <span>{nodes.length} nodes</span>
               <span>{edges.length} connections</span>
               <span>{layers.length} layers</span>

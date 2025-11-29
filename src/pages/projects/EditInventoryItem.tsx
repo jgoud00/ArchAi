@@ -44,8 +44,9 @@ export const EditInventoryItem = () => {
           category: item.category || '',
         })
       }
-    } catch (error: any) {
-      showToast(error.message || 'Failed to load item', 'error')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to load item'
+      showToast(message, 'error')
     } finally {
       setLoading(false)
     }
@@ -70,8 +71,9 @@ export const EditInventoryItem = () => {
       })
       showToast('Item updated successfully', 'success')
       navigate(`/projects/${id}/inventory`)
-    } catch (error: any) {
-      showToast(error.message || 'Failed to update item', 'error')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to update item'
+      showToast(message, 'error')
     } finally {
       setSaving(false)
     }

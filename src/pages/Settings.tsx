@@ -62,7 +62,7 @@ export const Settings = () => {
       })
       setAvatarPreview(user.avatar || null)
     }
-  }, [user])
+  }, [user, profileForm])
 
   const handleUpdateProfile = async (data: ProfileFormData) => {
     if (!user) return
@@ -75,8 +75,9 @@ export const Settings = () => {
 
       setUser(updatedUser)
       showToast('Profile updated successfully!', 'success')
-    } catch (error: any) {
-      showToast(error.message || 'Failed to update profile', 'error')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to update profile'
+      showToast(message, 'error')
     }
   }
 
@@ -117,8 +118,9 @@ export const Settings = () => {
       setUser(updatedUser)
       setAvatarPreview(avatarUrl)
       showToast('Avatar uploaded successfully!', 'success')
-    } catch (error: any) {
-      showToast(error.message || 'Failed to upload avatar', 'error')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to upload avatar'
+      showToast(message, 'error')
       setAvatarPreview(user.avatar || null)
     } finally {
       setUploadingAvatar(false)
@@ -139,8 +141,9 @@ export const Settings = () => {
       setUser(updatedUser)
       setAvatarPreview(null)
       showToast('Avatar removed successfully!', 'success')
-    } catch (error: any) {
-      showToast(error.message || 'Failed to remove avatar', 'error')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to remove avatar'
+      showToast(message, 'error')
     }
   }
 
@@ -158,8 +161,9 @@ export const Settings = () => {
 
       showToast('Password updated successfully!', 'success')
       passwordForm.reset()
-    } catch (error: any) {
-      showToast(error.message || 'Failed to update password', 'error')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to update password'
+      showToast(message, 'error')
     }
   }
 
@@ -171,15 +175,16 @@ export const Settings = () => {
       // Frontend cannot directly delete users via admin API
       // Use a Supabase RPC function or Edge Function for this
       const { error: deleteError } = await supabase.rpc('delete_user_account')
-      
+
       if (deleteError) {
         throw new Error(deleteError.message || 'Failed to delete account. Please contact support.')
       }
 
       showToast('Account deleted successfully', 'success')
       await logout()
-    } catch (error: any) {
-      showToast(error.message || 'Failed to delete account', 'error')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to delete account'
+      showToast(message, 'error')
     }
   }
 
@@ -216,92 +221,92 @@ export const Settings = () => {
               <label htmlFor="email" className="text-sm font-medium">
                 Email
               </label>
-              <Input 
-                id="email" 
-                type="email" 
-                value={user.email} 
-                disabled 
+              <Input
+                id="email"
+                type="email"
+                value={user.email}
+                disabled
               />
               <p className="text-xs text-muted-foreground">Email cannot be changed</p>
             </div>
 
-                <div className="space-y-4">
-                  {/* Avatar Upload */}
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Avatar</label>
-                    <div className="flex items-center gap-4">
-                      <div className="relative">
-                        {avatarPreview ? (
-                          <img
-                            src={avatarPreview}
-                            alt="Avatar"
-                            className="h-20 w-20 rounded-full object-cover border-2 border-border"
-                          />
-                        ) : (
-                          <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center border-2 border-border">
-                            <User className="h-10 w-10 text-muted-foreground" />
-                          </div>
-                        )}
-                        {uploadingAvatar && (
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full">
-                            <Spinner size="sm" />
-                          </div>
-                        )}
+            <div className="space-y-4">
+              {/* Avatar Upload */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Avatar</label>
+                <div className="flex items-center gap-4">
+                  <div className="relative">
+                    {avatarPreview ? (
+                      <img
+                        src={avatarPreview}
+                        alt="Avatar"
+                        className="h-20 w-20 rounded-full object-cover border-2 border-border"
+                      />
+                    ) : (
+                      <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center border-2 border-border">
+                        <User className="h-10 w-10 text-muted-foreground" />
                       </div>
-                      <div className="flex gap-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => fileInputRef.current?.click()}
-                          disabled={uploadingAvatar}
-                        >
-                          <Upload className="h-4 w-4 mr-2" />
-                          {avatarPreview ? 'Change' : 'Upload'}
-                        </Button>
-                        {avatarPreview && (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={handleRemoveAvatar}
-                            disabled={uploadingAvatar}
-                          >
-                            <X className="h-4 w-4 mr-2" />
-                            Remove
-                          </Button>
-                        )}
-                        <input
-                          ref={fileInputRef}
-                          type="file"
-                          accept="image/*"
-                          onChange={handleAvatarUpload}
-                          className="hidden"
-                        />
+                    )}
+                    {uploadingAvatar && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full">
+                        <Spinner size="sm" />
                       </div>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Upload a profile picture (max 5MB, JPG, PNG, or GIF)
-                    </p>
-                  </div>
-
-                  {/* Display Name */}
-                  <div className="space-y-2">
-                    <label htmlFor="displayName" className="text-sm font-medium">
-                      Display Name
-                    </label>
-                    <Input
-                      id="displayName"
-                      {...profileForm.register('displayName')}
-                      className={profileForm.formState.errors.displayName ? 'border-destructive' : ''}
-                    />
-                    {profileForm.formState.errors.displayName && (
-                      <p className="text-sm text-destructive">
-                        {profileForm.formState.errors.displayName.message}
-                      </p>
                     )}
                   </div>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploadingAvatar}
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      {avatarPreview ? 'Change' : 'Upload'}
+                    </Button>
+                    {avatarPreview && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleRemoveAvatar}
+                        disabled={uploadingAvatar}
+                      >
+                        <X className="h-4 w-4 mr-2" />
+                        Remove
+                      </Button>
+                    )}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarUpload}
+                      className="hidden"
+                    />
+                  </div>
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  Upload a profile picture (max 5MB, JPG, PNG, or GIF)
+                </p>
+              </div>
+
+              {/* Display Name */}
+              <div className="space-y-2">
+                <label htmlFor="displayName" className="text-sm font-medium">
+                  Display Name
+                </label>
+                <Input
+                  id="displayName"
+                  {...profileForm.register('displayName')}
+                  className={profileForm.formState.errors.displayName ? 'border-destructive' : ''}
+                />
+                {profileForm.formState.errors.displayName && (
+                  <p className="text-sm text-destructive">
+                    {profileForm.formState.errors.displayName.message}
+                  </p>
+                )}
+              </div>
+            </div>
 
             <Button type="submit">
               <Save className="h-4 w-4 mr-2" />

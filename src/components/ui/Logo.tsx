@@ -18,7 +18,7 @@ export const Logo: React.FC<LogoProps> = ({ className = "h-8 w-auto" }) => {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="text-cyan-500"
+                className="text-primary"
             />
             <path
                 d="M2 17L12 22L22 17"
@@ -26,7 +26,7 @@ export const Logo: React.FC<LogoProps> = ({ className = "h-8 w-auto" }) => {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="text-cyan-500"
+                className="text-primary"
             />
             <path
                 d="M2 12L12 17L22 12"
@@ -34,7 +34,7 @@ export const Logo: React.FC<LogoProps> = ({ className = "h-8 w-auto" }) => {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="text-cyan-400"
+                className="text-primary"
             />
         </svg>
     );

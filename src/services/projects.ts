@@ -1,14 +1,15 @@
 import { supabase } from './supabase'
 import { Project, Scan, TeamMember } from '../types'
+import { STORAGE_BUCKETS, BATCH_SIZES } from '../constants'
 
-const STORAGE_BUCKET = 'project-files'
+const STORAGE_BUCKET = STORAGE_BUCKETS.PROJECT_FILES
 
 const extractStoragePath = (fileUrl?: string | null): string | null => {
   if (!fileUrl) return null
   try {
     const url = new URL(fileUrl)
     const parts = url.pathname.split('/').filter(Boolean)
-    const bucketIndex = parts.indexOf('project-files')
+    const bucketIndex = parts.indexOf(STORAGE_BUCKET)
     if (bucketIndex === -1) return null
     return parts.slice(bucketIndex + 1).join('/')
   } catch {
@@ -28,7 +29,7 @@ const deleteStorageObjects = async (paths: string[]): Promise<void> => {
   const uniquePaths = Array.from(new Set(paths.filter(Boolean)))
   if (uniquePaths.length === 0) return
 
-  for (const batch of chunkArray(uniquePaths, 50)) {
+  for (const batch of chunkArray(uniquePaths, BATCH_SIZES.DELETE_OPERATIONS)) {
     const { error } = await supabase.storage.from(STORAGE_BUCKET).remove(batch)
     if (error) {
       throw new Error(error.message || 'Failed to remove project files from storage')
@@ -125,95 +126,39 @@ export const getUserProjects = async (userId: string): Promise<Project[]> => {
     return []
   }
 
-  // Combine owned and member projects
-  const allProjects: any[] = []
-  const projectIds = new Set<string>()
-
-  // Add owned projects
-  if (ownedProjects) {
-    ownedProjects.forEach((project: any) => {
-      allProjects.push(project)
-      projectIds.add(project.id)
-    })
+  type RawProject = {
+    id: string
+    name: string
+    description: string
+    owner_id: string
+    status: 'active' | 'archived' | 'completed'
+    created_at: string
+    updated_at: string
   }
 
-  // Add member projects (avoid duplicates)
-  if (memberProjects) {
-    memberProjects.forEach((item: any) => {
-      if (item.projects && !projectIds.has(item.projects.id)) {
-        allProjects.push(item.projects)
-        projectIds.add(item.projects.id)
-      }
-    })
-  }
+  const allProjects = [
+    ...(ownedProjects || []),
+    ...(memberProjects?.map((m) => m.projects) || []),
+  ].filter(Boolean) as RawProject[]
 
-  // Transform data and get counts efficiently (batch queries instead of N+1)
-  const projectIdArray = Array.from(projectIds)
-  if (projectIdArray.length === 0) {
-    return []
-  }
+  // Remove duplicates
+  const uniqueProjects = Array.from(new Map(allProjects.map((p) => [p.id, p])).values())
 
-  // Batch fetch all counts in parallel (4 queries total instead of 4*N queries)
-  const [scanCountsData, memberCountsData, fileCountsData, commentCountsData] = await Promise.all([
-    // Get all scan counts
-    supabase
-      .from('scans')
-      .select('project_id')
-      .in('project_id', projectIdArray),
-    // Get all member counts
-    supabase
-      .from('team_members')
-      .select('project_id')
-      .in('project_id', projectIdArray),
-    // Get all file counts
-    supabase
-      .from('project_files')
-      .select('project_id')
-      .in('project_id', projectIdArray),
-    // Get all comment counts
-    supabase
-      .from('project_comments')
-      .select('project_id')
-      .in('project_id', projectIdArray),
-  ])
-
-  // Count occurrences per project
-  const countByProjectId = (data: any[]): Record<string, number> => {
-    const counts: Record<string, number> = {}
-    data?.forEach((item) => {
-      counts[item.project_id] = (counts[item.project_id] || 0) + 1
-    })
-    return counts
-  }
-
-  const scanCounts = countByProjectId(scanCountsData.data || [])
-  const memberCounts = countByProjectId(memberCountsData.data || [])
-  const fileCounts = countByProjectId(fileCountsData.data || [])
-  const commentCounts = countByProjectId(commentCountsData.data || [])
-
-  // Transform projects with counts
-  const transformedProjects: Project[] = allProjects.map((project) => ({
-    id: project.id,
-    name: project.name,
-    description: project.description,
-    ownerId: project.owner_id,
-    status: project.status,
-    createdAt: new Date(project.created_at),
-    updatedAt: new Date(project.updated_at),
-    scanCount: scanCounts[project.id] || 0,
-    memberCount: memberCounts[project.id] || 0,
-    fileCount: fileCounts[project.id] || 0,
-    commentCount: commentCounts[project.id] || 0,
+  return uniqueProjects.map((p) => ({
+    id: p.id,
+    name: p.name,
+    description: p.description,
+    ownerId: p.owner_id,
+    status: p.status,
+    createdAt: new Date(p.created_at),
+    updatedAt: new Date(p.updated_at),
   }))
-
-  return transformedProjects
 }
-
 export const updateProject = async (
   projectId: string,
   updates: Partial<Pick<Project, 'name' | 'description' | 'status'>>
 ): Promise<void> => {
-  const updateData: any = {}
+  const updateData: Record<string, unknown> = {}
 
   if (updates.name !== undefined) updateData.name = updates.name
   if (updates.description !== undefined) updateData.description = updates.description
@@ -343,7 +288,7 @@ export const getProjectTeam = async (projectId: string): Promise<TeamMember[]> =
     return []
   }
 
-  return data.map((member: any) => ({
+  return data.map((member) => ({
     id: member.id,
     userId: member.user_id,
     email: member.email,

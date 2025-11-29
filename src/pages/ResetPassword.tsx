@@ -51,12 +51,13 @@ export const ResetPassword = () => {
       await resetPassword(data.password)
       setSuccess(true)
       showToast('Password reset successfully! Redirecting to login...', 'success')
-      
+
       setTimeout(() => {
         navigate('/login', { replace: true })
       }, 2000)
-    } catch (error: any) {
-      showToast(error.message || 'Failed to reset password. Please try again.', 'error')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to reset password. Please try again.'
+      showToast(message, 'error')
       setLoading(false)
     }
   }

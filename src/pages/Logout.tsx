@@ -24,9 +24,9 @@ export const Logout = () => {
     }, [logout, navigate])
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-slate-950">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-background">
             <Spinner size="lg" />
-            <p className="mt-4 text-slate-400">Logging out...</p>
+            <p className="mt-4 text-muted-foreground">Logging out...</p>
         </div>
     )
 }

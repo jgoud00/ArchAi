@@ -35,7 +35,7 @@ const MOCK_NOTIFICATIONS: Notification[] = [
         type: 'activity',
         timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
         read: false,
-        icon: <UserPlus className="h-4 w-4 text-blue-500" />
+        icon: <UserPlus className="h-4 w-4 text-primary" />
     },
     {
         id: '3',

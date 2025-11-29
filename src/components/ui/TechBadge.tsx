@@ -19,7 +19,7 @@ export const TechBadge: React.FC<TechBadgeProps> = React.memo(({
   className,
 }) => {
   const colorMap = React.useMemo(() => ({
-    frontend: 'bg-blue-100 text-blue-800 border-blue-200',
+    frontend: 'bg-primary/10 text-primary border-primary/20',
     backend: 'bg-green-100 text-green-800 border-green-200',
     database: 'bg-purple-100 text-purple-800 border-purple-200',
     tool: 'bg-orange-100 text-orange-800 border-orange-200',

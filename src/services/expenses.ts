@@ -84,7 +84,7 @@ export const updateExpense = async (
   expenseId: string,
   updates: Partial<Pick<Expense, 'type' | 'name' | 'amount' | 'date'>>
 ): Promise<void> => {
-  const updateData: Record<string, any> = {}
+  const updateData: Record<string, unknown> = {}
 
   if (updates.type !== undefined) updateData.type = updates.type
   if (updates.name !== undefined) updateData.name = updates.name

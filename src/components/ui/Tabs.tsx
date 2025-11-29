@@ -45,7 +45,7 @@ export const TabsList: React.FC<TabsListProps> = ({ children, className }) => {
   return (
     <div
       className={cn(
-        "inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground",
+        "inline-flex h-10 items-center justify-center rounded-lg bg-muted/50 p-1 text-muted-foreground border border-border/50",
         className
       )}
     >
@@ -81,8 +81,8 @@ export const TabsTrigger: React.FC<TabsTriggerProps> = React.memo(({
       className={cn(
         "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
         isActive
-          ? "bg-background text-foreground shadow-sm"
-          : "text-muted-foreground hover:bg-background/50",
+          ? "bg-primary/10 text-primary shadow-[0_0_10px_rgba(6,182,212,0.2)] border border-primary/20"
+          : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
         className
       )}
     >

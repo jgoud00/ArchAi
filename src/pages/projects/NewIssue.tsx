@@ -42,8 +42,9 @@ export const NewIssue = () => {
       await createIssue(id, data.title, data.description || '', data.priority, user.uid, photoFile || undefined)
       showToast('Issue created successfully', 'success')
       navigate(`/projects/${id}/issues`)
-    } catch (error: any) {
-      showToast(error.message || 'Failed to create issue', 'error')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to create issue'
+      showToast(message, 'error')
     } finally {
       setLoading(false)
     }

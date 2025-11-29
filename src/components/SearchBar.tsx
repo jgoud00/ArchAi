@@ -21,7 +21,7 @@ export const SearchBar = ({ onSearch }: SearchBarProps) => {
     onSearch(query, filters)
   }
 
-  const handleFilterChange = (key: keyof SearchFilters, value: any) => {
+  const handleFilterChange = (key: keyof SearchFilters, value: string | undefined) => {
     const newFilters = { ...filters, [key]: value }
     setFilters(newFilters)
     onSearch(query, newFilters)
