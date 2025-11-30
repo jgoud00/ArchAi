@@ -1,9 +1,17 @@
+/**
+ * User Management Service
+ * 
+ * Handles administrative user operations such as fetching all users and updating roles.
+ */
+
 import { supabase } from './supabase'
 import { User, UserRole } from '../types'
 
 /**
- * Get all users (admin only)
- * Returns list of all users in the system
+ * Retrieves all users in the system (Admin only).
+ * 
+ * @returns A promise that resolves to an array of user objects, ordered by creation date (newest first).
+ * @throws Will throw an error if the database query fails.
  */
 export const getAllUsers = async (): Promise<User[]> => {
   const { data, error } = await supabase
@@ -30,8 +38,12 @@ export const getAllUsers = async (): Promise<User[]> => {
 }
 
 /**
- * Update user role (admin only)
- * Allows admins to change user roles
+ * Updates the role of a specific user (Admin only).
+ * 
+ * @param userId - The unique identifier of the user to update.
+ * @param newRole - The new role to assign ('admin', 'user', etc.).
+ * @returns A promise that resolves when the role is updated.
+ * @throws Will throw an error if the database operation fails.
  */
 export const updateUserRole = async (userId: string, newRole: UserRole): Promise<void> => {
   const { error } = await supabase
@@ -45,7 +57,10 @@ export const updateUserRole = async (userId: string, newRole: UserRole): Promise
 }
 
 /**
- * Get user by ID
+ * Retrieves a specific user by their ID.
+ * 
+ * @param userId - The unique identifier of the user.
+ * @returns A promise that resolves to the user object or null if not found.
  */
 export const getUserById = async (userId: string): Promise<User | null> => {
   const { data, error } = await supabase

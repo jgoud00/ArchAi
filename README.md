@@ -1,204 +1,147 @@
-<!-- 
-  ARCHITECT_AI README
-  Theme: Neon Blue & Slate
-  Style: Premium, Animated, Interactive
--->
+# ArchitectAI — Construction Management Platform
 
-<div align="center">
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Status](https://img.shields.io/badge/status-active-success.svg)
+![Tests](https://img.shields.io/badge/tests-0%25-red.svg)
 
-  <!-- Animated Banner -->
-  <img src="docs/media/header-banner.svg" width="100%" alt="ArchitectAI Banner" />
+ArchitectAI is a comprehensive, enterprise-grade construction management platform designed to streamline workflows for architects, engineers, and supervisors. It unifies project tracking, budget management, document control, and team collaboration into a single, intuitive interface.
 
-  <!-- Typing Animation -->
-  <h1>
-    <a href="https://github.com/jgoud00/ArchAi">
-      <img src="https://readme-typing-svg.herokuapp.com?font=Inter&weight=700&size=38&duration=2800&pause=900&color=3B82F6&center=true&vCenter=true&width=620&lines=ArchitectAI;Construction+Management+Platform;Build+the+Future" alt="Typing SVG" />
-    </a>
-  </h1>
+## Table of Contents
 
-  <!-- Motion Badges -->
-  <p>
-    <img src="https://img.shields.io/badge/build-passing-brightgreen?style=for-the-badge&logo=github" height="28" />
-    <img src="https://img.shields.io/badge/license-MIT-blue?style=for-the-badge&logo=open-source-initiative" height="28" />
-    <img src="https://img.shields.io/badge/stack-React_%7C_Supabase_%7C_Tailwind-blueviolet?style=for-the-badge&logo=react" height="28" />
-  </p>
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [Tech Stack](#tech-stack)
+- [Architecture](#architecture)
+- [Getting Started](#getting-started)
+- [Environment Variables](#environment-variables)
+- [Running Locally](#running-locally)
+- [Deployment](#deployment)
+- [Project Structure](#project-structure)
+- [Database Schema](#database-schema)
+- [Contributing](#contributing)
+- [License](#license)
 
-  <p align="center">
-    <b>A unified, enterprise-grade platform built for the future of construction.</b><br/>
-    <i>Centralize data, streamline workflows, visualize progress, and enhance on-site productivity.</i>
-  </p>
+## Overview
 
-</div>
+ArchitectAI modernizes construction management by replacing fragmented spreadsheets, offline files, and outdated tools with a unified digital workspace. Whether managing a single home build or multiple industrial projects, ArchitectAI provides visibility, automation, and collaboration features that scale with your team.
 
-<br/>
+### Why ArchitectAI?
 
-<img src="docs/media/divider.svg" width="100%" />
+- **Centralized Information Hub**: Blueprints, budgets, photos, and timelines all live in one place.
+- **Real-Time Collaboration**: Field and office teams stay perfectly in sync.
+- **Visual Documentation**: Drone scans, site photos, and annotated reports.
+- **Role-Based Security**: Admins, supervisors, and workers have appropriate access at all times.
 
-<br/>
+## Key Features
 
-## 📋 Table of Contents
+| Feature | Description |
+|---------|-------------|
+| **Project Management** | Track project milestones, status, and team assignments. |
+| **Budget Tracking** | Monitor spending, consumption, and variance in real-time. |
+| **Document Control** | Store, version, and retrieve blueprints, contracts, and permits. |
+| **Visual Progress** | Organize drone scans and site images to document construction phases. |
+| **Layout Planner** | Sketch, annotate, and markup blueprints with real-world dimensions. |
+| **Interactive Timeline** | Drag-and-drop Gantt chart for task scheduling. |
+| **3D Model Viewer** | View and interact with 3D project models (.glb/.gltf). |
 
-<details>
-<summary><b>Expand</b></summary>
+## Tech Stack
 
-- [Overview](#-overview)
-- [Key Features](#-key-features)
-- [Tech Stack](#-tech-stack)
-- [Architecture](#-architecture)
-- [Getting Started](#-getting-started)
-- [Environment Variables](#-environment-variables)
-- [Running Locally](#-running-locally)
-- [Deployment](#-deployment)
-- [Project Structure](#-project-structure)
-- [Database Schema](#-database-schema)
-- [Contributing](#-contributing)
-- [License](#-license)
+### Frontend
 
-</details>
+- **Framework**: React 18 + TypeScript
+- **Styling**: Tailwind CSS + shadcn/ui
+- **State Management**: Zustand
+- **Visualization**: Recharts & Custom SVG Gantt
+- **Testing**: Vitest + React Testing Library
 
-<br/>
+### Backend
 
-## 🎯 Overview
+- **Core**: Supabase (PostgreSQL)
+- **Auth**: Supabase Auth (RLS enabled)
+- **Storage**: Supabase Storage (media, documents)
 
-**ArchitectAI** modernizes construction management by replacing fragmented spreadsheets, offline files, and outdated tools with a unified digital workspace. Whether managing a single home build or multiple industrial projects, ArchitectAI provides visibility, automation, and collaboration features that scale with your team.
+## Architecture
 
-<br/>
+ArchitectAI is structured on a modern client–server architecture powered by Supabase.
 
-<div align="center">
-  <img src="docs/media/why-architect-ai.svg" width="100%" alt="Why ArchitectAI" />
-</div>
+![System Architecture](docs/architecture/system-diagram.svg)
 
-<br/>
+- **Frontend**: React application handling UI, state, and business logic.
+- **Backend**: Supabase providing Auth, Database (PostgreSQL), and Storage services.
+- **Security**: Row Level Security (RLS) ensures data privacy and access control.
 
-<img src="docs/media/divider.svg" width="100%" />
-
-<br/>
-
-## ✨ Key Features
-
-<div align="center">
-  <img src="docs/media/feature-project.svg" width="80%" alt="Project Management Feature" />
-</div>
-
-<br/>
-
-<div align="center">
-
-| Feature | Description | Preview |
-|--------|-------------|---------|
-| **📊 Project Management** | Track project milestones, status, and team assignments. | <img src="docs/media/demo-project.svg" width="55"/> |
-| **💰 Budget Tracking** | Monitor spending, consumption, and variance in real-time. | <img src="docs/media/demo-budget.svg" width="55"/> |
-| **📑 Document Control** | Store, version, and retrieve blueprints, contracts, and permits. | <img src="docs/media/demo-docs.svg" width="55"/> |
-| **📸 Visual Progress** | Organize drone scans and site images to document construction phases. | <img src="docs/media/demo-media.svg" width="55"/> |
-| **✏️ Blueprint Sketcher** | Sketch, annotate, and markup blueprints directly in the app. | <img src="docs/media/demo-blueprint.svg" width="55"/> |
-
-</div>
-
-<br/>
-
-## 🛠️ Tech Stack
-
-<div align="center">
-  <img src="docs/media/tech-stack.svg" width="100%" alt="Tech Stack" />
-</div>
-
-<br/>
-
-<img src="docs/media/divider.svg" width="100%" />
-
-<br/>
-
-## 🏗️ Architecture
-
-ArchitectAI is structured on a modern **client–server architecture** powered by Supabase.
-
-<div align="center">
-  <img src="docs/media/architecture.svg" width="80%" alt="Architecture Diagram" />
-</div>
-
-<br/>
-
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
+
 - Node.js v18+
-- npm / yarn
+- npm or yarn
 - Git
 - Supabase account
 
 ### Installation
 
-<details>
-<summary><b>Show Setup Instructions</b></summary>
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/architect-ai.git
+   cd architect-ai
+   ```
 
-1. Clone the repository  
-```bash
-git clone https://github.com/your-username/architect-ai.git
-cd architect-ai
-```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-2. Install dependencies
-```bash
-npm install
-```
+3. Create your environment configuration:
+   ```bash
+   cp .env.example .env
+   ```
 
-3. Create your environment config
-```bash
-cp .env.example .env
-```
+## Environment Variables
 
-</details> 
-
-<br/>
-
-## 🔐 Environment Variables
-
-Configure your `.env` file:
+Configure your `.env` file with the following keys. Values are available under **Supabase → Settings → API**.
 
 ```bash
 VITE_SUPABASE_URL=your_project_url
 VITE_SUPABASE_ANON_KEY=your_anon_key
 ```
 
-> Values available under **Supabase → Settings → API**.
+## Running Locally
 
-<br/>
+### Start Development Server
 
-## 🏃 Running Locally
-
-### Start development server
 ```bash
 npm run dev
 ```
-Access at `http://localhost:5173`.
 
-### Build for production
+Access the application at `http://localhost:5173`.
+
+### Run Tests
+
+```bash
+npm test
+```
+
+### Build for Production
+
 ```bash
 npm run build
 ```
 
-### Preview build
-```bash
-npm run preview
-```
+## Deployment
 
-<br/>
+ArchitectAI is ready for deployment on platforms such as:
 
-## 📦 Deployment
-
-ArchitectAI is deploy-ready for:
-- **Vercel**
-- **Netlify**
-- **AWS Amplify**
-- **Render**
+- Vercel
+- Netlify
+- AWS Amplify
+- Render
 
 Ensure environment variables are added in the host’s dashboard.
 
-<br/>
+## Project Structure
 
-## 📂 Project Structure
-
-```bash
+```text
 src/
 ├── components/       # Reusable UI components
 ├── pages/            # Screens and routes
@@ -208,30 +151,31 @@ src/
 ├── types/            # TypeScript types & interfaces
 ├── utils/            # Helper utilities
 └── App.tsx           # App entry point
+docs/
+├── architecture/     # System diagrams
+├── database/         # ER diagrams
+├── api/              # API documentation
+└── guides/           # Developer guides
 ```
 
-<br/>
+## Database Schema
 
-## 🤝 Contributing
+Key tables in the PostgreSQL database:
 
-We welcome contributions!
+![ER Diagram](docs/database/er-diagram.svg)
 
-1. **Fork** the repository
-2. Create a **New Branch** (`git checkout -b feature/NewFeature`)
-3. **Commit** your updates (`git commit -m 'Add some NewFeature'`)
-4. **Push** the branch (`git push origin feature/NewFeature`)
-5. Open a **Pull Request**
+- **users**: User profiles and role definitions.
+- **projects**: Core project details and status.
+- **team_members**: Project assignments and permissions.
+- **scans**, **documents**, **photos**: Media and file metadata.
+- **issues**, **tasks**, **budgets**: Project management data.
+- **inventory**, **inventory_categories**: Material tracking.
+- **project_templates**: Reusable project structures.
 
-<br/>
+## Contributing
 
-## 📄 License
+We welcome contributions! Please read our [Contributing Guidelines](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests.
 
-Licensed under the **MIT License**. See the [LICENSE](LICENSE) file.
+## License
 
-<br/> 
-
-<div align="center"> 
-  <img src="docs/media/footer-logo.svg" width="60" /> 
-  <br/> 
-  <b>ArchitectAI</b> — Building the future of construction. 
-</div>
+Licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

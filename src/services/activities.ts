@@ -8,7 +8,11 @@ import { supabase } from './supabase'
 import { ProjectActivity } from '../types'
 
 /**
- * Get activity log for a project
+ * Retrieves the activity log for a specific project.
+ * 
+ * @param projectId - The unique identifier of the project.
+ * @param limit - The maximum number of activities to retrieve. Defaults to 50.
+ * @returns A promise that resolves to an array of project activities.
  */
 export const getProjectActivities = async (
   projectId: string,
@@ -51,10 +55,17 @@ export const getProjectActivities = async (
 }
 
 /**
- * Log a custom activity
+ * Logs a custom activity for a project.
  * 
- * Note: Most activities are logged automatically by triggers.
- * Use this for custom activities not covered by triggers.
+ * Note: Most activities are logged automatically by database triggers.
+ * Use this function for custom activities that are not covered by triggers.
+ * 
+ * @param projectId - The unique identifier of the project.
+ * @param userId - The unique identifier of the user performing the activity.
+ * @param activityType - The type of activity being logged.
+ * @param description - A descriptive message for the activity.
+ * @param metadata - Optional key-value pairs providing additional context.
+ * @returns A promise that resolves when the activity is logged.
  */
 export const logActivity = async (
   projectId: string,

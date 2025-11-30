@@ -26,14 +26,14 @@ const ProgressPhotos = lazy(() => import('./pages/projects/ProgressPhotos').then
 const BudgetPage = lazy(() => import('./pages/projects/Budget').then(module => ({ default: module.BudgetPage })))
 const AddExpense = lazy(() => import('./pages/projects/AddExpense').then(module => ({ default: module.AddExpense })))
 const Documents = lazy(() => import('./pages/projects/Documents').then(module => ({ default: module.Documents })))
-const BlueprintSketcher = lazy(() => import('./pages/projects/BlueprintSketcher').then(module => ({ default: module.BlueprintSketcher })))
+const LayoutPlanner = lazy(() => import('./pages/projects/LayoutPlanner').then(module => ({ default: module.default })))
 const Inventory = lazy(() => import('./pages/projects/Inventory').then(module => ({ default: module.Inventory })))
 const NewInventoryItem = lazy(() => import('./pages/projects/NewInventoryItem').then(module => ({ default: module.NewInventoryItem })))
 const EditInventoryItem = lazy(() => import('./pages/projects/EditInventoryItem').then(module => ({ default: module.EditInventoryItem })))
 const Timeline = lazy(() => import('./pages/projects/Timeline').then(module => ({ default: module.Timeline })))
 const NewTask = lazy(() => import('./pages/projects/NewTask').then(module => ({ default: module.NewTask })))
 const Calendar = lazy(() => import('./pages/Calendar').then(module => ({ default: module.Calendar })))
-const ModelViewer = lazy(() => import('./pages/ModelViewer').then(module => ({ default: module.ModelViewer })))
+const ModelViewer = lazy(() => import('./pages/ModelViewer'))
 const Templates = lazy(() => import('./pages/Templates').then(module => ({ default: module.Templates })))
 const Documentation = lazy(() => import('./pages/Documentation').then(module => ({ default: module.Documentation })))
 
@@ -113,7 +113,7 @@ function App() {
               <Route path="projects/:id/budget" element={<BudgetPage />} />
               <Route path="projects/:id/budget/add-expense" element={<AddExpense />} />
               <Route path="projects/:id/documents" element={<Documents />} />
-              <Route path="projects/:id/sketch" element={<BlueprintSketcher />} />
+              <Route path="projects/:id/layout" element={<LayoutPlanner />} />
 
               {/* Lazy loaded routes with granular error boundaries */}
               <Route

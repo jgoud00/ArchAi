@@ -2,6 +2,15 @@ import { supabase } from './supabase'
 import { User, UserRole } from '../types'
 import { USER_ROLES, STORAGE_BUCKETS, MAX_AVATAR_SIZE, AVATAR_CACHE_CONTROL } from '../constants'
 
+/**
+ * Signs up a new user with email and password.
+ * 
+ * @param email - User's email address.
+ * @param password - User's password.
+ * @param displayName - User's display name.
+ * @returns A Promise resolving to the created User object.
+ * @throws Error if signup fails.
+ */
 export const signup = async (
   email: string,
   password: string,
@@ -71,10 +80,10 @@ export const signup = async (
  * 3. Create profile if missing (backup for trigger failures)
  * 4. Return user object
  * 
- * Error Handling:
- * - Invalid credentials: Throws error with message
- * - Missing profile: Creates profile automatically
- * - Network errors: Propagated to caller
+ * @param email - User's email.
+ * @param password - User's password.
+ * @returns A Promise resolving to the authenticated User object.
+ * @throws Error if authentication fails.
  */
 export const login = async (email: string, password: string): Promise<User> => {
   // Step 1: Authenticate with Supabase Auth
@@ -172,6 +181,10 @@ export const login = async (email: string, password: string): Promise<User> => {
   }
 }
 
+/**
+ * Logs out the current user.
+ * @throws Error if logout fails.
+ */
 export const logout = async (): Promise<void> => {
   const { error } = await supabase.auth.signOut()
   if (error) {
@@ -179,6 +192,12 @@ export const logout = async (): Promise<void> => {
   }
 }
 
+/**
+ * Retrieves the current authenticated user.
+ * 
+ * @param userId - The UUID of the user.
+ * @returns A Promise resolving to the User object or null if not found.
+ */
 export const getCurrentUser = async (userId: string): Promise<User | null> => {
   try {
     // First get auth user info
@@ -260,6 +279,9 @@ export const getCurrentUser = async (userId: string): Promise<User | null> => {
  * 
  * Sends a password reset email to the user.
  * The email contains a link to reset the password.
+ * 
+ * @param email - The email address to send the reset link to.
+ * @throws Error if sending fails.
  */
 export const requestPasswordReset = async (email: string): Promise<void> => {
   // Guard for SSR - use environment variable or fallback
@@ -280,6 +302,9 @@ export const requestPasswordReset = async (email: string): Promise<void> => {
  * Reset password with new password
  * 
  * Updates the user's password using the reset token from the email.
+ * 
+ * @param newPassword - The new password.
+ * @throws Error if reset fails.
  */
 export const resetPassword = async (newPassword: string): Promise<void> => {
   const { error } = await supabase.auth.updateUser({
@@ -295,6 +320,10 @@ export const resetPassword = async (newPassword: string): Promise<void> => {
  * Update user profile
  * 
  * Updates the user's display name and/or avatar.
+ * 
+ * @param updates - Object containing displayName and/or avatar URL.
+ * @returns A Promise resolving to the updated User object.
+ * @throws Error if update fails or user is not authenticated.
  */
 export const updateProfile = async (
   updates: { displayName?: string; avatar?: string }
@@ -342,6 +371,10 @@ export const updateProfile = async (
  * Upload avatar image
  * 
  * Uploads an avatar image to Supabase Storage and returns the public URL.
+ * 
+ * @param file - The image file to upload.
+ * @returns A Promise resolving to the public URL of the uploaded avatar.
+ * @throws Error if upload fails, file is invalid, or user is not authenticated.
  */
 export const uploadAvatar = async (file: File): Promise<string> => {
   const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -388,6 +421,12 @@ export const uploadAvatar = async (file: File): Promise<string> => {
   return urlData.publicUrl
 }
 
+/**
+ * Subscribes to authentication state changes.
+ * 
+ * @param callback - Function to call when auth state changes.
+ * @returns Unsubscribe function.
+ */
 export const onAuthChange = (callback: (user: User | null) => void) => {
   // Don't call callback immediately - let initializeAuth handle initial state
   // Only listen to future auth state changes

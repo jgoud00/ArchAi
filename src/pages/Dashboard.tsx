@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus, Folder, Users, LayoutDashboard, TrendingUp, Home as HomeIcon } from 'lucide-react'
 import { getUserProjects, createProject } from '@/services/projects'
+import { getDashboardStats } from '@/services/dashboard'
 import { useAuthStore } from '@/store/authStore'
 import { ProjectCard } from '@/components/ProjectCard'
 import { KPICard } from '@/components/dashboard/KPICard'
@@ -39,15 +40,32 @@ export const Dashboard = () => {
     resolver: zodResolver(projectSchema),
   })
 
-  const loadProjects = useCallback(async () => {
+  const [stats, setStats] = useState({
+    totalProjects: 0,
+    activeBuilds: 0,
+    tasksPending: 0,
+    teamMembers: 0
+  })
+
+  const loadDashboardData = useCallback(async () => {
     if (!user?.uid) return
 
     try {
       setLoading(true)
-      const userProjects = await getUserProjects(user.uid)
+      const [userProjects, dashboardStats] = await Promise.all([
+        getUserProjects(user.uid),
+        getDashboardStats(user.uid)
+      ])
+
       setProjects(userProjects)
+      setStats({
+        totalProjects: dashboardStats.total_projects,
+        activeBuilds: dashboardStats.active_builds,
+        tasksPending: dashboardStats.tasks_pending,
+        teamMembers: dashboardStats.team_members
+      })
     } catch (error) {
-      showToast('Failed to load projects. Please try again.', 'error')
+      showToast('Failed to load dashboard data. Please try again.', 'error')
     } finally {
       setLoading(false)
     }
@@ -55,26 +73,14 @@ export const Dashboard = () => {
 
   useEffect(() => {
     if (user) {
-      loadProjects()
+      loadDashboardData()
     } else {
       setLoading(false)
     }
-  }, [user, loadProjects])
+  }, [user, loadDashboardData])
 
-  // Memoize KPIs calculation
-  const kpiData = useMemo(() => {
-    const activeCount = projects.filter(p => p.status === 'active').length
-    const memberCount = projects.reduce((sum, p) => sum + (p.memberCount || 0), 0)
-
-    return {
-      totalProjects: projects.length,
-      activeBuilds: activeCount,
-      tasksPending: 0, // Placeholder as we don't have tasks API yet
-      teamMembers: memberCount
-    }
-  }, [projects])
-
-  // Memoize Chart Data calculation
+  // Memoize Chart Data calculation (Still using project creation dates for now, 
+  // but could be enhanced with a specific RPC for chart data if needed)
   const chartData = useMemo(() => {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     const today = new Date()
@@ -93,10 +99,13 @@ export const Dashboard = () => {
         return d.getMonth() === month.monthIndex && d.getFullYear() === month.year
       }).length
 
+      // For tasks, we don't have historical data easily accessible without a complex query.
+      // For now, we'll leave tasks as 0 in the chart or remove the line if preferred.
+      // To keep the visual, we will just show project trends.
       return {
         name: month.name,
         projects: projectsInMonth,
-        tasks: Math.floor(Math.random() * 10) // Placeholder for tasks
+        tasks: 0 // Placeholder removed, set to 0 to avoid misleading random data
       }
     })
   }, [projects])
@@ -110,7 +119,7 @@ export const Dashboard = () => {
       showToast('Project created successfully!', 'success')
       setCreateModalOpen(false)
       reset()
-      await loadProjects()
+      await loadDashboardData()
       navigate(`/projects/${projectId}`)
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to create project. Please try again.'
@@ -148,10 +157,10 @@ export const Dashboard = () => {
 
         {/* KPIs Section */}
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-          <KPICard title="Total Projects" value={kpiData.totalProjects} icon={<Folder size={32} />} />
-          <KPICard title="Active Builds" value={kpiData.activeBuilds} icon={<HomeIcon size={32} />} />
-          <KPICard title="Tasks Pending" value={kpiData.tasksPending} icon={<LayoutDashboard size={32} />} />
-          <KPICard title="Team Members" value={kpiData.teamMembers} icon={<Users size={32} />} />
+          <KPICard title="Total Projects" value={stats.totalProjects} icon={<Folder size={32} />} />
+          <KPICard title="Active Builds" value={stats.activeBuilds} icon={<HomeIcon size={32} />} />
+          <KPICard title="Tasks Pending" value={stats.tasksPending} icon={<LayoutDashboard size={32} />} />
+          <KPICard title="Team Members" value={stats.teamMembers} icon={<Users size={32} />} />
         </section>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

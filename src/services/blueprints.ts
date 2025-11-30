@@ -1,8 +1,20 @@
+/**
+ * Blueprint Management Service
+ * 
+ * Handles storage, retrieval, and versioning of project blueprints.
+ */
+
 import { supabase } from './supabase'
 import { Blueprint } from '../types'
 
 const STORAGE_BUCKET = 'project-files'
 
+/**
+ * Retrieves the current blueprint for a specific project.
+ * 
+ * @param projectId - The unique identifier of the project.
+ * @returns A promise that resolves to the blueprint object or null if not found.
+ */
 export const getProjectBlueprint = async (projectId: string): Promise<Blueprint | null> => {
   const { data, error } = await supabase
     .from('blueprints')
@@ -22,6 +34,21 @@ export const getProjectBlueprint = async (projectId: string): Promise<Blueprint 
   }
 }
 
+/**
+ * Saves a new blueprint for a project, uploading both the PNG thumbnail and JSON data.
+ * 
+ * This function handles:
+ * 1. Uploading the PNG thumbnail to storage.
+ * 2. Uploading the JSON layout data to storage.
+ * 3. Deleting old blueprint files to prevent storage clutter.
+ * 4. Updating the blueprint record in the database.
+ * 
+ * @param projectId - The unique identifier of the project.
+ * @param pngBlob - The PNG image data as a Blob.
+ * @param jsonData - The JSON layout data as a string.
+ * @returns A promise that resolves when the blueprint is successfully saved.
+ * @throws Will throw an error if any upload or database operation fails.
+ */
 export const saveBlueprint = async (
   projectId: string,
   pngBlob: Blob,
@@ -122,6 +149,13 @@ export const saveBlueprint = async (
   }
 }
 
+/**
+ * Fetches the blueprint JSON data from a given URL.
+ * 
+ * @param jsonUrl - The URL of the JSON file to fetch.
+ * @returns A promise that resolves to the JSON string.
+ * @throws Will throw an error if the URL is invalid, the fetch fails, or times out.
+ */
 export const loadBlueprintJson = async (jsonUrl: string): Promise<string> => {
   try {
     // Validate URL
@@ -178,6 +212,14 @@ export const loadBlueprintJson = async (jsonUrl: string): Promise<string> => {
   }
 }
 
+/**
+ * Saves a version snapshot of a blueprint.
+ * 
+ * @param projectId - The unique identifier of the project.
+ * @param data - The blueprint data to save as a version.
+ * @returns A promise that resolves when the version is saved.
+ * @throws Will throw an error if the database operation fails.
+ */
 export const saveBlueprintVersion = async (
   projectId: string,
   data: Record<string, unknown>
@@ -194,6 +236,13 @@ export const saveBlueprintVersion = async (
   }
 }
 
+/**
+ * Retrieves all saved versions of a blueprint for a specific project.
+ * 
+ * @param projectId - The unique identifier of the project.
+ * @returns A promise that resolves to an array of blueprint versions.
+ * @throws Will throw an error if the database query fails.
+ */
 export const getBlueprintVersions = async (projectId: string): Promise<Record<string, unknown>[]> => {
   const { data, error } = await supabase
     .from('blueprint_versions')

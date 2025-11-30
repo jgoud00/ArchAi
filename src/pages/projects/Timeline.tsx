@@ -1,22 +1,18 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Plus } from 'lucide-react'
+import { Plus, ArrowLeft } from 'lucide-react'
 import { getProjectTasks } from '@/services/tasks'
 import { getProject } from '@/services/projects'
 import { Task, Project } from '@/types'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import { useToast } from '@/hooks/useToast'
-// @ts-expect-error Frappe Gantt missing types - frappe-gantt doesn't have TypeScript definitions
-import Gantt from 'frappe-gantt'
+import { GanttChart } from '@/components/projects/GanttChart'
 
 export const Timeline = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { showToast } = useToast()
-  const ganttRef = useRef<SVGSVGElement>(null)
-  const ganttInstanceRef = useRef<Gantt | null>(null)
 
   const [project, setProject] = useState<Project | null>(null)
   const [tasks, setTasks] = useState<Task[]>([])
@@ -31,7 +27,13 @@ export const Timeline = () => {
         getProjectTasks(id),
       ])
       setProject(projectData)
-      setTasks(tasksData)
+      // Ensure dates are Date objects
+      const parsedTasks = tasksData.map(t => ({
+        ...t,
+        startDate: new Date(t.startDate),
+        endDate: new Date(t.endDate)
+      }))
+      setTasks(parsedTasks)
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Failed to load timeline'
       showToast(message, 'error')
@@ -46,55 +48,9 @@ export const Timeline = () => {
     }
   }, [id, loadData])
 
-  useEffect(() => {
-    // Clear previous instance
-    if (ganttRef.current) {
-      ganttRef.current.innerHTML = ''
-    }
-
-    const ganttContainer = ganttRef.current
-
-    if (ganttContainer && tasks.length > 0) {
-      const ganttData = tasks.map((task) => ({
-        id: task.id,
-        name: task.taskName,
-        start: task.startDate.toISOString().split('T')[0],
-        end: task.endDate.toISOString().split('T')[0],
-        progress: task.status === 'completed' ? 100 : task.status === 'in_progress' ? 50 : 0,
-        custom_class: task.status,
-      }))
-
-      try {
-        const gantt = new Gantt(ganttContainer, ganttData, {
-          view_mode: 'Month',
-          language: 'en',
-          on_click: () => {
-            // Handle task click
-          },
-          on_date_change: () => {
-            // Handle date change
-          },
-          on_progress_change: (_task: unknown, _progress: number) => {
-            // Handle progress change
-          },
-        })
-
-        ganttInstanceRef.current = gantt
-      } catch (error) {
-        console.error('Error initializing Gantt chart:', error)
-      }
-    }
-
-    // Cleanup function to destroy gantt instance
-    return () => {
-      if (ganttInstanceRef.current) {
-        if (ganttContainer) {
-          ganttContainer.innerHTML = ''
-        }
-        ganttInstanceRef.current = null
-      }
-    }
-  }, [tasks])
+  const handleTaskUpdate = (updatedTask: Task) => {
+    setTasks(prev => prev.map(t => t.id === updatedTask.id ? updatedTask : t))
+  }
 
   if (loading) {
     return (
@@ -107,9 +63,15 @@ export const Timeline = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">{project?.name} - Timeline</h1>
-          <p className="text-muted-foreground mt-1">View and manage project timeline</p>
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" onClick={() => navigate(-1)}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold">{project?.name} - Timeline</h1>
+            <p className="text-muted-foreground mt-1">Manage project schedule</p>
+          </div>
         </div>
         <Button onClick={() => navigate(`/projects/${id}/timeline/new-task`)}>
           <Plus className="h-4 w-4 mr-2" />
@@ -117,53 +79,7 @@ export const Timeline = () => {
         </Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Gantt Chart</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {tasks.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No tasks yet. Create your first task to see the timeline.</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <svg ref={ganttRef} className="w-full" style={{ minHeight: '400px' }} />
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Tasks List</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {tasks.map((task) => (
-              <div
-                key={task.id}
-                className="flex items-center justify-between p-3 border rounded-lg"
-              >
-                <div>
-                  <p className="font-medium">{task.taskName}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {task.startDate.toLocaleDateString()} - {task.endDate.toLocaleDateString()}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className={`px-2 py-1 rounded text-xs ${task.status === 'completed' ? 'bg-green-100 text-green-800' :
-                    task.status === 'in_progress' ? 'bg-primary/10 text-primary' :
-                      'bg-muted text-muted-foreground'
-                    }`}>
-                    {task.status.replace('_', ' ')}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <GanttChart tasks={tasks} onTaskUpdate={handleTaskUpdate} />
     </div>
   )
 }

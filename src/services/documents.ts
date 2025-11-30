@@ -1,8 +1,20 @@
+/**
+ * Document Management Service
+ * 
+ * Handles uploading, retrieving, and deleting project documents.
+ */
+
 import { supabase } from './supabase'
 import { Document } from '../types'
 
 const STORAGE_BUCKET = 'project-files'
 
+/**
+ * Extracts the storage path from a public file URL.
+ * 
+ * @param fileUrl - The public URL of the file.
+ * @returns The storage path relative to the bucket, or null if invalid.
+ */
 const extractStoragePath = (fileUrl?: string | null): string | null => {
   if (!fileUrl) return null
   try {
@@ -16,6 +28,13 @@ const extractStoragePath = (fileUrl?: string | null): string | null => {
   }
 }
 
+/**
+ * Deletes a file from Supabase storage.
+ * 
+ * @param path - The storage path of the file to delete.
+ * @returns A promise that resolves when the file is deleted.
+ * @throws Will throw an error if the deletion fails.
+ */
 const deleteFromStorage = async (path: string): Promise<void> => {
   const { error } = await supabase.storage.from(STORAGE_BUCKET).remove([path])
   if (error) {
@@ -23,6 +42,13 @@ const deleteFromStorage = async (path: string): Promise<void> => {
   }
 }
 
+/**
+ * Retrieves all documents associated with a project.
+ * 
+ * @param projectId - The unique identifier of the project.
+ * @returns A promise that resolves to an array of document objects.
+ * @throws Will throw an error if the database query fails.
+ */
 export const getProjectDocuments = async (projectId: string): Promise<Document[]> => {
   const { data, error } = await supabase
     .from('documents')
@@ -50,6 +76,20 @@ export const getProjectDocuments = async (projectId: string): Promise<Document[]
   }))
 }
 
+/**
+ * Uploads a new document for a project.
+ * 
+ * This function handles:
+ * 1. Uploading the file to Supabase Storage.
+ * 2. Generating a public URL for the file.
+ * 3. Creating a document record in the database.
+ * 
+ * @param projectId - The unique identifier of the project.
+ * @param file - The file object to upload.
+ * @param uploadedBy - The unique identifier of the user uploading the file.
+ * @returns A promise that resolves to the ID of the newly created document.
+ * @throws Will throw an error if upload or database insertion fails.
+ */
 export const uploadDocument = async (
   projectId: string,
   file: File,
@@ -109,6 +149,13 @@ export const uploadDocument = async (
   return docData.id
 }
 
+/**
+ * Deletes a document and its associated file from storage.
+ * 
+ * @param documentId - The unique identifier of the document to delete.
+ * @returns A promise that resolves when the document is deleted.
+ * @throws Will throw an error if the database or storage operation fails.
+ */
 export const deleteDocument = async (documentId: string): Promise<void> => {
   // Get document to delete file
   const { data: doc } = await supabase

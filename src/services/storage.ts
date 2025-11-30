@@ -1,7 +1,24 @@
+/**
+ * Storage Service
+ * 
+ * Handles generic file storage operations using Supabase Storage.
+ * Primarily used for scan uploads and file deletion.
+ */
+
 import { supabase } from './supabase'
 
 const STORAGE_BUCKET = 'project-files'
 
+/**
+ * Uploads a scan file (image or video) to Supabase Storage and creates a database record.
+ * 
+ * @param file - The file object to upload.
+ * @param projectId - The unique identifier of the project.
+ * @param uploadedBy - The unique identifier of the user uploading the file.
+ * @param onProgress - Optional callback function to track upload progress (simulated).
+ * @returns A promise that resolves to the ID of the newly created scan record.
+ * @throws Will throw an error if upload or database insertion fails.
+ */
 export const uploadScan = async (
   file: File,
   projectId: string,
@@ -68,6 +85,13 @@ export const uploadScan = async (
   return scanData.id
 }
 
+/**
+ * Deletes a file from Supabase Storage using its public URL.
+ * 
+ * @param fileUrl - The public URL of the file to delete.
+ * @returns A promise that resolves when the file is deleted.
+ * @throws Will throw an error if the URL is invalid or deletion fails.
+ */
 export const deleteScanFile = async (fileUrl: string): Promise<void> => {
   // Extract file path from URL
   // URL format: https://[project].supabase.co/storage/v1/object/public/project-files/path/to/file
@@ -95,7 +119,12 @@ export const deleteScanFile = async (fileUrl: string): Promise<void> => {
   }
 }
 
-// Helper function to get public URL
+/**
+ * Generates the public URL for a file in storage.
+ * 
+ * @param filePath - The path of the file within the storage bucket.
+ * @returns The public URL string.
+ */
 export const getPublicUrl = (filePath: string): string => {
   const { data } = supabase.storage
     .from(STORAGE_BUCKET)

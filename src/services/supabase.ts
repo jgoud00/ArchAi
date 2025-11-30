@@ -1,9 +1,20 @@
+/**
+ * Supabase Client Configuration
+ * 
+ * Initializes the Supabase client and defines database types.
+ */
+
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || ''
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
 
-// Create Supabase client with fallback values (will show error if not configured)
+/**
+ * The initialized Supabase client instance.
+ * 
+ * Configured with environment variables `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
+ * Includes persistent session and auto-refresh token handling.
+ */
 export const supabase = createClient(
   supabaseUrl || 'https://placeholder.supabase.co',
   supabaseAnonKey || 'placeholder-key',
@@ -15,12 +26,20 @@ export const supabase = createClient(
   }
 )
 
-// Helper to check if Supabase is configured
+/**
+ * Checks if the Supabase client is correctly configured with environment variables.
+ * 
+ * @returns `true` if both URL and Anon Key are present and non-empty, `false` otherwise.
+ */
 export const isSupabaseConfigured = () => {
   return !!(supabaseUrl && supabaseAnonKey && supabaseUrl !== '' && supabaseAnonKey !== '')
 }
 
-// Database helper types
+/**
+ * TypeScript definitions for the Supabase Database schema.
+ * 
+ * Defines the structure of tables (Row, Insert, Update) for type safety.
+ */
 export type Database = {
   public: {
     Tables: {
