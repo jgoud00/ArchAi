@@ -1,0 +1,49 @@
+<svg width="800" height="220" viewBox="0 0 800 220" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .icon-bg { fill-opacity: 0.2; }
+    .title { font-size: 14px; fill: #333; font-weight: bold; text-anchor: middle; font-family: sans-serif; }
+    .desc { font-size: 12px; fill: #666; text-anchor: middle; font-family: sans-serif; }
+    .dark-mode-text { fill: #e2e8f0; }
+    .dark-mode-desc { fill: #94a3b8; }
+    @media (prefers-color-scheme: dark) {
+      .title { fill: #e2e8f0; }
+      .desc { fill: #94a3b8; }
+    }
+  </style>
+  
+  <!-- Left Column -->
+  <g transform="translate(0, 10)">
+    <circle cx="100" cy="50" r="30" fill="#667eea" class="icon-bg"/>
+    <circle cx="100" cy="50" r="20" fill="#667eea"/>
+    <text x="100" y="58" font-size="24" fill="white" text-anchor="middle" font-weight="bold">🗂️</text>
+    <text x="100" y="110" class="title">Centralized Data</text>
+    <text x="100" y="130" class="desc">All project data in one place</text>
+  </g>
+  
+  <!-- Middle Left -->
+  <g transform="translate(0, 10)">
+    <circle cx="300" cy="50" r="30" fill="#34d399" class="icon-bg"/>
+    <circle cx="300" cy="50" r="20" fill="#34d399"/>
+    <text x="300" y="58" font-size="24" fill="white" text-anchor="middle" font-weight="bold">🤝</text>
+    <text x="300" y="110" class="title">Real-time Collaboration</text>
+    <text x="300" y="130" class="desc">Seamless team communication</text>
+  </g>
+  
+  <!-- Middle Right -->
+  <g transform="translate(0, 10)">
+    <circle cx="500" cy="50" r="30" fill="#fbbf24" class="icon-bg"/>
+    <circle cx="500" cy="50" r="20" fill="#fbbf24"/>
+    <text x="500" y="58" font-size="24" fill="white" text-anchor="middle" font-weight="bold">📸</text>
+    <text x="500" y="110" class="title">Visual Documentation</text>
+    <text x="500" y="130" class="desc">Drone scans & progress photos</text>
+  </g>
+  
+  <!-- Right -->
+  <g transform="translate(0, 10)">
+    <circle cx="700" cy="50" r="30" fill="#f87171" class="icon-bg"/>
+    <circle cx="700" cy="50" r="20" fill="#f87171"/>
+    <text x="700" y="58" font-size="24" fill="white" text-anchor="middle" font-weight="bold">🔐</text>
+    <text x="700" y="110" class="title">Role-Based Security</text>
+    <text x="700" y="130" class="desc">Granular access control</text>
+  </g>
+</svg>

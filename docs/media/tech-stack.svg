@@ -1,0 +1,23 @@
+<svg width="800" height="250" viewBox="0 0 800 250" xmlns="http://www.w3.org/2000/svg">
+  <!-- Frontend Section -->
+  <rect x="30" y="20" width="320" height="200" fill="#f0f9ff" stroke="#0ea5e9" stroke-width="2" rx="8"/>
+  <text x="190" y="50" font-size="18" fill="#0284c7" text-anchor="middle" font-weight="bold" font-family="sans-serif">Frontend</text>
+  <g font-size="13" fill="#0c4a6e" font-family="monospace">
+    <text x="50" y="85">• React 18 + TypeScript</text>
+    <text x="50" y="110">• Tailwind CSS + shadcn/ui</text>
+    <text x="50" y="135">• Zustand (State)</text>
+    <text x="50" y="160">• Recharts, Frappe Gantt</text>
+    <text x="50" y="185">• Vite (Build Tool)</text>
+  </g>
+  
+  <!-- Backend Section -->
+  <rect x="450" y="20" width="320" height="200" fill="#fef3c7" stroke="#f59e0b" stroke-width="2" rx="8"/>
+  <text x="610" y="50" font-size="18" fill="#b45309" text-anchor="middle" font-weight="bold" font-family="sans-serif">Backend & Database</text>
+  <g font-size="13" fill="#654321" font-family="monospace">
+    <text x="470" y="85">• Supabase (PostgreSQL)</text>
+    <text x="470" y="110">• Supabase Auth (RLS)</text>
+    <text x="470" y="135">• Storage Buckets</text>
+    <text x="470" y="160">• Row-Level Security</text>
+    <text x="470" y="185">• Real-time Subscriptions</text>
+  </g>
+</svg>
