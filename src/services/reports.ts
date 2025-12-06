@@ -1,7 +1,22 @@
+/**
+ * Report Generation Service
+ * 
+ * Handles generation of PDF reports for projects.
+ */
+
 import jsPDF from 'jspdf'
 import { Project, Scan } from '../types'
 import { format } from 'date-fns'
 
+/**
+ * Generates a PDF report for a project, including details and a list of scans.
+ * 
+ * This function uses `jspdf` to create a downloadable PDF file in the browser.
+ * 
+ * @param project - The project object containing details like name, description, and status.
+ * @param scans - An array of scans associated with the project.
+ * @returns A promise that resolves when the PDF is generated and saved (download triggered).
+ */
 export const generateProjectReport = async (
   project: Project,
   scans: Scan[]
@@ -55,7 +70,7 @@ export const generateProjectReport = async (
   } else {
     doc.setFontSize(10)
     doc.setFont('helvetica', 'normal')
-    
+
     scans.forEach((scan, index) => {
       // Check if we need a new page
       if (yPosition > doc.internal.pageSize.height - 30) {

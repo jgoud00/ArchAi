@@ -1,17 +1,39 @@
+/**
+ * AI Analysis Service
+ * 
+ * Provides functionality for analyzing project images using AI to detect progress, issues, and material usage.
+ */
+
 import { supabase } from './supabase'
 
+/**
+ * Represents the result of an AI analysis on a progress image.
+ */
 export interface AnalysisResult {
+  /** The estimated completion percentage of the project. */
   progressPercent: number
+  /** A list of potential issues detected in the image. */
   detectedIssues: string[]
+  /** Estimated usage of various materials. */
   materialUsage: {
     concrete?: number
     steel?: number
     bricks?: number
   }
+  /** A list of recommended actions based on the analysis. */
   recommendations: string[]
 }
 
-// Placeholder AI analysis - in production, this would call an actual AI service
+/**
+ * Analyzes a progress image to estimate project status and detect issues.
+ * 
+ * Note: This is currently a simulation using placeholder logic. In a production environment,
+ * this would integrate with an external AI service (e.g., Google Cloud Vision, AWS Rekognition).
+ * 
+ * @param imageUrl - The URL of the image to analyze.
+ * @param projectId - The unique identifier of the project associated with the image.
+ * @returns A promise that resolves to the analysis result.
+ */
 export const analyzeProgressImage = async (
   imageUrl: string,
   projectId: string
@@ -21,7 +43,7 @@ export const analyzeProgressImage = async (
   // - Google Cloud Vision API
   // - AWS Rekognition
   // - Custom ML model endpoint
-  
+
   await new Promise(resolve => setTimeout(resolve, 2000)) // Simulate processing time
 
   // Placeholder analysis results
@@ -66,6 +88,13 @@ export const analyzeProgressImage = async (
   }
 }
 
+/**
+ * Retrieves the history of AI analyses for a specific project.
+ * 
+ * @param projectId - The unique identifier of the project.
+ * @returns A promise that resolves to an array of past analysis records.
+ * @throws Will throw an error if the database query fails.
+ */
 export const getAnalysisHistory = async (projectId: string) => {
   const { data, error } = await supabase
     .from('scan_analyses')

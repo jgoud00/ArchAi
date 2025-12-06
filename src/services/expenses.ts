@@ -1,7 +1,19 @@
+/**
+ * Expense Management Service
+ * 
+ * Handles tracking of project expenses (material, labour, etc.) and updates the project budget accordingly.
+ */
+
 import { supabase } from './supabase'
 import { Expense } from '../types'
 import { getProjectBudget, createOrUpdateBudget } from './budgets'
 
+/**
+ * Retrieves all expenses associated with a project.
+ * 
+ * @param projectId - The unique identifier of the project.
+ * @returns A promise that resolves to an array of expense objects, ordered by date (newest first).
+ */
 export const getProjectExpenses = async (projectId: string): Promise<Expense[]> => {
   const { data, error } = await supabase
     .from('expenses')
@@ -25,6 +37,12 @@ export const getProjectExpenses = async (projectId: string): Promise<Expense[]> 
   }))
 }
 
+/**
+ * Retrieves a specific expense by its ID.
+ * 
+ * @param expenseId - The unique identifier of the expense.
+ * @returns A promise that resolves to the expense object or null if not found.
+ */
 export const getExpense = async (expenseId: string): Promise<Expense | null> => {
   const { data, error } = await supabase
     .from('expenses')
@@ -48,6 +66,17 @@ export const getExpense = async (expenseId: string): Promise<Expense | null> => 
   }
 }
 
+/**
+ * Creates a new expense record and updates the project budget.
+ * 
+ * @param projectId - The unique identifier of the project.
+ * @param type - The type of expense ('material' or 'labour').
+ * @param name - A descriptive name for the expense.
+ * @param amount - The cost amount.
+ * @param date - The date the expense was incurred.
+ * @returns A promise that resolves to the ID of the newly created expense.
+ * @throws Will throw an error if the database operation fails.
+ */
 export const createExpense = async (
   projectId: string,
   type: 'material' | 'labour',
@@ -80,6 +109,14 @@ export const createExpense = async (
   return data.id
 }
 
+/**
+ * Updates an existing expense and recalculates the project budget.
+ * 
+ * @param expenseId - The unique identifier of the expense to update.
+ * @param updates - An object containing the fields to update.
+ * @returns A promise that resolves when the expense is updated.
+ * @throws Will throw an error if the database operation fails.
+ */
 export const updateExpense = async (
   expenseId: string,
   updates: Partial<Pick<Expense, 'type' | 'name' | 'amount' | 'date'>>
@@ -115,6 +152,13 @@ export const updateExpense = async (
   }
 }
 
+/**
+ * Deletes an expense and recalculates the project budget.
+ * 
+ * @param expenseId - The unique identifier of the expense to delete.
+ * @returns A promise that resolves when the expense is deleted.
+ * @throws Will throw an error if the database operation fails.
+ */
 export const deleteExpense = async (expenseId: string): Promise<void> => {
   // Get expense to update budget
   const { data: expense } = await supabase

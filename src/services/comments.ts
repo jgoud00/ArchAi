@@ -8,7 +8,13 @@ import { supabase } from './supabase'
 import { ProjectComment } from '../types'
 
 /**
- * Add a comment to a project
+ * Adds a new comment to a project.
+ * 
+ * @param projectId - The unique identifier of the project.
+ * @param userId - The unique identifier of the user creating the comment.
+ * @param content - The text content of the comment.
+ * @returns A promise that resolves to the newly created comment object.
+ * @throws Will throw an error if the database operation fails.
  */
 export const addComment = async (
   projectId: string,
@@ -54,7 +60,10 @@ export const addComment = async (
 }
 
 /**
- * Get all comments for a project
+ * Retrieves all comments for a specific project.
+ * 
+ * @param projectId - The unique identifier of the project.
+ * @returns A promise that resolves to an array of project comments, ordered by creation date.
  */
 export const getProjectComments = async (projectId: string): Promise<ProjectComment[]> => {
   const { data, error } = await supabase
@@ -92,7 +101,12 @@ export const getProjectComments = async (projectId: string): Promise<ProjectComm
 }
 
 /**
- * Update a comment
+ * Updates the content of an existing comment.
+ * 
+ * @param commentId - The unique identifier of the comment to update.
+ * @param content - The new text content for the comment.
+ * @returns A promise that resolves when the comment is updated.
+ * @throws Will throw an error if the database operation fails.
  */
 export const updateComment = async (
   commentId: string,
@@ -109,7 +123,11 @@ export const updateComment = async (
 }
 
 /**
- * Delete a comment
+ * Deletes a comment.
+ * 
+ * @param commentId - The unique identifier of the comment to delete.
+ * @returns A promise that resolves when the comment is deleted.
+ * @throws Will throw an error if the database operation fails.
  */
 export const deleteComment = async (commentId: string): Promise<void> => {
   const { error } = await supabase

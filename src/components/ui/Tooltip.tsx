@@ -17,7 +17,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
     delay = 200,
 }) => {
     const [isVisible, setIsVisible] = useState(false);
-    const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
+    const [timeoutId, setTimeoutId] = useState<ReturnType<typeof setTimeout> | null>(null);
 
     const showTooltip = () => {
         const id = setTimeout(() => setIsVisible(true), delay);

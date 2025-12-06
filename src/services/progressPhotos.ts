@@ -1,8 +1,20 @@
+/**
+ * Progress Photo Management Service
+ * 
+ * Handles uploading, retrieving, updating, and deleting progress photos for projects.
+ */
+
 import { supabase } from './supabase'
 import { ProgressPhoto } from '../types'
 
 const STORAGE_BUCKET = 'project-files'
 
+/**
+ * Extracts the storage path from a public file URL.
+ * 
+ * @param fileUrl - The public URL of the file.
+ * @returns The storage path relative to the bucket, or null if invalid.
+ */
 const extractStoragePath = (fileUrl?: string | null): string | null => {
   if (!fileUrl) return null
   try {
@@ -16,6 +28,13 @@ const extractStoragePath = (fileUrl?: string | null): string | null => {
   }
 }
 
+/**
+ * Deletes a file from Supabase storage.
+ * 
+ * @param path - The storage path of the file to delete.
+ * @returns A promise that resolves when the file is deleted.
+ * @throws Will throw an error if the deletion fails.
+ */
 const deleteFromStorage = async (path: string): Promise<void> => {
   const { error } = await supabase.storage.from(STORAGE_BUCKET).remove([path])
   if (error) {
@@ -23,6 +42,13 @@ const deleteFromStorage = async (path: string): Promise<void> => {
   }
 }
 
+/**
+ * Retrieves all progress photos associated with a project.
+ * 
+ * @param projectId - The unique identifier of the project.
+ * @returns A promise that resolves to an array of progress photo objects, ordered by upload date (newest first).
+ * @throws Will throw an error if the database query fails.
+ */
 export const getProjectProgressPhotos = async (projectId: string): Promise<ProgressPhoto[]> => {
   const { data, error } = await supabase
     .from('progress_photos')
@@ -48,6 +74,21 @@ export const getProjectProgressPhotos = async (projectId: string): Promise<Progr
   }))
 }
 
+/**
+ * Uploads a new progress photo for a project.
+ * 
+ * This function handles:
+ * 1. Uploading the photo file to Supabase Storage.
+ * 2. Generating a public URL for the photo.
+ * 3. Creating a progress photo record in the database.
+ * 
+ * @param projectId - The unique identifier of the project.
+ * @param file - The photo file to upload.
+ * @param caption - A caption or description for the photo.
+ * @param uploadedBy - The unique identifier of the user uploading the photo.
+ * @returns A promise that resolves to the ID of the newly created progress photo.
+ * @throws Will throw an error if upload or database insertion fails.
+ */
 export const uploadProgressPhoto = async (
   projectId: string,
   file: File,
@@ -104,6 +145,13 @@ export const uploadProgressPhoto = async (
   return photoData.id
 }
 
+/**
+ * Deletes a progress photo and its associated file from storage.
+ * 
+ * @param photoId - The unique identifier of the photo to delete.
+ * @returns A promise that resolves when the photo is deleted.
+ * @throws Will throw an error if the database or storage operation fails.
+ */
 export const deleteProgressPhoto = async (photoId: string): Promise<void> => {
   // Get photo to delete file
   const { data: photo } = await supabase
@@ -131,6 +179,14 @@ export const deleteProgressPhoto = async (photoId: string): Promise<void> => {
   }
 }
 
+/**
+ * Updates the caption of a progress photo.
+ * 
+ * @param photoId - The unique identifier of the photo to update.
+ * @param caption - The new caption text.
+ * @returns A promise that resolves when the caption is updated.
+ * @throws Will throw an error if the database operation fails.
+ */
 export const updateProgressPhotoCaption = async (
   photoId: string,
   caption: string

@@ -1,6 +1,12 @@
 import { supabase } from './supabase'
 import { Task } from '../types'
 
+/**
+ * Retrieves all tasks for a specific project.
+ * 
+ * @param projectId - The UUID of the project.
+ * @returns A Promise resolving to an array of Task objects, ordered by start date.
+ */
 export const getProjectTasks = async (projectId: string): Promise<Task[]> => {
   const { data, error } = await supabase
     .from('tasks')
@@ -24,6 +30,12 @@ export const getProjectTasks = async (projectId: string): Promise<Task[]> => {
   }))
 }
 
+/**
+ * Retrieves a single task by its ID.
+ * 
+ * @param taskId - The UUID of the task.
+ * @returns A Promise resolving to the Task object or null if not found.
+ */
 export const getTask = async (taskId: string): Promise<Task | null> => {
   const { data, error } = await supabase
     .from('tasks')
@@ -47,6 +59,17 @@ export const getTask = async (taskId: string): Promise<Task | null> => {
   }
 }
 
+/**
+ * Creates a new task for a project.
+ * 
+ * @param projectId - The UUID of the project.
+ * @param taskName - The name/description of the task.
+ * @param startDate - The start date of the task.
+ * @param endDate - The end date of the task.
+ * @param status - The initial status of the task (default: 'pending').
+ * @returns A Promise resolving to the newly created task's ID.
+ * @throws Error if task creation fails.
+ */
 export const createTask = async (
   projectId: string,
   taskName: string,
@@ -73,6 +96,14 @@ export const createTask = async (
   return data.id
 }
 
+/**
+ * Updates an existing task.
+ * 
+ * @param taskId - The UUID of the task to update.
+ * @param updates - Partial object containing fields to update.
+ * @returns A Promise resolving when the update is complete.
+ * @throws Error if the update fails.
+ */
 export const updateTask = async (
   taskId: string,
   updates: Partial<Pick<Task, 'taskName' | 'startDate' | 'endDate' | 'status'>>
@@ -94,6 +125,13 @@ export const updateTask = async (
   }
 }
 
+/**
+ * Deletes a task by its ID.
+ * 
+ * @param taskId - The UUID of the task to delete.
+ * @returns A Promise resolving when the deletion is complete.
+ * @throws Error if the deletion fails.
+ */
 export const deleteTask = async (taskId: string): Promise<void> => {
   const { error } = await supabase
     .from('tasks')

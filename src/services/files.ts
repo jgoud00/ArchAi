@@ -9,14 +9,21 @@ import { supabase } from './supabase'
 import { ProjectFile } from '../types'
 
 /**
- * Upload a file to a project
+ * Uploads a file to a project.
  * 
- * @param file - The file to upload
- * @param projectId - The project ID
- * @param userId - The user ID uploading the file
- * @param category - Optional file category
- * @param description - Optional file description
- * @param onProgress - Optional progress callback
+ * This function handles:
+ * 1. Generating a unique filename.
+ * 2. Uploading the file to Supabase Storage.
+ * 3. Retrieving the public URL.
+ * 4. Saving file metadata to the database.
+ * 
+ * @param file - The file object to upload.
+ * @param projectId - The unique identifier of the project.
+ * @param userId - The unique identifier of the user uploading the file.
+ * @param category - Optional category for the file (default: 'other').
+ * @param description - Optional description of the file.
+ * @returns A promise that resolves to the uploaded file's metadata.
+ * @throws Will throw an error if the upload or database insertion fails.
  */
 export const uploadFile = async (
   file: File,
@@ -89,7 +96,10 @@ export const uploadFile = async (
 }
 
 /**
- * Get all files for a project
+ * Retrieves all files associated with a project.
+ * 
+ * @param projectId - The unique identifier of the project.
+ * @returns A promise that resolves to an array of project files, ordered by upload date (newest first).
  */
 export const getProjectFiles = async (projectId: string): Promise<ProjectFile[]> => {
   const { data, error } = await supabase
@@ -119,7 +129,12 @@ export const getProjectFiles = async (projectId: string): Promise<ProjectFile[]>
 }
 
 /**
- * Delete a file
+ * Deletes a file and its metadata.
+ * 
+ * @param fileId - The unique identifier of the file to delete.
+ * @param projectId - The unique identifier of the project (for verification).
+ * @returns A promise that resolves when the file is deleted.
+ * @throws Will throw an error if the file is not found or deletion fails.
  */
 export const deleteFile = async (fileId: string, projectId: string): Promise<void> => {
   // Get file info first
@@ -163,7 +178,13 @@ export const deleteFile = async (fileId: string, projectId: string): Promise<voi
 }
 
 /**
- * Update file metadata
+ * Updates the metadata of a file.
+ * 
+ * @param fileId - The unique identifier of the file to update.
+ * @param projectId - The unique identifier of the project.
+ * @param updates - An object containing the fields to update (name, description, category).
+ * @returns A promise that resolves when the file metadata is updated.
+ * @throws Will throw an error if the database operation fails.
  */
 export const updateFile = async (
   fileId: string,

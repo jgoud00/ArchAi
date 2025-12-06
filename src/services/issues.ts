@@ -1,3 +1,10 @@
+/**
+ * Issue Tracking Service
+ * 
+ * Handles creation, retrieval, updating, and deletion of project issues.
+ * Supports attaching photos to issues.
+ */
+
 import { supabase } from './supabase'
 import { Issue } from '../types'
 import { STORAGE_BUCKETS, ISSUE_STATUS } from '../constants'
@@ -5,6 +12,13 @@ import { extractStoragePath } from '../utils/storageUtils'
 
 const STORAGE_BUCKET = STORAGE_BUCKETS.PROJECT_FILES
 
+/**
+ * Deletes a file from Supabase storage.
+ * 
+ * @param path - The storage path of the file to delete.
+ * @returns A promise that resolves when the file is deleted.
+ * @throws Will throw an error if the deletion fails.
+ */
 const deleteFromStorage = async (path: string): Promise<void> => {
   const { error } = await supabase.storage.from(STORAGE_BUCKET).remove([path])
   if (error) {
@@ -12,6 +26,13 @@ const deleteFromStorage = async (path: string): Promise<void> => {
   }
 }
 
+/**
+ * Retrieves all issues associated with a project.
+ * 
+ * @param projectId - The unique identifier of the project.
+ * @returns A promise that resolves to an array of issue objects, ordered by creation date (newest first).
+ * @throws Will throw an error if the database query fails.
+ */
 export const getProjectIssues = async (projectId: string): Promise<Issue[]> => {
   const { data, error } = await supabase
     .from('issues')
@@ -41,6 +62,13 @@ export const getProjectIssues = async (projectId: string): Promise<Issue[]> => {
   }))
 }
 
+/**
+ * Retrieves a specific issue by its ID.
+ * 
+ * @param issueId - The unique identifier of the issue.
+ * @returns A promise that resolves to the issue object or null if not found.
+ * @throws Will throw an error if the database query fails.
+ */
 export const getIssue = async (issueId: string): Promise<Issue | null> => {
   const { data, error } = await supabase
     .from('issues')
@@ -70,6 +98,22 @@ export const getIssue = async (issueId: string): Promise<Issue | null> => {
   }
 }
 
+/**
+ * Creates a new issue for a project.
+ * 
+ * This function handles:
+ * 1. Uploading an optional photo to Supabase Storage.
+ * 2. Creating an issue record in the database.
+ * 
+ * @param projectId - The unique identifier of the project.
+ * @param title - The title of the issue.
+ * @param description - A detailed description of the issue.
+ * @param priority - The priority level ('low', 'medium', 'high').
+ * @param createdBy - The unique identifier of the user creating the issue.
+ * @param photoFile - Optional photo file to attach to the issue.
+ * @returns A promise that resolves to the ID of the newly created issue.
+ * @throws Will throw an error if upload or database insertion fails.
+ */
 export const createIssue = async (
   projectId: string,
   title: string,
@@ -129,6 +173,19 @@ export const createIssue = async (
   return data.id
 }
 
+/**
+ * Updates an existing issue.
+ * 
+ * This function handles:
+ * 1. Updating issue fields (title, description, priority, status).
+ * 2. Replacing the attached photo if a new one is provided (deleting the old one).
+ * 
+ * @param issueId - The unique identifier of the issue to update.
+ * @param updates - An object containing the fields to update.
+ * @param photoFile - Optional new photo file to replace the existing one.
+ * @returns A promise that resolves when the issue is updated.
+ * @throws Will throw an error if the database or storage operation fails.
+ */
 export const updateIssue = async (
   issueId: string,
   updates: Partial<Pick<Issue, 'title' | 'description' | 'priority' | 'status'>>,
@@ -199,6 +256,13 @@ export const updateIssue = async (
   }
 }
 
+/**
+ * Deletes an issue and its attached photo.
+ * 
+ * @param issueId - The unique identifier of the issue to delete.
+ * @returns A promise that resolves when the issue is deleted.
+ * @throws Will throw an error if the database or storage operation fails.
+ */
 export const deleteIssue = async (issueId: string): Promise<void> => {
   // Get issue to delete photo
   const { data: issue } = await supabase

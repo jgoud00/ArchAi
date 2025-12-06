@@ -15,43 +15,48 @@ function Model({ url }: { url: string }) {
   return <primitive object={scene} />
 }
 
-export const ModelViewer = () => {
+export default function ModelViewer() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { user } = useAuthStore()
   const { showToast } = useToast()
-  const [modelUrl, setModelUrl] = useState<string | null>(null)
+
+  const [models, setModels] = useState<any[]>([])
+  const [selectedModel, setSelectedModel] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const loadModel = useCallback(async () => {
+  const loadModels = useCallback(async () => {
     if (!id) return
 
     try {
       setLoading(true)
-      // Check if project has a 3D model
-      const { data } = await supabase
-        .from('blueprints')
-        .select('json_url')
+      const { data, error } = await supabase
+        .from('project_models')
+        .select('*')
         .eq('project_id', id)
-        .single()
+        .order('created_at', { ascending: false })
 
-      if (data?.json_url) {
-        setModelUrl(data.json_url)
+      if (error) throw error
+
+      setModels(data || [])
+      if (data && data.length > 0) {
+        setSelectedModel(data[0].url)
       }
     } catch (error) {
-      console.error('Failed to load model:', error)
+      console.error('Failed to load models:', error)
+      showToast('Failed to load models', 'error')
     } finally {
       setLoading(false)
     }
-  }, [id])
+  }, [id, showToast])
 
   useEffect(() => {
     if (id) {
-      loadModel()
+      loadModels()
     }
-  }, [id, loadModel])
+  }, [id, loadModels])
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -60,6 +65,13 @@ export const ModelViewer = () => {
     // Validate file type
     if (!file.name.endsWith('.glb') && !file.name.endsWith('.gltf')) {
       showToast('Please upload a .glb or .gltf file', 'error')
+      return
+    }
+
+    // Validate file size (e.g., 50MB limit)
+    const MAX_SIZE = 50 * 1024 * 1024
+    if (file.size > MAX_SIZE) {
+      showToast('File size exceeds 50MB limit', 'error')
       return
     }
 
@@ -85,18 +97,24 @@ export const ModelViewer = () => {
         .from('blueprints')
         .getPublicUrl(filePath)
 
-      // Update blueprint record
-      const { error: updateError } = await supabase
-        .from('blueprints')
-        .upsert({
+      // Determine version number
+      const nextVersion = models.length + 1
+
+      // Insert into project_models
+      const { error: dbError } = await supabase
+        .from('project_models')
+        .insert({
           project_id: id,
-          json_url: urlData.publicUrl,
+          name: file.name,
+          url: urlData.publicUrl,
+          version: nextVersion,
+          uploaded_by: user.uid
         })
 
-      if (updateError) throw updateError
+      if (dbError) throw dbError
 
-      setModelUrl(urlData.publicUrl)
       showToast('3D model uploaded successfully!', 'success')
+      await loadModels()
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Failed to upload model'
       showToast(message, 'error')
@@ -149,35 +167,73 @@ export const ModelViewer = () => {
             ) : (
               <>
                 <Upload className="h-4 w-4 mr-2" />
-                Upload Model
+                Upload New Version
               </>
             )}
           </Button>
         </div>
       </div>
 
-      <Card>
-        <CardContent className="p-0">
-          <div className="h-[600px] w-full bg-muted">
-            {modelUrl ? (
-              <Canvas>
-                <PerspectiveCamera makeDefault position={[0, 0, 5]} />
-                <ambientLight intensity={0.5} />
-                <pointLight position={[10, 10, 10]} />
-                <Model url={modelUrl} />
-                <OrbitControls />
-              </Canvas>
-            ) : (
-              <div className="flex items-center justify-center h-full text-muted-foreground">
-                <div className="text-center">
-                  <p className="text-lg font-medium mb-2">No 3D model uploaded</p>
-                  <p className="text-sm">Upload a .glb or .gltf file to view it here</p>
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="lg:col-span-3">
+          <Card className="h-[600px] overflow-hidden">
+            <CardContent className="p-0 h-full bg-muted relative">
+              {selectedModel ? (
+                <Canvas>
+                  <PerspectiveCamera makeDefault position={[0, 0, 5]} />
+                  <ambientLight intensity={0.5} />
+                  <pointLight position={[10, 10, 10]} />
+                  <Model url={selectedModel} />
+                  <OrbitControls />
+                </Canvas>
+              ) : (
+                <div className="flex items-center justify-center h-full text-muted-foreground">
+                  <div className="text-center">
+                    <p className="text-lg font-medium mb-2">No 3D model selected</p>
+                    <p className="text-sm">Upload a .glb or .gltf file to view it here</p>
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="lg:col-span-1 space-y-4">
+          <Card>
+            <CardContent className="p-4">
+              <h3 className="font-semibold mb-4">Version History</h3>
+              {models.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No versions uploaded yet.</p>
+              ) : (
+                <div className="space-y-2 max-h-[500px] overflow-y-auto">
+                  {models.map((model) => (
+                    <div
+                      key={model.id}
+                      className={`p-3 rounded-lg cursor-pointer transition-colors border ${selectedModel === model.url
+                        ? 'bg-primary/10 border-primary'
+                        : 'hover:bg-accent border-transparent'
+                        }`}
+                      onClick={() => setSelectedModel(model.url)}
+                    >
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-medium text-sm truncate max-w-[150px]">{model.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            Version {model.version} • {new Date(model.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                        {selectedModel === model.url && (
+                          <div className="h-2 w-2 rounded-full bg-primary mt-1.5" />
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   )
 }

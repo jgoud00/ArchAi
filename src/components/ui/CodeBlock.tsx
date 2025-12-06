@@ -20,7 +20,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = React.memo(({
 }) => {
   const [copied, setCopied] = React.useState(false)
   const codeRef = React.useRef<HTMLPreElement>(null)
-  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null)
+  const timeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Cleanup timeout on unmount
   React.useEffect(() => {
@@ -37,12 +37,12 @@ export const CodeBlock: React.FC<CodeBlockProps> = React.memo(({
         const text = codeRef.current.innerText
         await navigator.clipboard.writeText(text)
         setCopied(true)
-        
+
         // Clear existing timeout
         if (timeoutRef.current) {
           clearTimeout(timeoutRef.current)
         }
-        
+
         // Set new timeout
         timeoutRef.current = setTimeout(() => {
           setCopied(false)
