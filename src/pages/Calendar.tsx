@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { getUserProjects } from '@/services/projects'
 import { createTask } from '@/services/tasks'
+import { logger } from '@/utils/logger'
 
 export const Calendar = () => {
   const { user } = useAuthStore()
@@ -50,7 +51,7 @@ export const Calendar = () => {
       if (error) throw error
       setTasks(data as unknown as Task[])
     } catch (error) {
-      console.error(error)
+      logger.error('Failed to load tasks', error)
       showToast('Failed to load tasks', 'error')
     } finally {
       setLoading(false)
@@ -66,7 +67,7 @@ export const Calendar = () => {
         setNewTask(prev => ({ ...prev, projectId: userProjects[0].id }))
       }
     } catch (error) {
-      console.error(error)
+      logger.error('Failed to load projects', error)
     }
   }, [user?.uid])
 
@@ -110,7 +111,7 @@ export const Calendar = () => {
         fetchTasks(api.view.activeStart, api.view.activeEnd)
       }
     } catch (error) {
-      console.error(error)
+      logger.error('Failed to create task', error)
       showToast('Failed to create task', 'error')
     }
   }
@@ -134,7 +135,7 @@ export const Calendar = () => {
       if (error) throw error
       showToast('Task updated', 'success')
     } catch (error) {
-      console.error(error)
+      logger.error('Failed to update task (drag)', error)
       showToast('Failed to update task', 'error')
       arg.revert()
     }
@@ -159,7 +160,7 @@ export const Calendar = () => {
       if (error) throw error
       showToast('Task updated', 'success')
     } catch (error) {
-      console.error(error)
+      logger.error('Failed to update task (resize)', error)
       showToast('Failed to update task', 'error')
       arg.revert()
     }
@@ -207,7 +208,7 @@ export const Calendar = () => {
               eventDrop={handleEventDrop}
               eventResize={handleEventResize}
               eventClick={(info) => {
-                console.log('Clicked task:', info.event)
+                logger.debug('Clicked task:', { task: info.event.toPlainObject() })
               }}
             />
           </div>

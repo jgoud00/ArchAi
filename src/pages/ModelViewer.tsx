@@ -9,6 +9,17 @@ import { useToast } from '@/hooks/useToast'
 import { Spinner } from '@/components/ui/Spinner'
 import { supabase } from '@/services/supabase'
 import { useAuthStore } from '@/store/authStore'
+import { logger } from '@/utils/logger'
+
+interface Model3D {
+  id: string
+  project_id: string
+  name: string
+  url: string
+  version: number
+  uploaded_by: string
+  created_at: string
+}
 
 function Model({ url }: { url: string }) {
   const { scene } = useGLTF(url)
@@ -21,7 +32,7 @@ export default function ModelViewer() {
   const { user } = useAuthStore()
   const { showToast } = useToast()
 
-  const [models, setModels] = useState<any[]>([])
+  const [models, setModels] = useState<Model3D[]>([])
   const [selectedModel, setSelectedModel] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
@@ -45,7 +56,7 @@ export default function ModelViewer() {
         setSelectedModel(data[0].url)
       }
     } catch (error) {
-      console.error('Failed to load models:', error)
+      logger.error('Failed to load models', error)
       showToast('Failed to load models', 'error')
     } finally {
       setLoading(false)

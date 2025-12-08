@@ -4,6 +4,7 @@ import * as authService from '../services/auth'
 import { onAuthChange } from '../services/auth'
 import { supabase } from '../services/supabase'
 import { USER_ROLES } from '../constants'
+import { logger } from '../utils/logger'
 
 /**
  * Architecture Note:
@@ -111,7 +112,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       const { data: { session }, error } = await supabase.auth.getSession()
 
       if (error) {
-        console.error('[Auth Store] Error getting session:', error)
+        logger.error('Auth store: failed to get session', error)
         // Set up listener even if session check fails
         if (!authUnsubscribe) {
           authUnsubscribe = onAuthChange((user) => {
@@ -129,11 +130,11 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
             set({ user, userRole: user.role, loading: false })
           }
         } catch (error) {
-          console.error('[Auth Store] Error loading user profile:', error)
+          logger.error('Auth store: failed to load user profile', error, { userId: session.user.id })
         }
       }
     } catch (error) {
-      console.error('[Auth Store] Error checking session:', error)
+      logger.error('Auth store: session check failed', error)
     } finally {
       set((state) => ({
         ...state,

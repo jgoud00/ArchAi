@@ -6,8 +6,19 @@
 
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || ''
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+
+/**
+ * Validates that required Supabase environment variables are configured.
+ * Throws an error if configuration is missing to prevent runtime issues.
+ */
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error(
+    'Missing Supabase configuration. Please ensure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set in your .env file. ' +
+    'Copy .env.example to .env and add your Supabase credentials.'
+  )
+}
 
 /**
  * The initialized Supabase client instance.
@@ -16,8 +27,8 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
  * Includes persistent session and auto-refresh token handling.
  */
 export const supabase = createClient(
-  supabaseUrl || 'https://placeholder.supabase.co',
-  supabaseAnonKey || 'placeholder-key',
+  supabaseUrl,
+  supabaseAnonKey,
   {
     auth: {
       persistSession: true,
@@ -31,7 +42,7 @@ export const supabase = createClient(
  * 
  * @returns `true` if both URL and Anon Key are present and non-empty, `false` otherwise.
  */
-export const isSupabaseConfigured = () => {
+export const isSupabaseConfigured = (): boolean => {
   return !!(supabaseUrl && supabaseAnonKey && supabaseUrl !== '' && supabaseAnonKey !== '')
 }
 
