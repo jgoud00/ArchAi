@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Upload } from 'lucide-react'
 import { createIssue } from '@/services/issues'
@@ -34,7 +34,8 @@ export const NewIssue = () => {
     },
   })
 
-  const onSubmit = async (data: IssueFormData) => {
+  // OPTIMIZATION: Memoized handlers
+  const onSubmit = useCallback(async (data: IssueFormData) => {
     if (!id || !user) return
 
     try {
@@ -48,12 +49,24 @@ export const NewIssue = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [id, user, photoFile, showToast, navigate])
+
+  const handleBack = useCallback(() => {
+    navigate(`/projects/${id}/issues`)
+  }, [id, navigate])
+
+  const handleCancel = useCallback(() => {
+    navigate(`/projects/${id}/issues`)
+  }, [id, navigate])
+
+  const handlePhotoChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setPhotoFile(e.target.files?.[0] || null)
+  }, [])
 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate(`/projects/${id}/issues`)}>
+        <Button variant="ghost" size="icon" onClick={handleBack}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
@@ -107,7 +120,7 @@ export const NewIssue = () => {
                 <input
                   type="file"
                   accept="image/*"
-                  onChange={(e) => setPhotoFile(e.target.files?.[0] || null)}
+                  onChange={handlePhotoChange}
                   className="hidden"
                   id="photo-upload"
                 />
@@ -125,7 +138,7 @@ export const NewIssue = () => {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => navigate(`/projects/${id}/issues`)}
+                onClick={handleCancel}
               >
                 Cancel
               </Button>

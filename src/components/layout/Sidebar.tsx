@@ -5,6 +5,7 @@ import { useAuthStore } from '@/store/authStore'
 import { Button } from '../ui/Button'
 import { ShowIfHasRole } from '../RoleGuard'
 import { Logo } from '../Logo'
+import { logger } from '@/utils/logger'
 import { Tooltip } from '../ui/Tooltip'
 
 const navItems = [
@@ -30,7 +31,7 @@ export const Sidebar = ({ isOpen = true, onClose }: SidebarProps) => {
       await logout()
       navigate('/login')
     } catch (error) {
-      console.error('Logout error:', error)
+      logger.error('Logout error', error)
     }
   }
 
@@ -63,16 +64,16 @@ export const Sidebar = ({ isOpen = true, onClose }: SidebarProps) => {
             </div>
           )}
         </div>
-        {isOpen && onClose && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden text-muted-foreground hover:text-primary hover:bg-primary/10"
-            onClick={onClose}
-          >
-            <X className="h-5 w-5" />
-          </Button>
-        )}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="lg:hidden text-muted-foreground hover:text-primary hover:bg-primary/10"
+          onClick={onClose}
+          aria-label="Close sidebar"
+          title="Close sidebar"
+        >
+          <X className="h-5 w-5" aria-hidden="true" />
+        </Button>
       </div>
 
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">

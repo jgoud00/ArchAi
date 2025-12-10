@@ -74,6 +74,10 @@ export const ISSUE_PRIORITY = {
     HIGH: 'high',
 } as const
 
+// AI Analysis Mode - Set to false when Edge Function is ready
+export const AI_MOCK_MODE = true
+
+
 // File Types
 export const FILE_TYPES = {
     IMAGE: 'image',

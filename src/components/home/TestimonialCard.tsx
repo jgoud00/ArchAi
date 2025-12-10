@@ -1,4 +1,4 @@
-import React from 'react';
+import { memo } from 'react';
 
 interface TestimonialCardProps {
     quote: string;
@@ -6,7 +6,7 @@ interface TestimonialCardProps {
     role: string;
 }
 
-export const TestimonialCard: React.FC<TestimonialCardProps> = ({ quote, author, role }) => (
+export const TestimonialCard = memo<TestimonialCardProps>(({ quote, author, role }) => (
     <div className="p-8 rounded-2xl bg-card/50 border border-border backdrop-blur-sm">
         <div className="flex text-primary mb-4">
             {[...Array(5)].map((_, i) => (
@@ -19,4 +19,6 @@ export const TestimonialCard: React.FC<TestimonialCardProps> = ({ quote, author,
             <div className="text-sm text-muted-foreground">{role}</div>
         </div>
     </div>
-);
+));
+
+TestimonialCard.displayName = 'TestimonialCard';

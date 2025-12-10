@@ -1,11 +1,12 @@
 import { cn } from "@/utils/cn"
+import { memo } from "react"
 
 interface SpinnerProps {
   className?: string
   size?: "sm" | "md" | "lg"
 }
 
-export const Spinner: React.FC<SpinnerProps> = ({ className, size = "md" }) => {
+export const Spinner = memo<SpinnerProps>(({ className, size = "md" }) => {
   const sizes = {
     sm: "h-4 w-4",
     md: "h-8 w-8",
@@ -25,4 +26,6 @@ export const Spinner: React.FC<SpinnerProps> = ({ className, size = "md" }) => {
       <span className="sr-only">Loading...</span>
     </div>
   )
-}
+})
+
+Spinner.displayName = 'Spinner'

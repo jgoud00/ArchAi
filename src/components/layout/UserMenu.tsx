@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { LogOut, User, ChevronDown } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
+import { logger } from '@/utils/logger'
 import { cn } from '@/utils/cn'
 
 export const UserMenu = () => {
@@ -26,7 +27,7 @@ export const UserMenu = () => {
             await logout()
             navigate('/login')
         } catch (error) {
-            console.error('Logout error:', error)
+            logger.error('Logout error', error)
         }
     }
 

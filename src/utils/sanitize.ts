@@ -94,7 +94,9 @@ export const sanitizeURL = (url: string): string => {
  * @param data - Object containing form data
  * @returns Sanitized object with all string values cleaned
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const sanitizeFormData = <T extends Record<string, any>>(data: T): T => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sanitized = {} as Record<string, any>
 
     Object.keys(data).forEach((key) => {

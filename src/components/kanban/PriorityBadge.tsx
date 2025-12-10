@@ -1,9 +1,10 @@
+import { memo } from 'react';
 import { ArrowUpCircle, ArrowRightCircle, ArrowDownCircle } from 'lucide-react';
 import { cn } from '@/utils/cn';
 
 type Priority = 'High' | 'Medium' | 'Low';
 
-export const PriorityBadge = ({ priority }: { priority: Priority }) => {
+export const PriorityBadge = memo<{ priority: Priority }>(({ priority }) => {
     const colors = {
         High: 'text-red-500 bg-red-500/10 border-red-500/20',
         Medium: 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20',
@@ -19,9 +20,15 @@ export const PriorityBadge = ({ priority }: { priority: Priority }) => {
     const Icon = icons[priority];
 
     return (
-        <div className={cn("flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border", colors[priority])}>
-            <Icon className="w-3 h-3" />
+        <div
+            className={cn("flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border", colors[priority])}
+            role="status"
+            aria-label={`Priority: ${priority}`}
+        >
+            <Icon className="w-3 h-3" aria-hidden="true" />
             {priority}
         </div>
     );
-};
+});
+
+PriorityBadge.displayName = 'PriorityBadge';

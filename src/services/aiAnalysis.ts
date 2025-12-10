@@ -5,6 +5,7 @@
  */
 
 import { supabase } from './supabase'
+import { logger } from '@/utils/logger'
 
 /**
  * Represents the result of an AI analysis on a progress image.
@@ -25,28 +26,17 @@ export interface AnalysisResult {
 }
 
 /**
- * Analyzes a progress image to estimate project status and detect issues.
- * 
- * Note: This is currently a simulation using placeholder logic. In a production environment,
- * this would integrate with an external AI service (e.g., Google Cloud Vision, AWS Rekognition).
- * 
- * @param imageUrl - The URL of the image to analyze.
- * @param projectId - The unique identifier of the project associated with the image.
- * @returns A promise that resolves to the analysis result.
+ * Analyzes a progress image using AI (mock mode).
+ * Returns simulated analysis results for development/testing.
  */
-export const analyzeProgressImage = async (
+const analyzeImageMock = async (
   imageUrl: string,
   projectId: string
 ): Promise<AnalysisResult> => {
-  // Simulate AI analysis with placeholder logic
-  // In production, this would call an AI service like:
-  // - Google Cloud Vision API
-  // - AWS Rekognition
-  // - Custom ML model endpoint
+  // Simulate processing time
+  await new Promise(resolve => setTimeout(resolve, 2000))
 
-  await new Promise(resolve => setTimeout(resolve, 2000)) // Simulate processing time
-
-  // Placeholder analysis results
+  // Generate random placeholder results
   const progressPercent = Math.floor(Math.random() * 40) + 40 // 40-80%
   const detectedIssues = [
     'Potential structural concern detected in foundation area',
@@ -63,7 +53,7 @@ export const analyzeProgressImage = async (
     'Consider weather impact on progress',
   ]
 
-  // Store analysis result in database
+  // Store mock analysis in database
   const { error } = await supabase
     .from('scan_analyses')
     .insert({
@@ -77,7 +67,7 @@ export const analyzeProgressImage = async (
     })
 
   if (error) {
-    console.error('Failed to store analysis:', error)
+    logger.error('Failed to store analysis', error, { projectId, imageUrl })
   }
 
   return {
@@ -85,6 +75,72 @@ export const analyzeProgressImage = async (
     detectedIssues,
     materialUsage,
     recommendations,
+  }
+}
+
+/**
+ * Analyzes a progress image using real AI service (Edge Function).
+ * Calls external AI API for actual computer vision analysis.
+ */
+const analyzeImageReal = async (
+  imageUrl: string,
+  projectId: string
+): Promise<AnalysisResult> => {
+  try {
+    // TODO: Replace with actual Edge Function endpoint
+    const response = await fetch('/api/analyze-image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageUrl, projectId }),
+    })
+
+    if (!response.ok) {
+      throw new Error(`AI analysis failed: ${response.statusText}`)
+    }
+
+    const result = await response.json()
+
+    // Store real analysis in database
+    await supabase.from('scan_analyses').insert({
+      project_id: projectId,
+      scan_url: imageUrl,
+      progress_percent: result.progressPercent,
+      detected_issues: result.detectedIssues,
+      material_usage: result.materialUsage,
+      recommendations: result.recommendations,
+      created_at: new Date().toISOString(),
+    })
+
+    return result
+  } catch (error) {
+    throw new Error(
+      error instanceof Error
+        ? error.message
+        : 'Failed to analyze image with AI service'
+    )
+  }
+}
+
+/**
+ * Analyzes a progress image to estimate project status and detect issues.
+ * 
+ * Switches between mock and real AI based on AI_MOCK_MODE constant.
+ * In production, set AI_MOCK_MODE=false in constants/index.ts.
+ * 
+ * @param imageUrl - The URL of the image to analyze.
+ * @param projectId - The unique identifier of the project associated with the image.
+ * @returns A promise that resolves to the analysis result.
+ */
+export const analyzeProgressImage = async (
+  imageUrl: string,
+  projectId: string
+): Promise<AnalysisResult> => {
+  const { AI_MOCK_MODE } = await import('../constants')
+
+  if (AI_MOCK_MODE) {
+    return analyzeImageMock(imageUrl, projectId)
+  } else {
+    return analyzeImageReal(imageUrl, projectId)
   }
 }
 

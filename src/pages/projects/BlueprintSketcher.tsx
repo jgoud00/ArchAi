@@ -20,6 +20,7 @@ import { Project } from '@/types';
 import { Button } from '@/components/ui/Button';
 import { Spinner } from '@/components/ui/Spinner';
 import { useToast } from '@/hooks/useToast';
+import { logger } from '@/utils/logger';
 import { Sidebar } from '@/components/blueprint/Sidebar';
 import { LayersPanel } from '@/components/blueprint/LayersPanel';
 import RoomNode from '@/components/blueprint/nodes/RoomNode';
@@ -169,8 +170,8 @@ const BlueprintSketcherContent = () => {
       }, 'image/png');
 
     } catch (error) {
-      console.error(error);
-      showToast('Failed to save blueprint', 'error');
+      logger.error('Failed to save blueprint', error, { projectId: id })
+      showToast('Failed to save blueprint', 'error')
     } finally {
       setSaving(false);
     }

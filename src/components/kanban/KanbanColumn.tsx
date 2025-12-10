@@ -1,5 +1,6 @@
 import { useDroppable } from '@dnd-kit/core';
 import { Plus } from 'lucide-react';
+import { memo } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { KanbanCard, Issue, IssueStatus } from './KanbanCard';
@@ -13,7 +14,7 @@ interface KanbanColumnProps {
     color: string;
 }
 
-export const KanbanColumn = ({
+export const KanbanColumn = memo(({
     id,
     title,
     count,
@@ -34,8 +35,14 @@ export const KanbanColumn = ({
                         {count}
                     </Badge>
                 </div>
-                <Button variant="ghost" size="icon" className="h-6 w-6">
-                    <Plus className="h-4 w-4" />
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                    aria-label={`Add new issue to ${title}`}
+                    title={`Add new issue to ${title}`}
+                >
+                    <Plus className="h-4 w-4" aria-hidden="true" />
                 </Button>
             </div>
 
@@ -57,4 +64,6 @@ export const KanbanColumn = ({
             </div>
         </div>
     );
-};
+});
+
+KanbanColumn.displayName = 'KanbanColumn';

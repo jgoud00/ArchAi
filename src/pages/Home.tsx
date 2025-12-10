@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Button } from '../components/ui/Button';
 import { ArrowRight, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -7,6 +7,10 @@ import { useNavigate } from 'react-router-dom';
 
 export const Home: React.FC = () => {
   const navigate = useNavigate();
+
+  // OPTIMIZATION: Memoized navigation handlers
+  const handleSignup = useCallback(() => navigate('/signup'), [navigate]);
+  const handleLogin = useCallback(() => navigate('/login'), [navigate]);
 
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-x-hidden selection:bg-primary/30">
@@ -38,7 +42,7 @@ export const Home: React.FC = () => {
               <Button
                 size="lg"
                 className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:shadow-[0_0_30px_rgba(6,182,212,0.6)] transition-all duration-300"
-                onClick={() => navigate('/signup')}
+                onClick={handleSignup}
               >
                 Get Started Free <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
@@ -46,7 +50,7 @@ export const Home: React.FC = () => {
                 size="lg"
                 variant="outline"
                 className="w-full sm:w-auto border-border text-muted-foreground hover:text-foreground hover:bg-muted hover:border-border/80"
-                onClick={() => navigate('/login')}
+                onClick={handleLogin}
               >
                 View Live Demo
               </Button>

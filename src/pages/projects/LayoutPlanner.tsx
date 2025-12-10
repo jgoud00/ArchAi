@@ -31,6 +31,7 @@ import FurnitureNode from '@/components/blueprint/nodes/FurnitureNode'
 import AnnotationNode from '@/components/blueprint/nodes/AnnotationNode'
 import { WallEdge } from '@/components/blueprint/edges/WallEdge'
 import { useTemporalStore } from '@/store/temporalStore'
+import { logger } from '@/utils/logger'
 import html2canvas from 'html2canvas'
 
 
@@ -218,7 +219,7 @@ const LayoutPlannerContent = () => {
 
             showToast('Layout saved successfully', 'success')
         } catch (error) {
-            console.error(error)
+            logger.error('Failed to save layout', error, { projectId: id })
             showToast('Failed to save layout', 'error')
         }
     }

@@ -110,7 +110,7 @@ export const Dashboard = () => {
     })
   }, [projects])
 
-  const onCreateProject = async (data: ProjectFormData) => {
+  const onCreateProject = useCallback(async (data: ProjectFormData) => {
     if (!user?.uid) return
 
     try {
@@ -127,7 +127,7 @@ export const Dashboard = () => {
     } finally {
       setCreating(false)
     }
-  }
+  }, [user?.uid, showToast, reset, loadDashboardData, navigate])
 
   if (loading) {
     return (
@@ -149,9 +149,9 @@ export const Dashboard = () => {
           </div>
           <Button
             className="btn-primary-enhanced"
-            onClick={() => setCreateModalOpen(true)}
+            onClick={useCallback(() => setCreateModalOpen(true), [])}
           >
-            <Plus className="h-5 w-5 mr-2" /> New Project
+            <Plus className="h-5 w-5 mr-2" aria-hidden="true" /> New Project
           </Button>
         </header>
 

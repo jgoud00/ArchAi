@@ -1,5 +1,6 @@
 import { useDraggable } from '@dnd-kit/core';
 import { MoreHorizontal, MessageSquare, Paperclip } from 'lucide-react';
+import { memo } from 'react';
 import { Button } from '@/components/ui/Button';
 import { PriorityBadge } from './PriorityBadge';
 import { cn } from '@/utils/cn';
@@ -22,7 +23,7 @@ export interface Issue {
     photoUrl?: string;
 }
 
-export const KanbanCard = ({ issue }: { issue: Issue }) => {
+export const KanbanCard = memo(({ issue }: { issue: Issue }) => {
     const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
         id: issue.id,
         data: { issue }
@@ -46,8 +47,13 @@ export const KanbanCard = ({ issue }: { issue: Issue }) => {
         >
             <div className="flex justify-between items-start mb-2">
                 <span className="text-xs font-mono text-muted-foreground">{issue.id}</span>
-                <Button variant="ghost" size="icon" className="h-6 w-6 -mr-2 -mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <MoreHorizontal className="h-4 w-4" />
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 -mr-2 -mt-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    aria-label="More options"
+                >
+                    <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
                 </Button>
             </div>
 
@@ -66,13 +72,13 @@ export const KanbanCard = ({ issue }: { issue: Issue }) => {
                 <div className="flex items-center gap-2">
                     {issue.attachments > 0 && (
                         <div className="flex items-center text-muted-foreground text-xs">
-                            <Paperclip className="w-3 h-3 mr-1" />
+                            <Paperclip className="w-3 h-3 mr-1" aria-hidden="true" />
                             {issue.attachments}
                         </div>
                     )}
                     {issue.comments > 0 && (
                         <div className="flex items-center text-muted-foreground text-xs">
-                            <MessageSquare className="w-3 h-3 mr-1" />
+                            <MessageSquare className="w-3 h-3 mr-1" aria-hidden="true" />
                             {issue.comments}
                         </div>
                     )}
@@ -83,4 +89,6 @@ export const KanbanCard = ({ issue }: { issue: Issue }) => {
             </div>
         </div>
     );
-};
+});
+
+KanbanCard.displayName = 'KanbanCard';

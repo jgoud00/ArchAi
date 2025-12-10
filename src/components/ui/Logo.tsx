@@ -1,10 +1,10 @@
-import React from 'react';
+import { memo } from 'react';
 
 interface LogoProps {
     className?: string;
 }
 
-export const Logo: React.FC<LogoProps> = ({ className = "h-8 w-auto" }) => {
+export const Logo = memo<LogoProps>(({ className = "h-8 w-auto" }) => {
     return (
         <svg
             className={className}
@@ -41,5 +41,7 @@ export const Logo: React.FC<LogoProps> = ({ className = "h-8 w-auto" }) => {
             />
         </svg>
     );
-};
+});
+
+Logo.displayName = 'Logo';
 

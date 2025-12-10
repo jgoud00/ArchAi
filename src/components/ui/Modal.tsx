@@ -1,7 +1,9 @@
 import * as React from "react"
+import { useEffect, useRef } from "react"
 import { X } from "lucide-react"
 import { cn } from "@/utils/cn"
 import { Button } from "./Button"
+import FocusTrap from "focus-trap-react"
 
 interface ModalProps {
   isOpen: boolean
@@ -18,39 +20,75 @@ export const Modal: React.FC<ModalProps> = ({
   children,
   className,
 }) => {
+  const closeButtonRef = useRef<HTMLButtonElement>(null)
+
+  // Handle escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose()
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape)
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = 'hidden'
+
+      // Focus close button when modal opens
+      setTimeout(() => closeButtonRef.current?.focus(), 0)
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape)
+      document.body.style.overflow = ''
+    }
+  }, [isOpen, onClose])
+
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
+    <FocusTrap>
       <div
-        className="fixed inset-0 bg-black/50"
-        onClick={onClose}
-      />
-      
-      {/* Modal */}
-      <div
-        className={cn(
-          "relative z-50 w-full max-w-lg bg-background rounded-lg shadow-lg p-4 lg:p-6 mx-4 max-h-[90vh] overflow-y-auto",
-          className
-        )}
-        onClick={(e) => e.stopPropagation()}
+        className="fixed inset-0 z-50 flex items-center justify-center"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={title ? "modal-title" : undefined}
       >
-        {title && (
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">{title}</h2>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              className="h-6 w-6"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        )}
-        {children}
+        {/* Backdrop */}
+        <div
+          className="fixed inset-0 bg-black/50"
+          onClick={onClose}
+          aria-hidden="true"
+        />
+
+        {/* Modal */}
+        <div
+          className={cn(
+            "relative z-50 w-full max-w-lg bg-background rounded-lg shadow-lg p-4 lg:p-6 mx-4 max-h-[90vh] overflow-y-auto",
+            className
+          )}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {title && (
+            <div className="flex items-center justify-between mb-4">
+              <h2 id="modal-title" className="text-xl font-semibold">{title}</h2>
+              <Button
+                ref={closeButtonRef}
+                variant="ghost"
+                size="icon"
+                onClick={onClose}
+                className="h-6 w-6"
+                aria-label="Close modal"
+                title="Close modal"
+              >
+                <X className="h-4 w-4" aria-hidden="true" />
+              </Button>
+            </div>
+          )}
+          {children}
+        </div>
       </div>
-    </div>
+    </FocusTrap>
   )
 }

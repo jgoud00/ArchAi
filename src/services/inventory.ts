@@ -146,3 +146,63 @@ export const deleteInventoryItem = async (itemId: string): Promise<void> => {
   }
 }
 
+/**
+ * Retrieves inventory items that are running low on stock.
+ * 
+ * @param userId - The unique identifier of the user.
+ * @param threshold - The quantity threshold (default: 10).
+ * @returns A promise that resolves to an array of low-stock inventory items.
+ */
+export const getLowStockItems = async (
+  userId: string,
+  threshold: number = 10
+): Promise<InventoryItem[]> => {
+  //Get all projects the user owns or is a member of
+  const { data: projects, error: projectsError } = await supabase
+    .from('team_members')
+    .select('project_id')
+    .eq('user_id', userId)
+
+  if (projectsError) {
+    throw new Error(projectsError.message || 'Failed to load projects')
+  }
+
+  const projectIds = projects?.map(p => p.project_id) || []
+
+  // Add user's own projects
+  const { data: ownProjects } = await supabase
+    .from('projects')
+    .select('id')
+    .eq('owner_id', userId)
+
+  if (ownProjects) {
+    projectIds.push(...ownProjects.map(p => p.id))
+  }
+
+  if (projectIds.length === 0) return []
+
+  // Get low stock items
+  const { data, error } = await supabase
+    .from('inventory')
+    .select('*')
+    .in('project_id', projectIds)
+    .lte('quantity', threshold)
+    .order('quantity', { ascending: true })
+
+  if (error) {
+    throw new Error(error.message || 'Failed to load low stock items')
+  }
+
+  if (!data) return []
+
+  return data.map((item) => ({
+    id: item.id,
+    projectId: item.project_id,
+    itemName: item.item_name,
+    quantity: parseFloat(item.quantity || '0'),
+    unit: item.unit,
+    category: item.category || undefined,
+    updatedAt: new Date(item.updated_at),
+  }))
+}
+

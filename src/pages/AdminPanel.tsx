@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { Shield, Users, AlertCircle } from 'lucide-react'
 import { getAllUsers, updateUserRole } from '@/services/userManagement'
 import { useAuthStore } from '@/store/authStore'
@@ -78,10 +78,11 @@ export const AdminPanel = () => {
     }
   }
 
-  const roleCounts = {
+  // OPTIMIZATION: Memoize role counts
+  const roleCounts = useMemo(() => ({
     admin: users.filter(u => u.role === 'admin').length,
     user: users.filter(u => u.role === 'user').length,
-  }
+  }), [users])
 
   return (
     <RoleGuard requiredRole="admin">

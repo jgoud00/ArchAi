@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { supabase } from '@/services/supabase'
 import { useToast } from '@/hooks/useToast'
+import { logger } from '@/utils/logger'
 
 interface GanttChartProps {
     tasks: Task[]
@@ -112,7 +113,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({ tasks, onTaskUpdate }) =
                         })
                         showToast('Task updated', 'success')
                     } catch (error) {
-                        console.error(error)
+                        logger.error('Failed to update task', error, { taskId: task.id })
                         showToast('Failed to update task', 'error')
                     }
                 }
@@ -131,6 +132,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({ tasks, onTaskUpdate }) =
             window.removeEventListener('mousemove', handleMouseMove)
             window.removeEventListener('mouseup', handleMouseUp)
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [draggingTask, tasks, columnWidth])
 
     const getTaskStyle = (task: Task) => {

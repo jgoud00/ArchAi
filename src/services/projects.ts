@@ -6,6 +6,7 @@
  */
 
 import { supabase } from './supabase'
+import { logger } from '@/utils/logger'
 import { Project, Scan, TeamMember } from '../types'
 import { STORAGE_BUCKETS, BATCH_SIZES } from '../constants'
 
@@ -170,7 +171,7 @@ export const getUserProjects = async (userId: string): Promise<Project[]> => {
     .eq('user_id', userId)
 
   if (ownedError || memberError) {
-    console.error('Error fetching projects:', ownedError || memberError)
+    logger.error('Error fetching projects', ownedError || memberError, { userId })
     return []
   }
 

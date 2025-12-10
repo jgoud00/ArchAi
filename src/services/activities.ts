@@ -5,6 +5,7 @@
  */
 
 import { supabase } from './supabase'
+import { logger } from '@/utils/logger'
 import { ProjectActivity } from '../types'
 
 /**
@@ -85,7 +86,7 @@ export const logActivity = async (
     })
 
   if (error) {
-    console.error('Error logging activity:', error)
+    logger.error('Error logging activity', error, { projectId, activityType })
     // Don't throw - activity logging shouldn't break the app
   }
 }

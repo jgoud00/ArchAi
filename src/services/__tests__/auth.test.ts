@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { login, signup, logout, getCurrentUser, uploadAvatar, requestPasswordReset, resetPassword, updateProfile } from '../auth'
 import { supabase } from '../supabase'

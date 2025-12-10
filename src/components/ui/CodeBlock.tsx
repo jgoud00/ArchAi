@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { Copy, Check } from 'lucide-react'
 import { cn } from '@/utils/cn'
+import { logger } from '@/utils/logger'
 
 interface CodeBlockProps {
   code: string
@@ -49,7 +50,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = React.memo(({
           timeoutRef.current = null
         }, 2000)
       } catch (error) {
-        console.error('Failed to copy code:', error)
+        logger.error('Failed to copy code', error)
       }
     }
   }, [])

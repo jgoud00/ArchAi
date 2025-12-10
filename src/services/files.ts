@@ -6,6 +6,7 @@
  */
 
 import { supabase } from './supabase'
+import { logger } from '@/utils/logger'
 import { ProjectFile } from '../types'
 
 /**
@@ -161,7 +162,7 @@ export const deleteFile = async (fileId: string, projectId: string): Promise<voi
     .remove([filePath])
 
   if (storageError) {
-    console.error('Error deleting file from storage:', storageError)
+    logger.error('Error deleting file from storage', storageError, { filePath })
     // Continue to delete from database anyway
   }
 

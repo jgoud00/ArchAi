@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { format } from 'date-fns'
 import {
@@ -33,6 +33,11 @@ export const ProjectDetail = () => {
 
   const { toasts, dismissToast } = useToast()
   const [activeTab, setActiveTab] = useState('overview')
+
+  // OPTIMIZATION: Memoized tab change handler
+  const handleTabChange = useCallback((value: string) => {
+    setActiveTab(value)
+  }, [])
 
   const {
     project,
@@ -88,7 +93,7 @@ export const ProjectDetail = () => {
       />
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="scans">Scans ({scans.length})</TabsTrigger>

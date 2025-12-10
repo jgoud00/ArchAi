@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -41,11 +41,11 @@ export const Settings = () => {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const changeLanguage = (lng: string) => {
+  const changeLanguage = useCallback((lng: string) => {
     i18n.changeLanguage(lng)
     localStorage.setItem('language', lng)
     showToast('Language changed successfully!', 'success')
-  }
+  }, [i18n, showToast])
 
   const profileForm = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),

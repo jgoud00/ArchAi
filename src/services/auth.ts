@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { logger } from '@/utils/logger'
 import { User, UserRole } from '../types'
 import { USER_ROLES, STORAGE_BUCKETS, MAX_AVATAR_SIZE, AVATAR_CACHE_CONTROL } from '../constants'
 
@@ -50,7 +51,7 @@ export const signup = async (
     })
 
   if (profileError) {
-    console.error('Error creating user profile:', profileError)
+    logger.error('Error creating user profile in signup', profileError, { userId: authData.user.id })
     // Continue anyway as trigger should handle it
   }
 
@@ -117,7 +118,7 @@ export const login = async (email: string, password: string): Promise<User> => {
 
   // Step 3: Create profile if it doesn't exist (trigger might not have fired)
   if (profileError || !userProfile) {
-    console.warn('[Auth] User profile not found, creating...', profileError)
+    logger.warn('[Auth] User profile not found, creating...', { userId: authData.user.id, error: profileError })
 
     const { error: createError } = await supabase
       .from('users')
@@ -129,7 +130,7 @@ export const login = async (email: string, password: string): Promise<User> => {
       })
 
     if (createError) {
-      console.error('[Auth] Failed to create user profile:', createError)
+      logger.error('[Auth] Failed to create user profile in login', createError, { userId: authData.user.id })
       // Still return user info even if profile creation fails
       return {
         uid: authData.user.id,
@@ -204,7 +205,7 @@ export const getCurrentUser = async (userId: string): Promise<User | null> => {
     const { data: { user: authUser }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !authUser) {
-      console.error('Error getting auth user:', authError)
+      logger.error('Error getting auth user', authError)
       return null
     }
 
@@ -217,7 +218,7 @@ export const getCurrentUser = async (userId: string): Promise<User | null> => {
 
     // If profile doesn't exist, create it (might happen if trigger didn't fire)
     if (profileError || !userProfile) {
-      console.warn('User profile not found, creating...', profileError)
+      logger.warn('User profile not found in getCurrentUser, creating...', { userId, error: profileError })
 
       const { error: createError } = await supabase
         .from('users')
@@ -229,7 +230,7 @@ export const getCurrentUser = async (userId: string): Promise<User | null> => {
         })
 
       if (createError) {
-        console.error('Error creating user profile:', createError)
+        logger.error('Error creating user profile in getCurrentUser', createError, { userId })
         // Return basic user info even if profile creation fails
         return {
           uid: authUser.id,
@@ -269,7 +270,7 @@ export const getCurrentUser = async (userId: string): Promise<User | null> => {
       createdAt: new Date(userProfile.created_at),
     }
   } catch (error) {
-    console.error('Error getting current user:', error)
+    logger.error('Error getting current user', error, { userId })
     return null
   }
 }
@@ -438,7 +439,7 @@ export const onAuthChange = (callback: (user: User | null) => void) => {
         const user = await getCurrentUser(session.user.id)
         callback(user)
       } catch (error) {
-        console.error('[Auth] Error getting current user in auth change:', error)
+        logger.error('[Auth] Error getting current user in auth change', error)
         callback(null)
       }
     } else {
