@@ -23,11 +23,29 @@ import { useToast } from '@/hooks/useToast';
 import { logger } from '@/utils/logger';
 import { Sidebar } from '@/components/blueprint/Sidebar';
 import { LayersPanel } from '@/components/blueprint/LayersPanel';
+import { GridSystem } from '@/components/blueprint/GridSystem';
+import { CoordinateDisplay } from '@/components/blueprint/CoordinateDisplay';
+import { PropertiesPanel } from '@/components/blueprint/PropertiesPanel';
+import { DrawingToolbar } from '@/components/blueprint/DrawingToolbar';
+import { SnapIndicator } from '@/components/blueprint/SnapIndicator';
+import { MeasurementTool, MeasurementOverlay } from '@/components/blueprint/MeasurementTool';
+import { AlignmentTools } from '@/components/blueprint/AlignmentTools';
+import { TransformControls } from '@/components/blueprint/TransformControls';
+import { DrawingTool } from '@/components/blueprint/DrawingTool';
+import { GroupManager } from '@/components/blueprint/GroupManager';
+import { ExportDialog } from '@/components/blueprint/ExportDialog';
+import { CADHelpPanel } from '@/components/blueprint/CADHelpPanel';
 import RoomNode from '@/components/blueprint/nodes/RoomNode';
 import ShapeNode from '@/components/blueprint/nodes/ShapeNode';
 import FurnitureNode from '@/components/blueprint/nodes/FurnitureNode';
 import AnnotationNode from '@/components/blueprint/nodes/AnnotationNode';
+import WallNode from '@/components/blueprint/nodes/WallNode';
+import DoorNode from '@/components/blueprint/nodes/DoorNode';
+import WindowNode from '@/components/blueprint/nodes/WindowNode';
 import html2canvas from 'html2canvas';
+import { useCADShortcuts } from '@/hooks/useCADShortcuts';
+import { useSnapToGrid } from '@/hooks/useSnapToGrid';
+import { useMultiSelect } from '@/hooks/useMultiSelect';
 
 import { useBlueprintStore } from '@/store/blueprintStore';
 import { useStore } from 'zustand';
@@ -38,6 +56,9 @@ const nodeTypes = {
   shape: ShapeNode,
   furniture: FurnitureNode,
   annotation: AnnotationNode,
+  wall: WallNode,
+  door: DoorNode,
+  window: WindowNode,
 };
 
 const initialNodes: Node[] = [
@@ -49,10 +70,8 @@ const BlueprintSketcherContent = () => {
   const { showToast } = useToast();
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
 
-  const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [rfInstance, setRfInstance] = useState<ReactFlowInstance | null>(null);
 
   // Zustand Store
   const {
@@ -64,8 +83,30 @@ const BlueprintSketcherContent = () => {
     onConnect,
     addNode,
     setNodes,
-    setEdges
+    setEdges,
+    selectedNodeIds,
+    setSelectedNodes
   } = useBlueprintStore();
+
+  const [project, setProject] = useState<Project | null>(null);
+  const [rfInstance, setRfInstance] = useState<ReactFlowInstance | null>(null);
+  const [showExportDialog, setShowExportDialog] = useState(false);
+  const [showHelpPanel, setShowHelpPanel] = useState(false);
+
+  // CAD Hooks
+  useCADShortcuts(() => setShowHelpPanel(true));
+  const { snapPosition } = useSnapToGrid();
+  const { toggleNodeSelection, handleKeyDown, handleKeyUp } = useMultiSelect();
+
+  // Multi-select keyboard listeners
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, [handleKeyDown, handleKeyUp]);
 
   // Zundo History (Undo/Redo)
   // Subscribe to temporal state updates
@@ -121,22 +162,25 @@ const BlueprintSketcherContent = () => {
         return;
       }
 
-      const position = rfInstance?.screenToFlowPosition({
+      let position = rfInstance?.screenToFlowPosition({
         x: event.clientX,
         y: event.clientY,
-      });
+      }) || { x: 0, y: 0 };
+
+      // Apply snap to grid
+      position = snapPosition(position.x, position.y);
 
       const newNode: Node = {
         id: `${type}-${Date.now()}`,
         type,
-        position: position || { x: 0, y: 0 },
+        position,
         data: { label: `${label}`, ...extraData },
         style: type === 'room' ? { width: 150, height: 150 } : undefined,
       };
 
       addNode(newNode);
     },
-    [rfInstance, addNode],
+    [rfInstance, addNode, snapPosition],
   );
 
   const handleSave = async () => {
@@ -175,20 +219,6 @@ const BlueprintSketcherContent = () => {
     } finally {
       setSaving(false);
     }
-  };
-
-  const handleDownload = async () => {
-    const flowElement = document.querySelector('.react-flow') as HTMLElement;
-    if (!flowElement) return;
-
-    const canvas = await html2canvas(flowElement, {
-      backgroundColor: '#ffffff'
-    });
-
-    const link = document.createElement('a');
-    link.download = `blueprint-${id}.png`;
-    link.href = canvas.toDataURL();
-    link.click();
   };
 
   // Filter nodes based on layer visibility
@@ -242,7 +272,7 @@ const BlueprintSketcherContent = () => {
             <RotateCcw className="h-4 w-4 mr-2" />
             Reset
           </Button>
-          <Button variant="outline" size="sm" onClick={handleDownload}>
+          <Button variant="outline" size="sm" onClick={() => setShowExportDialog(true)}>
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
@@ -254,39 +284,60 @@ const BlueprintSketcherContent = () => {
       </div>
 
       {/* Editor Area */}
-      <div className="flex-1 flex overflow-hidden">
-        <Sidebar />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <DrawingToolbar />
 
-        <div className="flex-1 h-full bg-muted/10 relative" ref={reactFlowWrapper}>
-          <ReactFlow
-            nodes={visibleNodes}
-            edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            onInit={setRfInstance}
-            onDrop={onDrop}
-            onDragOver={onDragOver}
-            nodeTypes={nodeTypes}
-            fitView
-            className="bg-background"
-            nodesDraggable={true} // Should check layer lock status here ideally
-            nodesConnectable={true}
-          >
-            <Controls />
-            <MiniMap className="!bg-card !border-border" maskColor="rgba(0,0,0,0.1)" />
-            <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
+        <div className="flex-1 flex overflow-hidden">
+          <Sidebar />
 
-            <Panel position="top-right" className="glass-dark p-2 rounded-lg text-xs text-muted-foreground flex gap-4">
-              <span>{nodes.length} nodes</span>
-              <span>{edges.length} connections</span>
-              <span>{layers.length} layers</span>
-            </Panel>
-          </ReactFlow>
+          <div className="flex-1 h-full bg-muted/10 relative" ref={reactFlowWrapper}>
+            <ReactFlow
+              nodes={visibleNodes}
+              edges={edges}
+              onNodesChange={onNodesChange}
+              onEdgesChange={onEdgesChange}
+              onConnect={onConnect}
+              onInit={setRfInstance}
+              onDrop={onDrop}
+              onDragOver={onDragOver}
+              nodeTypes={nodeTypes}
+              fitView
+              className="bg-background"
+              nodesDraggable={true}
+              nodesConnectable={true}
+              onNodeClick={(event, node) => {
+                toggleNodeSelection(node.id, event.shiftKey);
+              }}
+              onPaneClick={() => setSelectedNodes([])}
+            >
+              <Controls />
+              <MiniMap className="!bg-card !border-border" maskColor="rgba(0,0,0,0.1)" />
+              <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
+              <GridSystem />
+              <CoordinateDisplay />
+              <SnapIndicator />
+              <MeasurementOverlay />
+              <MeasurementTool />
+              <DrawingTool />
+              <AlignmentTools />
+              <TransformControls />
+              <GroupManager />
+
+              <Panel position="top-right" className="glass-dark p-2 rounded-lg text-xs text-muted-foreground flex gap-4">
+                <span>{nodes.length} nodes</span>
+                <span>{edges.length} connections</span>
+                <span>{layers.length} layers</span>
+              </Panel>
+            </ReactFlow>
+          </div>
+
+          {selectedNodeIds.length > 0 ? <PropertiesPanel /> : <LayersPanel />}
         </div>
-
-        <LayersPanel />
       </div>
+
+      {/* Dialogs */}
+      {showExportDialog && <ExportDialog onClose={() => setShowExportDialog(false)} />}
+      {showHelpPanel && <CADHelpPanel onClose={() => setShowHelpPanel(false)} />}
     </div>
   );
 };

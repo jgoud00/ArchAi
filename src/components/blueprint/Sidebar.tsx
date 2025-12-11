@@ -1,5 +1,5 @@
 import { DragEvent } from 'react';
-import { Square, DoorOpen, Maximize2, Armchair, Circle, Triangle, Type, Bed, Monitor, Table, Bath } from 'lucide-react';
+import { Square, DoorOpen, Maximize2, Armchair, Circle, Triangle, Type, Bed, Monitor, Table, Bath, SquareSlash } from 'lucide-react';
 import { cn } from '@/utils/cn';
 
 export const Sidebar = () => {
@@ -40,7 +40,9 @@ export const Sidebar = () => {
                     <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Structural</h4>
                     <div className="space-y-2">
                         <DraggableItem type="room" label="Room" icon={Square} />
-                        <DraggableItem type="wall" label="Wall" icon={Maximize2} />
+                        <DraggableItem type="wall" label="Wall" icon={Maximize2} data={{ thickness: 6 }} />
+                        <DraggableItem type="door" label="Door" icon={DoorOpen} data={{ width: 36 }} />
+                        <DraggableItem type="window" label="Window" icon={SquareSlash} data={{ width: 48 }} />
                     </div>
                 </div>
 

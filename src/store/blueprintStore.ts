@@ -18,11 +18,32 @@ export interface Layer {
     locked: boolean;
 }
 
+export interface Measurement {
+    id: string;
+    startNode: string;
+    endNode: string;
+    label: string;
+    distance: number;
+}
+
+export type CADTool = 'select' | 'line' | 'rectangle' | 'circle' | 'wall' | 'door' | 'window' | 'measure';
+
 interface BlueprintState {
     nodes: Node[];
     edges: Edge[];
     layers: Layer[];
     activeLayerId: string;
+
+    // CAD-specific state
+    gridSize: number;
+    gridScale: number;
+    snapEnabled: boolean;
+    objectSnapEnabled: boolean;
+    selectedTool: CADTool;
+    measurements: Measurement[];
+    selectedNodeIds: string[];
+    gridVisible: boolean;
+    scale: string;
 
     // Actions
     onNodesChange: OnNodesChange;
@@ -38,6 +59,20 @@ interface BlueprintState {
     toggleLayerLock: (id: string) => void;
     setActiveLayer: (id: string) => void;
     deleteLayer: (id: string) => void;
+
+    // CAD Actions
+    setGridSize: (size: number) => void;
+    setGridScale: (scale: number) => void;
+    toggleSnap: () => void;
+    toggleObjectSnap: () => void;
+    toggleGridVisible: () => void;
+    setSelectedTool: (tool: CADTool) => void;
+    addMeasurement: (m: Measurement) => void;
+    removeMeasurement: (id: string) => void;
+    setSelectedNodes: (ids: string[]) => void;
+    updateNodePosition: (id: string, x: number, y: number) => void;
+    updateNodeSize: (id: string, width: number, height: number) => void;
+    setScale: (scale: string) => void;
 }
 
 export const useBlueprintStore = create<BlueprintState>()(
@@ -52,6 +87,17 @@ export const useBlueprintStore = create<BlueprintState>()(
                 { id: 'annotations', name: 'Annotations', visible: true, locked: false },
             ],
             activeLayerId: 'default',
+
+            // CAD state initialization
+            gridSize: 20,
+            gridScale: 1,
+            snapEnabled: true,
+            objectSnapEnabled: false,
+            selectedTool: 'select',
+            measurements: [],
+            selectedNodeIds: [],
+            gridVisible: true,
+            scale: '1:100',
 
             onNodesChange: (changes) => {
                 set({
@@ -125,6 +171,37 @@ export const useBlueprintStore = create<BlueprintState>()(
                     )
                 });
             },
+
+            // CAD Actions
+            setGridSize: (size) => set({ gridSize: size }),
+            setGridScale: (scale) => set({ gridScale: scale }),
+            toggleSnap: () => set({ snapEnabled: !get().snapEnabled }),
+            toggleObjectSnap: () => set({ objectSnapEnabled: !get().objectSnapEnabled }),
+            toggleGridVisible: () => set({ gridVisible: !get().gridVisible }),
+            setSelectedTool: (tool) => set({ selectedTool: tool }),
+
+            addMeasurement: (m) => set({ measurements: [...get().measurements, m] }),
+            removeMeasurement: (id) => set({ measurements: get().measurements.filter(m => m.id !== id) }),
+
+            setSelectedNodes: (ids) => set({ selectedNodeIds: ids }),
+
+            updateNodePosition: (id, x, y) => {
+                set({
+                    nodes: get().nodes.map(node =>
+                        node.id === id ? { ...node, position: { x, y } } : node
+                    )
+                });
+            },
+
+            updateNodeSize: (id, width, height) => {
+                set({
+                    nodes: get().nodes.map(node =>
+                        node.id === id ? { ...node, style: { ...node.style, width, height } } : node
+                    )
+                });
+            },
+
+            setScale: (scale) => set({ scale }),
         }),
         {
             limit: 100, // Limit history depth
