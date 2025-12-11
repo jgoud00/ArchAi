@@ -10,6 +10,7 @@ import {
   Calendar,
   Image as ImageIcon,
   AlertTriangle,
+  PenTool,
 } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
@@ -178,10 +179,10 @@ export const ProjectDetail = () => {
                 <Button
                   variant="outline"
                   className="h-auto flex-col py-4 hover-lift border-primary/20 hover:border-primary/50 hover:bg-primary/5"
-                  onClick={() => navigate(`/projects/${id}/sketch`)}
+                  onClick={() => navigate(`/projects/${id}/blueprint`)}
                 >
-                  <FileText className="h-5 w-5 mb-2 text-primary" />
-                  Blueprint
+                  <PenTool className="h-5 w-5 mb-2 text-primary" />
+                  CAD Blueprint
                 </Button>
                 <Button
                   variant="outline"

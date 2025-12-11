@@ -36,6 +36,7 @@ const Calendar = lazy(() => import('./pages/Calendar').then(module => ({ default
 const ModelViewer = lazy(() => import('./pages/ModelViewer'))
 const Templates = lazy(() => import('./pages/Templates').then(module => ({ default: module.Templates })))
 const Documentation = lazy(() => import('./pages/Documentation').then(module => ({ default: module.Documentation })))
+const BlueprintSketcher = lazy(() => import('./pages/projects/BlueprintSketcher').then(module => ({ default: module.BlueprintSketcher })))
 
 /**
  * Main Application Component
@@ -114,6 +115,7 @@ function App() {
               <Route path="projects/:id/budget/add-expense" element={<AddExpense />} />
               <Route path="projects/:id/documents" element={<Documents />} />
               <Route path="projects/:id/layout" element={<LayoutPlanner />} />
+              <Route path="projects/:id/blueprint" element={<BlueprintSketcher />} />
 
               {/* Lazy loaded routes with granular error boundaries */}
               <Route
