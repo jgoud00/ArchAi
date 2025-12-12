@@ -57,7 +57,7 @@ export const Modal: React.FC<ModalProps> = ({
       >
         {/* Backdrop */}
         <div
-          className="fixed inset-0 bg-black/50"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
           onClick={onClose}
           aria-hidden="true"
         />
@@ -65,7 +65,7 @@ export const Modal: React.FC<ModalProps> = ({
         {/* Modal */}
         <div
           className={cn(
-            "relative z-50 w-full max-w-lg bg-background rounded-lg shadow-lg p-4 lg:p-6 mx-4 max-h-[90vh] overflow-y-auto",
+            "relative z-50 w-full max-w-lg bg-background rounded-lg shadow-lg p-4 lg:p-6 mx-4 max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-200",
             className
           )}
           onClick={(e) => e.stopPropagation()}

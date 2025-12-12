@@ -1,0 +1,260 @@
+/**
+ * Accessibility CSS Utilities
+ * WCAG 2.1 AA Compliant
+ */
+
+/* ============================================
+   FOCUS RINGS - Visible Focus States
+   ============================================ */
+
+/* Default focus ring for all interactive elements */
+:focus-visible {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+}
+
+/* Enhanced focus ring utility */
+.focus-ring {
+    outline: none;
+}
+
+.focus-ring:focus-visible {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px hsl(var(--primary) / 0.2);
+}
+
+/* High visibility focus for important actions */
+.focus-ring-prominent:focus-visible {
+    outline: 3px solid hsl(var(--primary));
+    outline-offset: 3px;
+    box-shadow: 0 0 0 6px hsl(var(--primary) / 0.3);
+}
+
+/* Focus within for container focus */
+.focus-within-ring:focus-within {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+}
+
+/* Remove default focus outline when using custom */
+button:focus,
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+}
+
+/* ============================================
+   REDUCED MOTION - Respect User Preferences
+   ============================================ */
+
+/* Global reduced motion */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Reduced motion class for manual override */
+.reduced-motion *,
+.reduced-motion *::before,
+.reduced-motion *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+}
+
+/* Keep essential transitions short */
+.reduced-motion .transition-essential {
+    transition-duration: 100ms !important;
+}
+
+/* ============================================
+   HIGH CONTRAST MODE
+   ============================================ */
+
+/* High contrast theme */
+.high-contrast {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 5%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 210 100% 60%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 20%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 70%;
+    --accent: 210 100% 60%;
+    --accent-foreground: 0 0% 0%;
+    --destructive: 0 100% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 40%;
+    --input: 0 0% 30%;
+    --ring: 210 100% 60%;
+}
+
+/* High contrast text utilities */
+.high-contrast .text-muted-foreground {
+    color: hsl(0 0% 80%);
+}
+
+.high-contrast .border {
+    border-color: hsl(0 0% 50%);
+}
+
+/* Ensure links are distinguishable */
+.high-contrast a {
+    text-decoration: underline;
+}
+
+/* Enhanced button contrast */
+.high-contrast button:not([disabled]) {
+    border: 2px solid currentColor;
+}
+
+/* ============================================
+   SCREEN READER UTILITIES
+   ============================================ */
+
+/* Visually hidden but accessible to screen readers */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* Not sr-only - visible again */
+.not-sr-only {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: 0;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+}
+
+/* Focus-only: visible when focused */
+.sr-only-focusable:focus,
+.sr-only-focusable:focus-within {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: inherit;
+    margin: inherit;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+}
+
+/* ============================================
+   LIVE REGION STYLES
+   ============================================ */
+
+/* Live region container for dynamic announcements */
+.live-region {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+/* Visible live region for important alerts */
+.live-region-visible {
+    position: fixed;
+    bottom: 1rem;
+    left: 1rem;
+    right: 1rem;
+    z-index: 9999;
+    padding: 1rem;
+    background: hsl(var(--card));
+    border: 2px solid hsl(var(--border));
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* ============================================
+   SKIP LINK ENHANCEMENT
+   ============================================ */
+
+.skip-link {
+    position: absolute;
+    top: -100%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    padding: 0.75rem 1.5rem;
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    font-weight: 600;
+    border-radius: 0 0 0.5rem 0.5rem;
+    text-decoration: none;
+    transition: top 0.2s;
+}
+
+.skip-link:focus {
+    top: 0;
+    outline: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================
+   MINIMUM TARGET SIZE (WCAG 2.5.5)
+   ============================================ */
+
+/* Ensure minimum 44x44px touch/click targets */
+.target-size {
+    min-width: 44px;
+    min-height: 44px;
+}
+
+/* Inline target with adequate spacing */
+.target-size-inline {
+    min-height: 44px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+/* ============================================
+   COLOR CONTRAST HELPERS
+   ============================================ */
+
+/* Ensure text on colored backgrounds meets contrast */
+.contrast-text {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Force high contrast colors */
+.force-contrast {
+    color: hsl(var(--foreground)) !important;
+    background-color: hsl(var(--background)) !important;
+}

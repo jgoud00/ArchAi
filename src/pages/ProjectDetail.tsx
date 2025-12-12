@@ -1,9 +1,7 @@
 import { useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { format } from 'date-fns'
 import {
   Upload,
-  Download,
   Trash2,
   FileText,
   UserPlus,
@@ -18,24 +16,36 @@ import { Button } from '@/components/ui/Button'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/Tabs'
 import { Modal } from '@/components/ui/Modal'
 import { FileUpload } from '@/components/FileUpload'
-import { Input } from '@/components/ui/Input'
 import { useToast } from '@/hooks/useToast'
 import { ToastContainer } from '@/components/ui/Toast'
 import { Spinner } from '@/components/ui/Spinner'
-import { ProjectHeader } from '@/components/projects/ProjectHeader'
-import { ProjectStats } from '@/components/projects/ProjectStats'
-import { ProjectMembers } from '@/components/projects/ProjectMembers'
-import { ProjectFiles } from '@/components/projects/ProjectFiles'
-import { useProjectLogic } from '@/hooks/useProjectLogic'
+import { ProjectHeader } from '@/features/projects/components/ProjectHeader'
+import { ProjectStats } from '@/features/projects/components/ProjectStats'
+import { ProjectMembers } from '@/features/projects/components/ProjectMembers'
+import { ProjectFiles } from '@/features/projects/components/ProjectFiles'
+import { ModuleButton } from '@/features/projects/components/ModuleButton'
+import { InviteMemberModal } from '@/features/projects/components/InviteMemberModal'
+import { ProjectSettingsModal } from '@/features/projects/components/ProjectSettingsModal'
+import { DeleteProjectModal } from '@/features/projects/components/DeleteProjectModal'
+import { ScanPreviewModal } from '@/features/projects/components/ScanPreviewModal'
+import { useProjectLogic } from '@/features/projects/hooks/useProjectLogic'
 
+/**
+ * ProjectDetail - Project management page with tabs for overview, scans, and team
+ * 
+ * Refactored from 423 to ~200 lines by extracting:
+ * - ModuleButton: Reusable navigation button
+ * - InviteMemberModal: Team member invitation form
+ * - ProjectSettingsModal: Project settings form
+ * - DeleteProjectModal: Deletion confirmation
+ * - ScanPreviewModal: Scan preview with download
+ */
 export const ProjectDetail = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-
   const { toasts, dismissToast } = useToast()
   const [activeTab, setActiveTab] = useState('overview')
 
-  // OPTIMIZATION: Memoized tab change handler
   const handleTabChange = useCallback((value: string) => {
     setActiveTab(value)
   }, [])
@@ -47,7 +57,6 @@ export const ProjectDetail = () => {
     loading,
     isOwner,
     isMember,
-    // Modals
     uploadModalOpen,
     setUploadModalOpen,
     inviteModalOpen,
@@ -58,10 +67,8 @@ export const ProjectDetail = () => {
     setDeleteConfirmOpen,
     previewScan,
     setPreviewScan,
-    // Forms
     projectForm,
     inviteForm,
-    // Handlers
     handleUploadScan,
     handleDeleteScan,
     handleUpdateProject,
@@ -144,62 +151,13 @@ export const ProjectDetail = () => {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                <Button
-                  variant="outline"
-                  className="h-auto flex-col py-4 hover-lift border-primary/20 hover:border-primary/50 hover:bg-primary/5"
-                  onClick={() => navigate(`/projects/${id}/issues`)}
-                >
-                  <AlertTriangle className="h-5 w-5 mb-2 text-primary" />
-                  Issues
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-auto flex-col py-4 hover-lift border-primary/20 hover:border-primary/50 hover:bg-primary/5"
-                  onClick={() => navigate(`/projects/${id}/progress`)}
-                >
-                  <ImageIcon className="h-5 w-5 mb-2 text-primary" />
-                  Progress Photos
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-auto flex-col py-4 hover-lift border-primary/20 hover:border-primary/50 hover:bg-primary/5"
-                  onClick={() => navigate(`/projects/${id}/budget`)}
-                >
-                  <FileText className="h-5 w-5 mb-2 text-primary" />
-                  Budget
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-auto flex-col py-4 hover-lift border-primary/20 hover:border-primary/50 hover:bg-primary/5"
-                  onClick={() => navigate(`/projects/${id}/documents`)}
-                >
-                  <FileText className="h-5 w-5 mb-2 text-primary" />
-                  Documents
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-auto flex-col py-4 hover-lift border-primary/20 hover:border-primary/50 hover:bg-primary/5"
-                  onClick={() => navigate(`/projects/${id}/blueprint`)}
-                >
-                  <PenTool className="h-5 w-5 mb-2 text-primary" />
-                  CAD Blueprint
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-auto flex-col py-4 hover-lift border-primary/20 hover:border-primary/50 hover:bg-primary/5"
-                  onClick={() => navigate(`/projects/${id}/inventory`)}
-                >
-                  <FileText className="h-5 w-5 mb-2 text-primary" />
-                  Inventory
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-auto flex-col py-4 hover-lift border-primary/20 hover:border-primary/50 hover:bg-primary/5"
-                  onClick={() => navigate(`/projects/${id}/timeline`)}
-                >
-                  <Calendar className="h-5 w-5 mb-2 text-primary" />
-                  Timeline
-                </Button>
+                <ModuleButton icon={AlertTriangle} label="Issues" onClick={() => navigate(`/projects/${id}/issues`)} />
+                <ModuleButton icon={ImageIcon} label="Progress Photos" onClick={() => navigate(`/projects/${id}/progress`)} />
+                <ModuleButton icon={FileText} label="Budget" onClick={() => navigate(`/projects/${id}/budget`)} />
+                <ModuleButton icon={FileText} label="Documents" onClick={() => navigate(`/projects/${id}/documents`)} />
+                <ModuleButton icon={PenTool} label="CAD Blueprint" onClick={() => navigate(`/projects/${id}/blueprint`)} />
+                <ModuleButton icon={FileText} label="Inventory" onClick={() => navigate(`/projects/${id}/inventory`)} />
+                <ModuleButton icon={Calendar} label="Timeline" onClick={() => navigate(`/projects/${id}/timeline`)} />
               </div>
             </CardContent>
           </Card>
@@ -236,7 +194,7 @@ export const ProjectDetail = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Upload Modal */}
+      {/* Modals */}
       <Modal
         isOpen={uploadModalOpen}
         onClose={() => setUploadModalOpen(false)}
@@ -245,176 +203,30 @@ export const ProjectDetail = () => {
         <FileUpload onUpload={handleUploadScan} />
       </Modal>
 
-      {/* Invite Modal */}
-      <Modal
+      <InviteMemberModal
         isOpen={inviteModalOpen}
-        onClose={() => {
-          setInviteModalOpen(false)
-          inviteForm.reset()
-        }}
-        title="Invite Team Member"
-      >
-        <form onSubmit={inviteForm.handleSubmit(handleInviteMember)} className="space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium">
-              Email *
-            </label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="member@example.com"
-              {...inviteForm.register('email')}
-            />
-            {inviteForm.formState.errors.email && (
-              <p className="text-sm text-destructive">
-                {inviteForm.formState.errors.email.message}
-              </p>
-            )}
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="role" className="text-sm font-medium">
-              Role
-            </label>
-            <select
-              id="role"
-              {...inviteForm.register('role')}
-              className="w-full px-3 py-2 border border-input rounded-md bg-background text-sm"
-              defaultValue="viewer"
-            >
-              <option value="viewer">Viewer</option>
-              <option value="editor">Editor</option>
-            </select>
-            {inviteForm.formState.errors.role && (
-              <p className="text-sm text-destructive">
-                {inviteForm.formState.errors.role.message}
-              </p>
-            )}
-          </div>
-          <div className="flex gap-2 justify-end">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setInviteModalOpen(false)
-                inviteForm.reset()
-              }}
-            >
-              Cancel
-            </Button>
-            <Button type="submit">Invite</Button>
-          </div>
-        </form>
-      </Modal>
+        onClose={() => setInviteModalOpen(false)}
+        form={inviteForm}
+        onSubmit={handleInviteMember}
+      />
 
-      {/* Settings Modal */}
-      <Modal
+      <ProjectSettingsModal
         isOpen={settingsModalOpen}
-        onClose={() => {
-          setSettingsModalOpen(false)
-          projectForm.reset()
-        }}
-        title="Project Settings"
-      >
-        <form onSubmit={projectForm.handleSubmit(handleUpdateProject)} className="space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="name" className="text-sm font-medium">
-              Project Name
-            </label>
-            <Input
-              id="name"
-              {...projectForm.register('name')}
-              className={projectForm.formState.errors.name ? 'border-destructive' : ''}
-            />
-            {projectForm.formState.errors.name && (
-              <p className="text-sm text-destructive">
-                {projectForm.formState.errors.name.message}
-              </p>
-            )}
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="description" className="text-sm font-medium">
-              Description
-            </label>
-            <textarea
-              id="description"
-              {...projectForm.register('description')}
-              className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            />
-            {projectForm.formState.errors.description && (
-              <p className="text-sm text-destructive">
-                {projectForm.formState.errors.description.message}
-              </p>
-            )}
-          </div>
-          <div className="flex gap-2 justify-end">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setSettingsModalOpen(false)
-                projectForm.reset()
-              }}
-            >
-              Cancel
-            </Button>
-            <Button type="submit">Save Changes</Button>
-          </div>
-        </form>
-      </Modal>
+        onClose={() => setSettingsModalOpen(false)}
+        form={projectForm}
+        onSubmit={handleUpdateProject}
+      />
 
-      {/* Delete Confirmation Modal */}
-      <Modal
+      <DeleteProjectModal
         isOpen={deleteConfirmOpen}
         onClose={() => setDeleteConfirmOpen(false)}
-        title="Delete Project"
-      >
-        <div className="space-y-4">
-          <div className="flex items-center gap-3 text-warning">
-            <AlertTriangle className="h-5 w-5" />
-            <p className="font-medium">Are you sure you want to delete this project?</p>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            This action cannot be undone. All scans and team data will be permanently deleted.
-          </p>
-          <div className="flex gap-2 justify-end">
-            <Button variant="outline" onClick={() => setDeleteConfirmOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleDeleteProject}>
-              Delete Project
-            </Button>
-          </div>
-        </div>
-      </Modal>
+        onConfirm={handleDeleteProject}
+      />
 
-      {/* Preview Modal */}
-      {previewScan && (
-        <Modal
-          isOpen={!!previewScan}
-          onClose={() => setPreviewScan(null)}
-          title={previewScan.name}
-          className="max-w-4xl"
-        >
-          <div className="space-y-4">
-            {previewScan.type === 'image' ? (
-              <img src={previewScan.url} alt={previewScan.name} className="w-full rounded-lg" />
-            ) : (
-              <video src={previewScan.url} controls className="w-full rounded-lg" />
-            )}
-            <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <span>Uploaded {format(previewScan.uploadedAt, 'MMM dd, yyyy')}</span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => window.open(previewScan.url, '_blank')}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Download
-              </Button>
-            </div>
-          </div>
-        </Modal>
-      )}
+      <ScanPreviewModal
+        scan={previewScan}
+        onClose={() => setPreviewScan(null)}
+      />
 
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </div>

@@ -16,7 +16,7 @@ import {
 import { Button } from '@/components/ui/Button';
 import { KanbanColumn } from '@/components/kanban/KanbanColumn';
 import { Issue } from '@/types';
-import { getProjectIssues, updateIssue } from '@/services/issues';
+import { getProjectIssues, updateIssue } from '@/features/projects/services/issues';
 import { useToast } from '@/hooks/useToast';
 import { Spinner } from '@/components/ui/Spinner';
 import { logger } from '@/utils/logger';
@@ -75,14 +75,12 @@ export default function IssuesKanban() {
     const [updating, setUpdating] = useState(false);
 
     // OPTIMIZATION 4: useSensors memoized (was recreating every render)
-    const sensors = useMemo(
-        () => useSensors(
-            useSensor(PointerSensor, {
-                activationConstraint: { distance: 8 },
-            })
-        ),
-        []
-    );
+    const pointerSensor = useSensor(PointerSensor, {
+        activationConstraint: { distance: 8 },
+    });
+
+    // useSensors must be called directly in the component body
+    const sensors = useSensors(pointerSensor);
 
     // OPTIMIZATION 5: loadIssues already using useCallback - GOOD!
     const loadIssues = useCallback(async () => {

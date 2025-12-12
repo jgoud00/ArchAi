@@ -24,7 +24,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = memo(({ project }) => {
   }
 
   return (
-    <div className="bg-card/50 backdrop-blur-sm border border-border p-5 rounded-xl space-y-3 transition-all duration-300 hover:shadow-primary/20 hover:shadow-md group">
+    <div className="bg-card/50 backdrop-blur-sm border border-border p-5 rounded-xl space-y-3 transition-all duration-300 hover:shadow-lg group card-hover-lift">
       <div className="flex justify-between items-start">
         <h4 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">{project.name}</h4>
         <span

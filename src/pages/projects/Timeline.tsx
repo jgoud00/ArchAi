@@ -1,13 +1,13 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Plus, ArrowLeft } from 'lucide-react'
-import { getProjectTasks } from '@/services/tasks'
-import { getProject } from '@/services/projects'
+import { getProjectTasks } from '@/features/projects/services/tasks'
+import { getProject } from '@/features/projects/services/projects'
 import { Task, Project } from '@/types'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import { useToast } from '@/hooks/useToast'
-import { GanttChart } from '@/components/projects/GanttChart'
+import { GanttChart } from '@/features/projects/components/GanttChart'
 
 export const Timeline = () => {
   const { id } = useParams<{ id: string }>()

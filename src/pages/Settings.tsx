@@ -2,19 +2,22 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { User, Trash2, Key, Save, Upload, X, Globe } from 'lucide-react'
+import { AlertTriangle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { useAuthStore } from '@/store/authStore'
+import { useAuthStore } from '@/features/auth/store/authStore'
 import { supabase } from '@/services/supabase'
-import { updateProfile, uploadAvatar } from '@/services/auth'
+import { updateProfile, uploadAvatar } from '@/features/auth/services/auth'
 import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Modal } from '@/components/ui/Modal'
 import { useToast } from '@/hooks/useToast'
 import { ToastContainer } from '@/components/ui/Toast'
-import { AlertTriangle } from 'lucide-react'
-import { Spinner } from '@/components/ui/Spinner'
+import { PageLayout } from '@/components/layout/PageLayout'
+import { PageHeader } from '@/components/layout/PageHeader'
+import { ProfileSettings } from '@/components/settings/ProfileSettings'
+import { PasswordSettings } from '@/components/settings/PasswordSettings'
+import { LanguageSettings } from '@/components/settings/LanguageSettings'
+import { DangerZoneSettings } from '@/components/settings/DangerZoneSettings'
+import { layout } from '@/styles/designTokens'
 
 const profileSchema = z.object({
   displayName: z.string().min(2, 'Name must be at least 2 characters'),
@@ -41,12 +44,6 @@ export const Settings = () => {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const changeLanguage = useCallback((lng: string) => {
-    i18n.changeLanguage(lng)
-    localStorage.setItem('language', lng)
-    showToast('Language changed successfully!', 'success')
-  }, [i18n, showToast])
-
   const profileForm = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
   })
@@ -64,7 +61,7 @@ export const Settings = () => {
     }
   }, [user, profileForm])
 
-  const handleUpdateProfile = async (data: ProfileFormData) => {
+  const handleUpdateProfile = useCallback(async (data: ProfileFormData) => {
     if (!user) return
 
     try {
@@ -79,19 +76,17 @@ export const Settings = () => {
       const message = error instanceof Error ? error.message : 'Failed to update profile'
       showToast(message, 'error')
     }
-  }
+  }, [user, avatarPreview, setUser, showToast])
 
-  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file || !user) return
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       showToast('Please select an image file', 'error')
       return
     }
 
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       showToast('Image must be less than 5MB', 'error')
       return
@@ -100,20 +95,14 @@ export const Settings = () => {
     setUploadingAvatar(true)
 
     try {
-      // Create preview
       const reader = new FileReader()
       reader.onloadend = () => {
         setAvatarPreview(reader.result as string)
       }
       reader.readAsDataURL(file)
 
-      // Upload avatar
       const avatarUrl = await uploadAvatar(file)
-
-      // Update profile with new avatar
-      const updatedUser = await updateProfile({
-        avatar: avatarUrl,
-      })
+      const updatedUser = await updateProfile({ avatar: avatarUrl })
 
       setUser(updatedUser)
       setAvatarPreview(avatarUrl)
@@ -128,16 +117,13 @@ export const Settings = () => {
         fileInputRef.current.value = ''
       }
     }
-  }
+  }, [user, setUser, showToast])
 
-  const handleRemoveAvatar = async () => {
+  const handleRemoveAvatar = useCallback(async () => {
     if (!user) return
 
     try {
-      const updatedUser = await updateProfile({
-        avatar: undefined,
-      })
-
+      const updatedUser = await updateProfile({ avatar: undefined })
       setUser(updatedUser)
       setAvatarPreview(null)
       showToast('Avatar removed successfully!', 'success')
@@ -145,9 +131,9 @@ export const Settings = () => {
       const message = error instanceof Error ? error.message : 'Failed to remove avatar'
       showToast(message, 'error')
     }
-  }
+  }, [user, setUser, showToast])
 
-  const handleChangePassword = async (data: PasswordFormData) => {
+  const handleChangePassword = useCallback(async (data: PasswordFormData) => {
     if (!user) return
 
     try {
@@ -155,9 +141,7 @@ export const Settings = () => {
         password: data.newPassword,
       })
 
-      if (error) {
-        throw error
-      }
+      if (error) throw error
 
       showToast('Password updated successfully!', 'success')
       passwordForm.reset()
@@ -165,15 +149,18 @@ export const Settings = () => {
       const message = error instanceof Error ? error.message : 'Failed to update password'
       showToast(message, 'error')
     }
-  }
+  }, [user, showToast, passwordForm])
 
-  const handleDeleteAccount = async () => {
+  const changeLanguage = useCallback((lng: string) => {
+    i18n.changeLanguage(lng)
+    localStorage.setItem('language', lng)
+    showToast('Language changed successfully!', 'success')
+  }, [i18n, showToast])
+
+  const handleDeleteAccount = useCallback(async () => {
     if (!user) return
 
     try {
-      // Note: User deletion requires backend/admin API
-      // Frontend cannot directly delete users via admin API
-      // Use a Supabase RPC function or Edge Function for this
       const { error: deleteError } = await supabase.rpc('delete_user_account')
 
       if (deleteError) {
@@ -186,263 +173,53 @@ export const Settings = () => {
       const message = error instanceof Error ? error.message : 'Failed to delete account'
       showToast(message, 'error')
     }
-  }
+  }, [user, showToast, logout])
 
   if (!user) {
     return (
-      <div className="space-y-6 max-w-2xl">
+      <PageLayout>
         <p className="text-muted-foreground">Loading user data...</p>
-      </div>
+      </PageLayout>
     )
   }
 
   return (
-    <div className="space-y-6 max-w-2xl">
+    <PageLayout maxWidth="2xl">
+      <div className={layout.sectionSpacing}>
+        <PageHeader
+          title="Settings"
+          description="Manage your account settings"
+        />
 
-      <div>
-        <h1 className="text-3xl font-bold">Settings</h1>
-        <p className="text-muted-foreground mt-1">Manage your account settings</p>
+        {/* Profile Section */}
+        <ProfileSettings
+          user={user}
+          profileForm={profileForm}
+          avatarPreview={avatarPreview}
+          uploadingAvatar={uploadingAvatar}
+          fileInputRef={fileInputRef}
+          onSubmit={handleUpdateProfile}
+          onAvatarUpload={handleAvatarUpload}
+          onRemoveAvatar={handleRemoveAvatar}
+        />
+
+        {/* Password Section */}
+        <PasswordSettings
+          passwordForm={passwordForm}
+          onSubmit={handleChangePassword}
+        />
+
+        {/* Language Section */}
+        <LanguageSettings
+          currentLanguage={i18n.language}
+          onLanguageChange={changeLanguage}
+        />
+
+        {/* Danger Zone */}
+        <DangerZoneSettings
+          onDeleteAccount={() => setDeleteConfirmOpen(true)}
+        />
       </div>
-
-      {/* Profile Section */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <User className="h-5 w-5" />
-            <div>
-              <CardTitle>Profile</CardTitle>
-              <CardDescription>Update your profile information</CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={profileForm.handleSubmit(handleUpdateProfile)} className="space-y-4">
-            <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium">
-                Email
-              </label>
-              <Input
-                id="email"
-                type="email"
-                value={user.email}
-                disabled
-              />
-              <p className="text-xs text-muted-foreground">Email cannot be changed</p>
-            </div>
-
-            <div className="space-y-4">
-              {/* Avatar Upload */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Avatar</label>
-                <div className="flex items-center gap-4">
-                  <div className="relative">
-                    {avatarPreview ? (
-                      <img
-                        src={avatarPreview}
-                        alt="Avatar"
-                        className="h-20 w-20 rounded-full object-cover border-2 border-border"
-                      />
-                    ) : (
-                      <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center border-2 border-border">
-                        <User className="h-10 w-10 text-muted-foreground" />
-                      </div>
-                    )}
-                    {uploadingAvatar && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full">
-                        <Spinner size="sm" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={uploadingAvatar}
-                    >
-                      <Upload className="h-4 w-4 mr-2" />
-                      {avatarPreview ? 'Change' : 'Upload'}
-                    </Button>
-                    {avatarPreview && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={handleRemoveAvatar}
-                        disabled={uploadingAvatar}
-                      >
-                        <X className="h-4 w-4 mr-2" />
-                        Remove
-                      </Button>
-                    )}
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleAvatarUpload}
-                      className="hidden"
-                    />
-                  </div>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Upload a profile picture (max 5MB, JPG, PNG, or GIF)
-                </p>
-              </div>
-
-              {/* Display Name */}
-              <div className="space-y-2">
-                <label htmlFor="displayName" className="text-sm font-medium">
-                  Display Name
-                </label>
-                <Input
-                  id="displayName"
-                  {...profileForm.register('displayName')}
-                  className={profileForm.formState.errors.displayName ? 'border-destructive' : ''}
-                />
-                {profileForm.formState.errors.displayName && (
-                  <p className="text-sm text-destructive">
-                    {profileForm.formState.errors.displayName.message}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <Button type="submit">
-              <Save className="h-4 w-4 mr-2" />
-              Save Changes
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-
-      {/* Password Section */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <Key className="h-5 w-5" />
-            <div>
-              <CardTitle>Change Password</CardTitle>
-              <CardDescription>Update your password</CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={passwordForm.handleSubmit(handleChangePassword)} className="space-y-4">
-            <div className="space-y-2">
-              <label htmlFor="currentPassword" className="text-sm font-medium">
-                Current Password
-              </label>
-              <Input
-                id="currentPassword"
-                type="password"
-                {...passwordForm.register('currentPassword')}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="newPassword" className="text-sm font-medium">
-                New Password
-              </label>
-              <Input
-                id="newPassword"
-                type="password"
-                {...passwordForm.register('newPassword')}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="confirmPassword" className="text-sm font-medium">
-                Confirm New Password
-              </label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                {...passwordForm.register('confirmPassword')}
-              />
-              {passwordForm.formState.errors.confirmPassword && (
-                <p className="text-sm text-destructive">
-                  {passwordForm.formState.errors.confirmPassword.message}
-                </p>
-              )}
-            </div>
-
-            <Button type="submit">
-              <Key className="h-4 w-4 mr-2" />
-              Change Password
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-
-      {/* Language Section */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <Globe className="h-5 w-5" />
-            <div>
-              <CardTitle>Language</CardTitle>
-              <CardDescription>Customize your app language</CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Language</label>
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant={i18n.language === 'en' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => changeLanguage('en')}
-              >
-                English
-              </Button>
-              <Button
-                type="button"
-                variant={i18n.language === 'hi' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => changeLanguage('hi')}
-              >
-                हिंदी
-              </Button>
-              <Button
-                type="button"
-                variant={i18n.language === 'te' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => changeLanguage('te')}
-              >
-                తెలుగు
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Danger Zone */}
-      <Card className="border-destructive">
-        <CardHeader>
-          <CardTitle className="text-destructive">Danger Zone</CardTitle>
-          <CardDescription>Irreversible actions</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div>
-              <h3 className="font-semibold mb-2">Delete Account</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Permanently delete your account and all associated data. This action cannot be undone.
-              </p>
-              <Button
-                variant="destructive"
-                onClick={() => setDeleteConfirmOpen(true)}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete Account
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Delete Confirmation Modal */}
       <Modal
@@ -470,6 +247,6 @@ export const Settings = () => {
       </Modal>
 
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
-    </div>
+    </PageLayout>
   )
 }

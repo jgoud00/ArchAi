@@ -1,7 +1,8 @@
+import { memo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Settings, LogOut, User, BookOpen, Shield, X, Calendar, FileText, Home } from 'lucide-react'
+import { LayoutDashboard, Settings, LogOut, User, BookOpen, Shield, X, Calendar, FileText, Home, Table2, FileEdit } from 'lucide-react'
 import { cn } from '@/utils/cn'
-import { useAuthStore } from '@/store/authStore'
+import { useAuthStore } from '@/features/auth/store/authStore'
 import { Button } from '../ui/Button'
 import { ShowIfHasRole } from '../RoleGuard'
 import { Logo } from '../Logo'
@@ -11,6 +12,8 @@ import { Tooltip } from '../ui/Tooltip'
 const navItems = [
   { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { path: '/calendar', icon: Calendar, label: 'Calendar' },
+  { path: '/spreadsheets', icon: Table2, label: 'Spreadsheets' },
+  { path: '/documents', icon: FileEdit, label: 'Documents' },
   { path: '/templates', icon: FileText, label: 'Templates' },
   { path: '/documentation', icon: BookOpen, label: 'Docs' },
   { path: '/settings', icon: Settings, label: 'Settings' },
@@ -21,7 +24,7 @@ interface SidebarProps {
   onClose?: () => void
 }
 
-export const Sidebar = ({ isOpen = true, onClose }: SidebarProps) => {
+export const Sidebar = memo(({ isOpen = true, onClose }: SidebarProps) => {
   const navigate = useNavigate()
   const location = useLocation()
   const { user, logout } = useAuthStore()
@@ -44,12 +47,13 @@ export const Sidebar = ({ isOpen = true, onClose }: SidebarProps) => {
   }
 
   return (
-    <div className={cn(
-      "bg-card/80 backdrop-blur-xl border-r border-border flex flex-col h-screen transition-all duration-300 relative z-40",
-      isOpen ? "w-64" : "w-20"
-    )}>
-      {/* Neon Glow Line */}
-      <div className="absolute right-0 top-0 bottom-0 w-[1px] bg-gradient-to-b from-transparent via-primary/50 to-transparent opacity-50" />
+    <aside
+      className={cn(
+        "bg-card border-r border-border flex flex-col h-screen transition-all duration-300 ease-in-out relative z-40 will-change-[width]",
+        isOpen ? "w-64" : "w-20"
+      )}
+      aria-label="Main navigation"
+    >
 
       <div className={cn(
         "p-6 border-b border-border/50 flex items-center",
@@ -76,24 +80,24 @@ export const Sidebar = ({ isOpen = true, onClose }: SidebarProps) => {
         </Button>
       </div>
 
-      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+      <nav className="flex-1 p-4 space-y-2 overflow-y-auto" aria-label="Primary navigation">
         <Tooltip content="Home" position="right" className={isOpen ? "hidden" : ""}>
           <Button
             variant="ghost"
             className={cn(
               "w-full gap-3 transition-all duration-200 group relative overflow-hidden",
               location.pathname === '/' || location.pathname === '/dashboard'
-                ? 'bg-primary/10 text-primary shadow-[0_0_15px_rgba(6,182,212,0.15)]'
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
+                ? 'bg-primary/10 text-primary'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted',
               isOpen ? "justify-start" : "justify-center px-2"
             )}
             onClick={() => handleNavigate('/dashboard')}
           >
             {(location.pathname === '/' || location.pathname === '/dashboard') && (
-              <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary shadow-[0_0_10px_#06b6d4]" />
+              <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-primary rounded-r" />
             )}
             <Home className={cn("h-5 w-5 flex-shrink-0 transition-transform group-hover:scale-110", location.pathname === '/' || location.pathname === '/dashboard' ? "text-primary" : "")} />
-            {isOpen && <span>Home</span>}
+            {isOpen && <span className="animate-in fade-in duration-200 delay-75 fill-mode-forwards">Home</span>}
           </Button>
         </Tooltip>
 
@@ -106,17 +110,17 @@ export const Sidebar = ({ isOpen = true, onClose }: SidebarProps) => {
                 className={cn(
                   "w-full gap-3 transition-all duration-200 group relative overflow-hidden",
                   isActive
-                    ? 'bg-primary/10 text-primary shadow-[0_0_15px_rgba(6,182,212,0.15)]'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted',
                   isOpen ? "justify-start" : "justify-center px-2"
                 )}
                 onClick={() => handleNavigate(item.path)}
               >
                 {isActive && (
-                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary shadow-[0_0_10px_#06b6d4]" />
+                  <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-primary rounded-r" />
                 )}
                 <item.icon className={cn("h-5 w-5 flex-shrink-0 transition-transform group-hover:scale-110", isActive ? "text-primary" : "")} />
-                {isOpen && <span>{item.label}</span>}
+                {isOpen && <span className="animate-in fade-in duration-200 delay-75 fill-mode-forwards">{item.label}</span>}
               </Button>
             </Tooltip>
           )
@@ -129,17 +133,17 @@ export const Sidebar = ({ isOpen = true, onClose }: SidebarProps) => {
               className={cn(
                 "w-full gap-3 transition-all duration-200 group relative overflow-hidden",
                 location.pathname.startsWith('/admin')
-                  ? 'bg-primary/10 text-primary shadow-[0_0_15px_rgba(6,182,212,0.15)]'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
+                  ? 'bg-primary/10 text-primary'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted',
                 isOpen ? "justify-start" : "justify-center px-2"
               )}
               onClick={() => handleNavigate('/admin')}
             >
               {location.pathname.startsWith('/admin') && (
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary shadow-[0_0_10px_#06b6d4]" />
+                <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-primary rounded-r" />
               )}
               <Shield className="h-5 w-5 flex-shrink-0 transition-transform group-hover:scale-110" />
-              {isOpen && <span>Admin</span>}
+              {isOpen && <span className="animate-in fade-in duration-200 delay-75 fill-mode-forwards">Admin</span>}
             </Button>
           </Tooltip>
         </ShowIfHasRole>
@@ -182,10 +186,12 @@ export const Sidebar = ({ isOpen = true, onClose }: SidebarProps) => {
             onClick={handleLogout}
           >
             <LogOut className="h-5 w-5 flex-shrink-0" />
-            {isOpen && <span>Logout</span>}
+            {isOpen && <span className="animate-in fade-in duration-200 delay-75 fill-mode-forwards">Logout</span>}
           </Button>
         </Tooltip>
       </div>
-    </div>
+    </aside>
   )
-}
+})
+
+Sidebar.displayName = 'Sidebar'

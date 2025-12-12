@@ -1,58 +1,81 @@
-import { useState, useCallback } from 'react';
-import { useBlueprintStore } from '@/store/blueprintStore';
+import { useEffect } from 'react';
+import { useBlueprintStore } from '@/features/blueprint/store/blueprintStore';
 
 /**
- * Hook for multi-selection logic
+ * useMultiSelect - Enhanced multi-selection logic
+ * Handles Shift+Click for multi-select, Box Selection, and Keyboard Shortcuts (Ctrl+A, Esc)
  */
 export const useMultiSelect = () => {
-    const { selectedNodeIds, setSelectedNodes } = useBlueprintStore();
-    const [shiftPressed, setShiftPressed] = useState(false);
+    const { nodes, selectedNodeIds, setSelectedNodes } = useBlueprintStore();
 
-    // Track shift key state
-    const handleKeyDown = useCallback((e: KeyboardEvent) => {
-        if (e.key === 'Shift') {
-            setShiftPressed(true);
-        }
-    }, []);
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // Ctrl/Cmd+A: Select All
+            if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+                // Only prevent default if we're not inside an input/textarea
+                const target = e.target as HTMLElement;
+                if (!['INPUT', 'TEXTAREA'].includes(target.tagName)) {
+                    e.preventDefault();
+                    const allNodeIds = nodes.map(n => n.id);
+                    setSelectedNodes(allNodeIds);
+                }
+            }
 
-    const handleKeyUp = useCallback((e: KeyboardEvent) => {
-        if (e.key === 'Shift') {
-            setShiftPressed(false);
-        }
-    }, []);
+            // Escape: Deselect All
+            if (e.key === 'Escape') {
+                setSelectedNodes([]);
+            }
+        };
 
-    // Add/toggle node selection
-    const toggleNodeSelection = useCallback((nodeId: string, isShift: boolean = false) => {
-        if (isShift) {
-            // Shift+Click: Add to selection or remove if already selected
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [nodes, setSelectedNodes]);
+
+    const handleNodeClick = (nodeId: string, shiftKey: boolean) => {
+        if (shiftKey) {
+            // Add to selection or toggle
             if (selectedNodeIds.includes(nodeId)) {
                 setSelectedNodes(selectedNodeIds.filter(id => id !== nodeId));
             } else {
                 setSelectedNodes([...selectedNodeIds, nodeId]);
             }
         } else {
-            // Normal click: Replace selection
+            // Replace selection
             setSelectedNodes([nodeId]);
         }
-    }, [selectedNodeIds, setSelectedNodes]);
+    };
 
-    // Select all nodes
-    const selectAll = useCallback((allNodeIds: string[]) => {
-        setSelectedNodes(allNodeIds);
-    }, [setSelectedNodes]);
+    const selectBox = (startX: number, startY: number, endX: number, endY: number) => {
+        const minX = Math.min(startX, endX);
+        const maxX = Math.max(startX, endX);
+        const minY = Math.min(startY, endY);
+        const maxY = Math.max(startY, endY);
 
-    // Clear selection
-    const clearSelection = useCallback(() => {
-        setSelectedNodes([]);
-    }, [setSelectedNodes]);
+        const nodesInBox = nodes.filter(node => {
+            const width = (node.style?.width as number) || 100;
+            const height = (node.style?.height as number) || 100;
+            const nodeRight = node.position.x + width;
+            const nodeBottom = node.position.y + height;
+
+            return (
+                node.position.x >= minX &&
+                nodeRight <= maxX &&
+                node.position.y >= minY &&
+                nodeBottom <= maxY
+            );
+        });
+
+        setSelectedNodes(nodesInBox.map(n => n.id));
+    };
+
+    const clearSelection = () => setSelectedNodes([]);
+    const selectAll = () => setSelectedNodes(nodes.map(n => n.id));
 
     return {
+        handleNodeClick,
+        selectBox,
         selectedNodeIds,
-        shiftPressed,
-        toggleNodeSelection,
-        selectAll,
         clearSelection,
-        handleKeyDown,
-        handleKeyUp,
+        selectAll
     };
 };

@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/Card'
 import { useToast } from '@/hooks/useToast'
 import { Spinner } from '@/components/ui/Spinner'
 import { supabase } from '@/services/supabase'
-import { useAuthStore } from '@/store/authStore'
+import { useAuthStore } from '@/features/auth/store/authStore'
 import { logger } from '@/utils/logger'
 
 interface Model3D {

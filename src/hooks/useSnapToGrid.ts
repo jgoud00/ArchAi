@@ -1,5 +1,5 @@
-import { useBlueprintStore } from '@/store/blueprintStore';
-import { snapToGrid as snapToGridUtil, snapToObject as snapToObjectUtil } from '@/utils/snapEngine';
+import { useBlueprintStore } from '@/features/blueprint/store/blueprintStore';
+import { snapToGrid as snapToGridUtil, smartSnap } from '@/utils/snapEngine';
 import { useCallback } from 'react';
 
 /**
@@ -24,7 +24,10 @@ export const useSnapToGrid = () => {
 
             // Apply object snapping if enabled
             if (objectSnapEnabled) {
-                position = snapToObjectUtil(position.x, position.y, nodes, 20);
+                const snapResult = smartSnap(position.x, position.y, nodes, gridSize, { center: true, edge: true });
+                if (snapResult.snapped) {
+                    position = { x: snapResult.x, y: snapResult.y };
+                }
             }
 
             return position;

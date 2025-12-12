@@ -1,20 +1,26 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { newPasswordSchema } from '@/utils/validators'
-import { resetPassword } from '@/services/auth'
+import { resetPassword } from '@/features/auth/services/auth'
 import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import { useToast } from '@/hooks/useToast'
 import { ToastContainer } from '@/components/ui/Toast'
 import { Spinner } from '@/components/ui/Spinner'
 import { z } from 'zod'
-import { CheckCircle } from 'lucide-react'
+import { CheckCircle, Lock, ArrowLeft } from 'lucide-react'
+import { AuthInputField } from '@/features/auth/components'
 
 type ResetPasswordFormData = z.infer<typeof newPasswordSchema>
 
+/**
+ * ResetPassword Page - Set new password after email verification
+ * 
+ * Refactored to use auth components with accessibility improvements.
+ * Original: 150 lines → Refactored: ~120 lines
+ */
 export const ResetPassword = () => {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -31,7 +37,6 @@ export const ResetPassword = () => {
   })
 
   useEffect(() => {
-    // Check if we have a valid reset token in the URL
     const accessToken = searchParams.get('access_token')
     const type = searchParams.get('type')
 
@@ -43,7 +48,7 @@ export const ResetPassword = () => {
     }
   }, [searchParams, navigate, showToast])
 
-  const onSubmit = async (data: ResetPasswordFormData) => {
+  const onSubmit = useCallback(async (data: ResetPasswordFormData) => {
     if (loading) return
 
     setLoading(true)
@@ -60,15 +65,15 @@ export const ResetPassword = () => {
       showToast(message, 'error')
       setLoading(false)
     }
-  }
+  }, [loading, navigate, showToast])
 
   if (success) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
-        <Card className="w-full max-w-md">
+        <Card className="w-full max-w-md animate-fade-in-up">
           <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-              <CheckCircle className="h-6 w-6 text-green-600" />
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/20">
+              <CheckCircle className="h-6 w-6 text-green-600" aria-hidden="true" />
             </div>
             <CardTitle className="text-2xl font-bold">Password Reset Successful</CardTitle>
             <CardDescription>Your password has been updated. Redirecting to login...</CardDescription>
@@ -81,64 +86,62 @@ export const ResetPassword = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md animate-fade-in-up">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold">Reset Password</CardTitle>
           <CardDescription>Enter your new password</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium">
-                New Password
-              </label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                {...register('password')}
-                className={errors.password ? 'border-destructive' : ''}
-                disabled={loading}
-              />
-              {errors.password && (
-                <p className="text-sm text-destructive">{errors.password.message}</p>
-              )}
-            </div>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+            <AuthInputField
+              icon={Lock}
+              id="password"
+              type="password"
+              placeholder="New password"
+              autoComplete="new-password"
+              aria-label="New password"
+              aria-describedby={errors.password ? 'password-error' : undefined}
+              disabled={loading}
+              error={errors.password?.message}
+              {...register('password')}
+            />
 
-            <div className="space-y-2">
-              <label htmlFor="confirmPassword" className="text-sm font-medium">
-                Confirm New Password
-              </label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="••••••••"
-                {...register('confirmPassword')}
-                className={errors.confirmPassword ? 'border-destructive' : ''}
-                disabled={loading}
-              />
-              {errors.confirmPassword && (
-                <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
-              )}
-            </div>
+            <AuthInputField
+              icon={Lock}
+              id="confirmPassword"
+              type="password"
+              placeholder="Confirm new password"
+              autoComplete="new-password"
+              aria-label="Confirm new password"
+              aria-describedby={errors.confirmPassword ? 'confirm-error' : undefined}
+              disabled={loading}
+              error={errors.confirmPassword?.message}
+              {...register('confirmPassword')}
+            />
 
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loading}
+              aria-busy={loading}
+            >
               {loading ? (
                 <>
-                  <Spinner size="sm" className="mr-2" />
-                  Resetting password...
+                  <Spinner size="sm" className="mr-2" aria-hidden="true" />
+                  <span>Resetting password...</span>
                 </>
               ) : (
                 'Reset Password'
               )}
             </Button>
 
-            <p className="text-center text-sm text-muted-foreground">
-              Remember your password?{' '}
-              <Link to="/login" className="text-primary hover:underline">
-                Sign in
-              </Link>
-            </p>
+            <Link
+              to="/login"
+              className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              Back to Sign In
+            </Link>
           </form>
         </CardContent>
       </Card>
@@ -146,4 +149,3 @@ export const ResetPassword = () => {
     </div>
   )
 }
-

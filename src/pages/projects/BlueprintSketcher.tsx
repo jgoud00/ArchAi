@@ -2,8 +2,6 @@ import { useCallback, useRef, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   ReactFlow,
-  MiniMap,
-  Controls,
   Background,
   BackgroundVariant,
   Node,
@@ -13,41 +11,56 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
-import { Save, Download, RotateCcw, Undo, Redo } from 'lucide-react';
-import { getProjectBlueprint, saveBlueprint, saveBlueprintVersion } from '@/services/blueprints';
-import { getProject } from '@/services/projects';
+import { Save, Download, RotateCcw, Undo, Redo, Box } from 'lucide-react';
+import { getProjectBlueprint, saveBlueprint, saveBlueprintVersion } from '@/features/projects/services/blueprints';
+import { getProject } from '@/features/projects/services/projects';
 import { Project } from '@/types';
 import { Button } from '@/components/ui/Button';
 import { Spinner } from '@/components/ui/Spinner';
 import { useToast } from '@/hooks/useToast';
 import { logger } from '@/utils/logger';
-import { Sidebar } from '@/components/blueprint/Sidebar';
-import { LayersPanel } from '@/components/blueprint/LayersPanel';
-import { GridSystem } from '@/components/blueprint/GridSystem';
-import { CoordinateDisplay } from '@/components/blueprint/CoordinateDisplay';
-import { PropertiesPanel } from '@/components/blueprint/PropertiesPanel';
-import { DrawingToolbar } from '@/components/blueprint/DrawingToolbar';
-import { SnapIndicator } from '@/components/blueprint/SnapIndicator';
-import { MeasurementTool, MeasurementOverlay } from '@/components/blueprint/MeasurementTool';
-import { AlignmentTools } from '@/components/blueprint/AlignmentTools';
-import { TransformControls } from '@/components/blueprint/TransformControls';
-import { DrawingTool } from '@/components/blueprint/DrawingTool';
-import { GroupManager } from '@/components/blueprint/GroupManager';
-import { ExportDialog } from '@/components/blueprint/ExportDialog';
-import { CADHelpPanel } from '@/components/blueprint/CADHelpPanel';
-import RoomNode from '@/components/blueprint/nodes/RoomNode';
-import ShapeNode from '@/components/blueprint/nodes/ShapeNode';
-import FurnitureNode from '@/components/blueprint/nodes/FurnitureNode';
-import AnnotationNode from '@/components/blueprint/nodes/AnnotationNode';
-import WallNode from '@/components/blueprint/nodes/WallNode';
-import DoorNode from '@/components/blueprint/nodes/DoorNode';
-import WindowNode from '@/components/blueprint/nodes/WindowNode';
+import { Sidebar } from '@/features/blueprint/components/Sidebar';
+import { LayersPanel } from '@/features/blueprint/components/LayersPanel';
+import { GridSystem } from '@/features/blueprint/components/GridSystem';
+import { CoordinateDisplay } from '@/features/blueprint/components/CoordinateDisplay';
+import { PropertiesPanel } from '@/features/blueprint/components/PropertiesPanel';
+import { SnapIndicator } from '@/features/blueprint/components/SnapIndicator';
+import { MeasurementTool, MeasurementOverlay } from '@/features/blueprint/components/MeasurementTool';
+import { AlignmentTools } from '@/features/blueprint/components/AlignmentTools';
+import { TransformControls } from '@/features/blueprint/components/TransformControls';
+import { DrawingTool } from '@/features/blueprint/components/DrawingTool';
+import { GroupManager } from '@/features/blueprint/components/GroupManager';
+import { ExportDialog } from '@/features/blueprint/components/ExportDialog';
+import { CADHelpPanel } from '@/features/blueprint/components/CADHelpPanel';
+import { Blueprint3DPreview } from '@/features/blueprint/components/Blueprint3DPreview';
+import RoomNode from '@/features/blueprint/components/nodes/RoomNode';
+import ShapeNode from '@/features/blueprint/components/nodes/ShapeNode';
+import FurnitureNode from '@/features/blueprint/components/nodes/FurnitureNode';
+import AnnotationNode from '@/features/blueprint/components/nodes/AnnotationNode';
+import WallNode from '@/features/blueprint/components/nodes/WallNode';
+import DoorNode from '@/features/blueprint/components/nodes/DoorNode';
+import WindowNode from '@/features/blueprint/components/nodes/WindowNode';
+import CircleNode from '@/features/blueprint/components/nodes/CircleNode';
+import PolygonNode from '@/features/blueprint/components/nodes/PolygonNode';
+import ElectricalNode from '@/features/blueprint/components/nodes/ElectricalNode';
+import StairsNode from '@/features/blueprint/components/nodes/StairsNode';
+import ColumnNode from '@/features/blueprint/components/nodes/ColumnNode';
+import ArcNode from '@/features/blueprint/components/nodes/ArcNode';
+import PolylineNode from '@/features/blueprint/components/nodes/PolylineNode';
+import BezierNode from '@/features/blueprint/components/nodes/BezierNode';
+import RoundedRectNode from '@/features/blueprint/components/nodes/RoundedRectNode';
 import html2canvas from 'html2canvas';
 import { useCADShortcuts } from '@/hooks/useCADShortcuts';
 import { useSnapToGrid } from '@/hooks/useSnapToGrid';
 import { useMultiSelect } from '@/hooks/useMultiSelect';
+import { useEnhancedCADShortcuts } from '@/hooks/useEnhancedCADShortcuts';
+import { AdvancedEditTools } from '@/features/blueprint/components/AdvancedEditTools';
+import { DimensionTool } from '@/features/blueprint/components/DimensionTool';
+import { ZoomControls } from '@/features/blueprint/components/ZoomControls';
+import { CollapsibleMinimap } from '@/features/blueprint/components/CollapsibleMinimap';
+import { EnhancedDrawingToolbar } from '@/features/blueprint/components/EnhancedDrawingToolbar';
 
-import { useBlueprintStore } from '@/store/blueprintStore';
+import { useBlueprintStore } from '@/features/blueprint/store/blueprintStore';
 import { useStore } from 'zustand';
 
 // Node Types Registration
@@ -59,6 +72,15 @@ const nodeTypes = {
   wall: WallNode,
   door: DoorNode,
   window: WindowNode,
+  circle: CircleNode,
+  polygon: PolygonNode,
+  electrical: ElectricalNode,
+  stairs: StairsNode,
+  column: ColumnNode,
+  arc: ArcNode,
+  polyline: PolylineNode,
+  bezier: BezierNode,
+  roundedRect: RoundedRectNode,
 };
 
 const initialNodes: Node[] = [
@@ -92,21 +114,13 @@ const BlueprintSketcherContent = () => {
   const [rfInstance, setRfInstance] = useState<ReactFlowInstance | null>(null);
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [showHelpPanel, setShowHelpPanel] = useState(false);
+  const [show3D, setShow3D] = useState(false);
 
   // CAD Hooks
   useCADShortcuts(() => setShowHelpPanel(true));
+  useEnhancedCADShortcuts(); // Enhanced copy/paste/shortcuts
   const { snapPosition } = useSnapToGrid();
-  const { toggleNodeSelection, handleKeyDown, handleKeyUp } = useMultiSelect();
-
-  // Multi-select keyboard listeners
-  useEffect(() => {
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
-    };
-  }, [handleKeyDown, handleKeyUp]);
+  const { handleNodeClick } = useMultiSelect();
 
   // Zundo History (Undo/Redo)
   // Subscribe to temporal state updates
@@ -272,6 +286,15 @@ const BlueprintSketcherContent = () => {
             <RotateCcw className="h-4 w-4 mr-2" />
             Reset
           </Button>
+          <Button
+            variant={show3D ? "default" : "outline"}
+            size="sm"
+            onClick={() => setShow3D(!show3D)}
+            title="Toggle 3D Preview"
+          >
+            <Box className="h-4 w-4 mr-2" />
+            {show3D ? '2D View' : '3D View'}
+          </Button>
           <Button variant="outline" size="sm" onClick={() => setShowExportDialog(true)}>
             <Download className="h-4 w-4 mr-2" />
             Export
@@ -285,7 +308,7 @@ const BlueprintSketcherContent = () => {
 
       {/* Editor Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <DrawingToolbar />
+        <EnhancedDrawingToolbar />
 
         <div className="flex-1 flex overflow-hidden">
           <Sidebar />
@@ -306,12 +329,11 @@ const BlueprintSketcherContent = () => {
               nodesDraggable={true}
               nodesConnectable={true}
               onNodeClick={(event, node) => {
-                toggleNodeSelection(node.id, event.shiftKey);
+                handleNodeClick(node.id, event.shiftKey);
               }}
               onPaneClick={() => setSelectedNodes([])}
             >
-              <Controls />
-              <MiniMap className="!bg-card !border-border" maskColor="rgba(0,0,0,0.1)" />
+              {/* Custom Controls - We use our own instead of ReactFlow's */}
               <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
               <GridSystem />
               <CoordinateDisplay />
@@ -322,12 +344,22 @@ const BlueprintSketcherContent = () => {
               <AlignmentTools />
               <TransformControls />
               <GroupManager />
+              <AdvancedEditTools />
+              <DimensionTool />
 
               <Panel position="top-right" className="glass-dark p-2 rounded-lg text-xs text-muted-foreground flex gap-4">
                 <span>{nodes.length} nodes</span>
                 <span>{edges.length} connections</span>
                 <span>{layers.length} layers</span>
               </Panel>
+
+              {/* Enhanced Zoom Controls */}
+              <Panel position="bottom-left" className="!bg-transparent !shadow-none">
+                <ZoomControls />
+              </Panel>
+
+              {/* Collapsible Minimap */}
+              <CollapsibleMinimap nodes={nodes} />
             </ReactFlow>
           </div>
 
@@ -338,6 +370,9 @@ const BlueprintSketcherContent = () => {
       {/* Dialogs */}
       {showExportDialog && <ExportDialog onClose={() => setShowExportDialog(false)} />}
       {showHelpPanel && <CADHelpPanel onClose={() => setShowHelpPanel(false)} />}
+
+      {/* 3D Preview */}
+      <Blueprint3DPreview nodes={nodes} show3D={show3D} onClose={() => setShow3D(false)} />
     </div>
   );
 };

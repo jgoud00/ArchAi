@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { MessageSquare } from 'lucide-react'
-import { IssueComment, getIssueComments } from '@/services/issueComments'
+import { IssueComment, getIssueComments } from '@/features/projects/services/issueComments'
 import { CommentItem } from './CommentItem'
 import { CommentForm } from './CommentForm'
 import { Spinner } from '@/components/ui/Spinner'

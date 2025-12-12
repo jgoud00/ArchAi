@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { MessageSquare, Send } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
-import { useAuthStore } from '@/store/authStore'
+import { useAuthStore } from '@/features/auth/store/authStore'
 import { useToast } from '@/hooks/useToast'
-import { createIssueComment } from '@/services/issueComments'
+import { createIssueComment } from '@/features/projects/services/issueComments'
 import { logger } from '@/utils/logger'
 
 interface CommentFormProps {

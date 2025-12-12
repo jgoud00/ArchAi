@@ -15,7 +15,7 @@ export const TestimonialCard = memo<TestimonialCardProps>(({ quote, author, role
         </div>
         <p className="text-muted-foreground mb-6 italic">"{quote}"</p>
         <div>
-            <div className="font-bold text-white">{author}</div>
+            <div className="font-bold text-foreground">{author}</div>
             <div className="text-sm text-muted-foreground">{role}</div>
         </div>
     </div>

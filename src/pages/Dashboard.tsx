@@ -1,15 +1,24 @@
 
 import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Folder, Users, LayoutDashboard, TrendingUp, Home as HomeIcon } from 'lucide-react'
-import { getUserProjects, createProject } from '@/services/projects'
-import { getDashboardStats } from '@/services/dashboard'
-import { useAuthStore } from '@/store/authStore'
-import { ProjectCard } from '@/components/ProjectCard'
-import { KPICard } from '@/components/dashboard/KPICard'
+import { Plus, Folder, Users, LayoutDashboard, Home as HomeIcon, Calendar, FileText, Settings } from 'lucide-react'
+import { getUserProjects, createProject } from '@/features/projects/services/projects'
+import { getDashboardStats } from '@/features/dashboard/services/dashboard'
+import { useAuthStore } from '@/features/auth/store/authStore'
+import { KPICard } from '@/features/dashboard/components/KPICard'
+import { ProjectsGrid } from '@/features/dashboard/components/ProjectsGrid'
+import { QuickActions } from '@/features/dashboard/components/QuickActions'
+import { PageLayout } from '@/components/layout/PageLayout'
+import { lazy, Suspense } from 'react'
+
+const DashboardChart = lazy(() => import('@/features/dashboard/components/DashboardChart').then(m => ({ default: m.DashboardChart })))
+import { PageHeader } from '@/components/layout/PageHeader'
+import { Section } from '@/components/layout/Section'
+import { CardGrid } from '@/components/layout/CardGrid'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { Input } from '@/components/ui/Input'
+import { FormField, FormActions, FieldError } from '@/components/ui/FormComponents'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { projectSchema } from '@/utils/validators'
@@ -18,7 +27,8 @@ import { ToastContainer } from '@/components/ui/Toast'
 import { z } from 'zod'
 import { Project } from '@/types'
 import { Spinner } from '@/components/ui/Spinner'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { layout } from '@/styles/designTokens'
+import { PageTransition, AnimatedList, FadeIn } from '@/components/ui/animations'
 
 type ProjectFormData = z.infer<typeof projectSchema>
 
@@ -79,8 +89,7 @@ export const Dashboard = () => {
     }
   }, [user, loadDashboardData])
 
-  // Memoize Chart Data calculation (Still using project creation dates for now, 
-  // but could be enhanced with a specific RPC for chart data if needed)
+  // Memoize Chart Data calculation
   const chartData = useMemo(() => {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     const today = new Date()
@@ -99,13 +108,10 @@ export const Dashboard = () => {
         return d.getMonth() === month.monthIndex && d.getFullYear() === month.year
       }).length
 
-      // For tasks, we don't have historical data easily accessible without a complex query.
-      // For now, we'll leave tasks as 0 in the chart or remove the line if preferred.
-      // To keep the visual, we will just show project trends.
       return {
         name: month.name,
         projects: projectsInMonth,
-        tasks: 0 // Placeholder removed, set to 0 to avoid misleading random data
+        tasks: 0
       }
     })
   }, [projects])
@@ -129,6 +135,8 @@ export const Dashboard = () => {
     }
   }, [user?.uid, showToast, reset, loadDashboardData, navigate])
 
+  const handleOpenCreateModal = useCallback(() => setCreateModalOpen(true), []);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -138,177 +146,143 @@ export const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground relative overflow-hidden p-4 lg:p-8">
-      <div className="blueprint-grid absolute inset-0 z-0 opacity-20 pointer-events-none"></div>
+    <PageLayout>
+      <PageTransition>
+        <div className="blueprint-grid absolute inset-0 -z-10 opacity-30 pointer-events-none mix-blend-multiply dark:mix-blend-overlay"></div>
 
-      <div className="relative z-10 space-y-8">
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <h1 className="text-4xl font-bold text-foreground tracking-tight">Dashboard Overview</h1>
-            <p className="text-muted-foreground mt-1">Welcome back, {user?.displayName || 'Architect'}</p>
-          </div>
-          <Button
-            className="btn-primary-enhanced"
-            onClick={useCallback(() => setCreateModalOpen(true), [])}
-          >
-            <Plus className="h-5 w-5 mr-2" aria-hidden="true" /> New Project
-          </Button>
-        </header>
+        <div className={layout.sectionSpacing}>
+          <PageHeader
+            title="Dashboard Overview"
+            description={`Welcome back, ${user?.displayName || 'Architect'}`}
+            actions={
+              <Button className="btn-primary-enhanced" onClick={handleOpenCreateModal}>
+                <Plus className="h-5 w-5 mr-2" aria-hidden="true" /> New Project
+              </Button>
+            }
+          />
 
-        {/* KPIs Section */}
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-          <KPICard title="Total Projects" value={stats.totalProjects} icon={<Folder size={32} />} />
-          <KPICard title="Active Builds" value={stats.activeBuilds} icon={<HomeIcon size={32} />} />
-          <KPICard title="Tasks Pending" value={stats.tasksPending} icon={<LayoutDashboard size={32} />} />
-          <KPICard title="Team Members" value={stats.teamMembers} icon={<Users size={32} />} />
-        </section>
+          {/* KPIs Section */}
+          <Section>
+            <CardGrid cols={4}>
+              <AnimatedList staggerDelay={75}>
+                <KPICard title="Total Projects" value={stats.totalProjects} icon={<Folder size={32} />} />
+                <KPICard title="Active Builds" value={stats.activeBuilds} icon={<HomeIcon size={32} />} />
+                <KPICard title="Tasks Pending" value={stats.tasksPending} icon={<LayoutDashboard size={32} />} />
+                <KPICard title="Team Members" value={stats.teamMembers} icon={<Users size={32} />} />
+              </AnimatedList>
+            </CardGrid>
+          </Section>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Recent Projects Section */}
-          <section className="lg:col-span-2 space-y-6 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-            <h2 className="text-2xl font-semibold text-foreground">Recent Projects</h2>
-            {projects.length === 0 ? (
-              <div className="glass-dark border border-dashed border-border/50 p-12 rounded-xl text-center relative overflow-hidden group">
-                <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="relative z-10">
-                  <div className="h-16 w-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <Folder className="h-8 w-8 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2 text-foreground">No projects yet</h3>
-                  <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                    Start your journey by creating your first construction project. AI-powered tools await.
-                  </p>
-                  <Button onClick={() => setCreateModalOpen(true)} className="btn-primary-enhanced">
-                    <Plus className="h-4 w-4 mr-2" /> Create Project
-                  </Button>
-                </div>
+          <FadeIn delay={200}>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-10">
+              {/* Recent Projects Section */}
+              <Section className="lg:col-span-2" title="Recent Projects">
+                <ProjectsGrid projects={projects} onCreateProject={handleOpenCreateModal} />
+              </Section>
+
+              {/* Chart and Quick Actions */}
+              <div className="space-y-6">
+                <Suspense fallback={<div className="h-80 flex items-center justify-center"><Spinner /></div>}>
+                  <DashboardChart data={chartData} />
+                </Suspense>
+
+                {/* Quick Actions */}
+                <Section title="Quick Actions">
+                  <QuickActions
+                    items={[
+                      {
+                        id: 'new-project',
+                        title: 'New Project',
+                        description: 'Create a new project',
+                        icon: <Plus className="h-5 w-5" />,
+                        onClick: handleOpenCreateModal,
+                      },
+                      {
+                        id: 'calendar',
+                        title: 'Calendar',
+                        description: 'View schedule',
+                        icon: <Calendar className="h-5 w-5" />,
+                        onClick: () => navigate('/calendar'),
+                      },
+                      {
+                        id: 'templates',
+                        title: 'Templates',
+                        description: 'Browse templates',
+                        icon: <FileText className="h-5 w-5" />,
+                        onClick: () => navigate('/templates'),
+                      },
+                      {
+                        id: 'settings',
+                        title: 'Settings',
+                        description: 'Configure app',
+                        icon: <Settings className="h-5 w-5" />,
+                        onClick: () => navigate('/settings'),
+                      },
+                    ]}
+                  />
+                </Section>
               </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {projects.map((project) => (
-                  <ProjectCard key={project.id} project={project} />
-                ))}
-              </div>
-            )}
-          </section>
-
-          {/* Project Progress Chart Section */}
-          <section className="space-y-6 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-            <h2 className="text-2xl font-semibold text-foreground">Monthly Progress</h2>
-            <div className="glass border border-border p-6 rounded-xl h-80 flex items-center justify-center">
-              {chartData.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart
-                    data={chartData}
-                    margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                    <XAxis
-                      dataKey="name"
-                      stroke="hsl(var(--muted-foreground))"
-                      tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                    <YAxis
-                      stroke="hsl(var(--muted-foreground))"
-                      tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                    <Tooltip
-                      contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', borderRadius: '8px', color: 'hsl(var(--foreground))' }}
-                      itemStyle={{ color: 'hsl(var(--foreground))' }}
-                      cursor={{ fill: 'hsl(var(--muted)/0.2)' }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="projects"
-                      stroke="hsl(var(--primary))"
-                      strokeWidth={3}
-                      dot={{ r: 4, fill: 'hsl(var(--primary))', strokeWidth: 0 }}
-                      activeDot={{ r: 6, fill: 'hsl(var(--primary))', strokeWidth: 0 }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="tasks"
-                      stroke="hsl(var(--secondary))"
-                      strokeWidth={3}
-                      dot={{ r: 4, fill: 'hsl(var(--secondary))', strokeWidth: 0 }}
-                      activeDot={{ r: 6, fill: 'hsl(var(--secondary))', strokeWidth: 0 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="text-center text-muted-foreground">
-                  <TrendingUp className="h-10 w-10 mx-auto mb-2 opacity-50" />
-                  <p>No activity data available</p>
-                </div>
-              )}
             </div>
-          </section>
+          </FadeIn>
         </div>
-      </div>
 
-      {/* Create Project Modal */}
-      <Modal
-        isOpen={createModalOpen}
-        onClose={() => {
-          setCreateModalOpen(false)
-          reset()
-        }}
-        title="Create New Project"
-      >
-        <form onSubmit={handleSubmit(onCreateProject)} className="space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="name" className="text-sm font-medium">
-              Project Name
-            </label>
-            <Input
-              id="name"
-              placeholder="My Construction Project"
-              {...register('name')}
-              className={errors.name ? 'border-destructive' : ''}
-            />
-            {errors.name && (
-              <p className="text-sm text-destructive">{errors.name.message}</p>
-            )}
-          </div>
+        {/* Create Project Modal */}
+        <Modal
+          isOpen={createModalOpen}
+          onClose={() => {
+            setCreateModalOpen(false)
+            reset()
+          }}
+          title="Create New Project"
+        >
+          <form onSubmit={handleSubmit(onCreateProject)} className="space-y-4">
+            <FormField>
+              <label htmlFor="name" className="text-sm font-medium">
+                Project Name
+              </label>
+              <Input
+                id="name"
+                placeholder="My Construction Project"
+                {...register('name')}
+                className={errors.name ? 'border-destructive' : ''}
+              />
+              <FieldError>{errors.name?.message}</FieldError>
+            </FormField>
 
-          <div className="space-y-2">
-            <label htmlFor="description" className="text-sm font-medium">
-              Description
-            </label>
-            <textarea
-              id="description"
-              placeholder="Project description..."
-              {...register('description')}
-              className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            />
-            {errors.description && (
-              <p className="text-sm text-destructive">{errors.description.message}</p>
-            )}
-          </div>
+            <FormField>
+              <label htmlFor="description" className="text-sm font-medium">
+                Description
+              </label>
+              <textarea
+                id="description"
+                placeholder="Project description..."
+                {...register('description')}
+                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              />
+              <FieldError>{errors.description?.message}</FieldError>
+            </FormField>
 
-          <div className="flex gap-2 justify-end">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setCreateModalOpen(false)
-                reset()
-              }}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={creating}>
-              {creating ? 'Creating...' : 'Create Project'}
-            </Button>
-          </div>
-        </form>
-      </Modal>
+            <FormActions>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setCreateModalOpen(false)
+                  reset()
+                }}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={creating}>
+                {creating ? 'Creating...' : 'Create Project'}
+              </Button>
+            </FormActions>
+          </form>
+        </Modal>
 
-      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
-    </div>
+
+        <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+      </PageTransition>
+    </PageLayout>
   )
 }

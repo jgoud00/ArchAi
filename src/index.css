@@ -1,50 +1,70 @@
+/* Import custom styles - must be first */
+@import './styles/animations.css';
+@import './styles/utilities.css';
+@import './styles/responsive.css';
+@import './styles/accessibility.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* Cyber-Industrial Palette (Dark Mode Default) */
-    --background: 222.2 84% 4.9%;
-    /* Slate 950: #020617 */
-    --foreground: 210 40% 98%;
-    /* Slate 50: #f8fafc */
+    /* ============================================
+       CLEAN LIGHT THEME - Professional Blue
+       Inspired by Notion, Figma, Linear, Apple
+       ============================================ */
 
-    --card: 222.2 84% 4.9%;
-    /* Slate 950 (Glass base) */
-    --card-foreground: 210 40% 98%;
+    /* Core Backgrounds */
+    --background: 0 0% 100%;
+    /* Pure white #FFFFFF */
+    --foreground: 222 47% 11%;
+    /* Dark slate #0F172A */
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    /* Cards & Surfaces */
+    --card: 0 0% 100%;
+    /* White */
+    --card-foreground: 222 47% 11%;
 
-    --primary: 189 94% 43%;
-    /* Cyan 500: #06b6d4 (Neon Cyan) */
-    --primary-foreground: 222.2 47.4% 11.2%;
-    /* Dark text on cyan */
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    /* Slate 800 */
-    --secondary-foreground: 210 40% 98%;
+    /* Primary - Professional Blue */
+    --primary: 221 83% 53%;
+    /* #3B82F6 (Blue 500) */
+    --primary-foreground: 0 0% 100%;
+    /* White text on blue */
 
-    --muted: 217.2 32.6% 17.5%;
-    /* Slate 800 */
-    --muted-foreground: 215 20.2% 65.1%;
-    /* Slate 400 */
+    /* Secondary - Soft Gray */
+    --secondary: 220 14% 96%;
+    /* #F4F5F7 */
+    --secondary-foreground: 222 47% 11%;
 
-    --accent: 189 94% 43%;
-    /* Cyan 500 (low opacity usage) */
-    --accent-foreground: 210 40% 98%;
+    /* Muted - Subdued elements */
+    --muted: 220 14% 96%;
+    /* #F4F5F7 */
+    --muted-foreground: 215 16% 47%;
+    /* #64748B (Slate 500) */
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    /* Accent - Same as primary for consistency */
+    --accent: 221 83% 53%;
+    --accent-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    /* Slate 800 */
-    --input: 217.2 32.6% 17.5%;
-    --ring: 189 94% 43%;
-    /* Cyan 500 */
+    /* Destructive - Clean Red */
+    --destructive: 0 84% 60%;
+    /* #EF4444 */
+    --destructive-foreground: 0 0% 100%;
 
-    --radius: 0.5rem;
+    /* Borders & Inputs */
+    --border: 220 13% 91%;
+    /* #E2E8F0 (Slate 200) */
+    --input: 220 13% 91%;
+    --ring: 221 83% 53%;
+    /* Blue focus ring */
+
+    /* Radius - Softer, more modern */
+    --radius: 0.75rem;
+    /* 12px */
   }
 }
 
@@ -54,7 +74,36 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-feature-settings: 'cv11', 'ss01';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Premium Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
+  }
+
+  /* Premium Text Selection */
+  ::selection {
+    background: hsl(var(--primary) / 0.2);
+    color: hsl(var(--primary));
   }
 }
 
@@ -81,7 +130,7 @@
   @keyframes slideInUp {
     from {
       opacity: 0;
-      transform: translateY(30px);
+      transform: translateY(20px);
     }
 
     to {
@@ -93,7 +142,7 @@
   @keyframes scaleIn {
     from {
       opacity: 0;
-      transform: scale(0.95);
+      transform: scale(0.98);
     }
 
     to {
@@ -102,70 +151,24 @@
     }
   }
 
-  @keyframes parallax {
-    from {
-      transform: translateY(0);
-    }
-
-    to {
-      transform: translateY(-20px);
-    }
-  }
-
-  @keyframes blueprintGrid {
-    0% {
-      transform: translate(0, 0);
-    }
-
-    50% {
-      transform: translate(15px, 15px);
-    }
-
-    100% {
-      transform: translate(0, 0);
-    }
-  }
-
-  @keyframes float {
-
-    0%,
-    100% {
-      transform: translateY(0px);
-    }
-
-    50% {
-      transform: translateY(-10px);
-    }
-  }
-
-  @keyframes shimmer {
-    0% {
-      background-position: -1000px 0;
-    }
-
-    100% {
-      background-position: 1000px 0;
-    }
-  }
-
   /* Animation utilities */
   .animate-fade-in {
-    animation: fadeIn 0.6s ease-out forwards;
+    animation: fadeIn 0.4s ease-out forwards;
   }
 
   .animate-slide-in-up {
-    animation: slideInUp 0.8s ease-out forwards;
+    animation: slideInUp 0.5s ease-out forwards;
   }
 
   .animate-scale-in {
-    animation: scaleIn 0.5s ease-out forwards;
+    animation: scaleIn 0.3s ease-out forwards;
   }
 
   /* Intersection Observer animation classes */
   .fade-in-on-scroll {
     opacity: 0;
-    transform: translateY(30px);
-    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
   }
 
   .fade-in-on-scroll.visible {
@@ -173,206 +176,161 @@
     transform: translateY(0);
   }
 
-  /* Focus visible styles for accessibility */
+  /* Focus visible styles for accessibility with animation */
   *:focus-visible {
-    outline: 2px solid hsl(var(--ring));
-    outline-offset: 2px;
+    outline: none;
+    box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring));
+    transition: box-shadow 0.2s ease;
+    border-radius: 4px;
+    /* Default fallback, components should override */
   }
 
-  /* Sticky header */
+  /* Sticky header - Clean light style */
   .sticky-header {
     position: sticky;
     top: 0;
     z-index: 50;
-    backdrop-filter: blur(10px);
-    background-color: hsl(var(--background) / 0.95);
+    backdrop-filter: blur(12px);
+    background-color: hsl(var(--background) / 0.9);
+    border-bottom: 1px solid hsl(var(--border));
   }
 
+  /* ============================================
+     CLEAN HOVER & INTERACTION EFFECTS
+     ============================================ */
 
-  /* Micro-interaction hover effects */
+  /* Subtle hover lift */
   .hover-lift {
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
 
   .hover-lift:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
 
-  /* Icon animation */
-  .icon-float {
-    animation: float 3s ease-in-out infinite;
-  }
+  /* ============================================
+     CLEAN BUTTON STYLES
+     ============================================ */
 
-  /* Button enhancements - Primary with neon-cyan accent */
+  /* Primary button - Clean blue */
   .btn-primary-enhanced {
-    background: linear-gradient(135deg, #00E5FF 0%, #00B8D4 100%);
-    color: #0A1B2E;
-    font-weight: 600;
-    box-shadow: 0 4px 16px rgba(0, 229, 255, 0.4), 0 0 20px rgba(0, 229, 255, 0.2);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: hsl(221, 83%, 53%);
+    color: white;
+    font-weight: 500;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
     border: none;
   }
 
   .btn-primary-enhanced:hover {
-    background: linear-gradient(135deg, #00F0FF 0%, #00E5FF 100%);
-    box-shadow: 0 6px 24px rgba(0, 229, 255, 0.5), 0 0 30px rgba(0, 229, 255, 0.3);
-    transform: translateY(-2px);
+    background: hsl(221, 83%, 47%);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+    transform: translateY(-1px);
   }
 
   .btn-primary-enhanced:active {
     transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   }
 
-  /* Button enhancements - Secondary thin outlined style */
+  /* Secondary/Outline button - Clean border */
   .btn-outline-enhanced {
-    border: 1.5px solid #00E5FF;
+    border: 1px solid hsl(var(--border));
     background: transparent;
-    color: #00E5FF;
+    color: hsl(var(--foreground));
     font-weight: 500;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 0 0 0 rgba(0, 229, 255, 0);
+    transition: all 0.2s ease;
   }
 
   .btn-outline-enhanced:hover {
-    background: rgba(0, 229, 255, 0.08);
-    border-color: #00E5FF;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 229, 255, 0.2);
+    background: hsl(var(--muted));
+    border-color: hsl(var(--border));
+    transform: translateY(-1px);
   }
 
   .btn-outline-enhanced:active {
     transform: translateY(0);
   }
 
-  /* Enhanced glassmorphism */
+  /* ============================================
+     CLEAN CARD & SURFACE STYLES
+     ============================================ */
+
+  /* Glass effect - Light & subtle */
   .glass {
-    background: rgba(255, 255, 255, 0.75);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    box-shadow: 0 8px 32px 0 rgba(10, 27, 46, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+    background: hsl(var(--background) / 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--border));
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   }
 
   .glass-dark {
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(28px) saturate(180%);
-    -webkit-backdrop-filter: blur(28px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 12px 40px 0 rgba(10, 27, 46, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+    background: hsl(var(--background) / 0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid hsl(var(--border));
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   }
 
-  /* Enhanced blueprint grid with subtle animation */
-  .blueprint-grid {
-    background-image:
-      linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    animation: blueprintGrid 50s ease-in-out infinite;
+  /* Clean card style */
+  .card-clean {
+    background: white;
+    border: 1px solid hsl(var(--border));
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    transition: box-shadow 0.2s ease;
   }
 
-  /* Hero glow effect */
-  .hero-glow {
-    position: relative;
+  .card-clean:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
 
-  .hero-glow::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 120%;
-    height: 120%;
-    background: radial-gradient(circle, rgba(0, 229, 255, 0.15) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: -1;
-  }
+  /* ============================================
+     CLEAN SHADOW UTILITIES
+     ============================================ */
 
-  /* Enhanced shadow utilities */
   .shadow-soft {
-    box-shadow: 0 2px 8px rgba(10, 27, 46, 0.06), 0 4px 16px rgba(10, 27, 46, 0.04);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
   }
 
   .shadow-soft-lg {
-    box-shadow: 0 4px 12px rgba(10, 27, 46, 0.08), 0 8px 24px rgba(10, 27, 46, 0.06);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
   }
 
   .shadow-soft-xl {
-    box-shadow: 0 8px 16px rgba(10, 27, 46, 0.1), 0 16px 32px rgba(10, 27, 46, 0.08);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
   }
 
-  /* Premium hero gradient */
+  /* ============================================
+     SUBTLE BACKGROUND PATTERNS
+     ============================================ */
+
+  /* Subtle grid pattern - Light gray */
+  .blueprint-grid {
+    background-image:
+      linear-gradient(hsl(220, 13%, 95%) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(220, 13%, 95%) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* Hero gradient - Soft blue tint */
   .hero-gradient {
     background: linear-gradient(135deg,
-        rgba(0, 229, 255, 0.08) 0%,
-        rgba(0, 184, 212, 0.05) 30%,
-        rgba(10, 27, 46, 0.02) 60%,
-        rgba(255, 255, 255, 0) 100%);
+        hsl(221, 83%, 97%) 0%,
+        hsl(220, 14%, 98%) 50%,
+        hsl(var(--background)) 100%);
   }
 
-  /* Text glow for hero headline */
-  .text-glow {
-    text-shadow: 0 0 20px rgba(0, 229, 255, 0.3), 0 0 40px rgba(0, 229, 255, 0.15);
-  }
-
-  /* Enhanced hover lift with better shadow */
-  .hover-lift {
-    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.35s ease;
-  }
-
-  .hover-lift:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 16px 32px rgba(10, 27, 46, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.6) inset;
-  }
-
-  /* User provided styles for Futuristic Construction Tech aesthetic */
-  .glass {
-    background: rgba(255, 255, 255, 0.1) !important;
-    backdrop-filter: blur(10px) !important;
-    -webkit-backdrop-filter: blur(10px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
-  }
-
-  .glass-dark {
-    background: rgba(0, 0, 0, 0.3) !important;
-    backdrop-filter: blur(15px) !important;
-    -webkit-backdrop-filter: blur(15px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2) !important;
-  }
-
-  .blueprint-grid {
-    background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px) !important;
-    background-size: 40px 40px !important;
-    animation: pan-grid 60s linear infinite !important;
-  }
-
-  @keyframes pan-grid {
-    0% {
-      background-position: 0% 0%;
-    }
-
-    100% {
-      background-position: 100% 100%;
-    }
-  }
-
-  .hover-lift {
-    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out !important;
-  }
-
-  .hover-lift:hover {
-    transform: translateY(-5px) !important;
-    box-shadow: 0 8px 15px rgba(0, 182, 212, 0.4) !important;
-    /* Accent color shadow */
-  }
+  /* ============================================
+     ANIMATION KEYFRAMES
+     ============================================ */
 
   @keyframes fade-in-left {
     from {
       opacity: 0;
-      transform: translateX(-20px);
+      transform: translateX(-10px);
     }
 
     to {
@@ -384,7 +342,7 @@
   @keyframes fade-in-right {
     from {
       opacity: 0;
-      transform: translateX(20px);
+      transform: translateX(10px);
     }
 
     to {
@@ -396,7 +354,7 @@
   @keyframes fade-in-up {
     from {
       opacity: 0;
-      transform: translateY(20px);
+      transform: translateY(10px);
     }
 
     to {
@@ -406,11 +364,15 @@
   }
 
   .animate-fade-in-left {
-    animation: fade-in-left 1s ease-out forwards;
+    animation: fade-in-left 0.4s ease-out forwards;
   }
 
   .animate-fade-in-right {
-    animation: fade-in-right 1s ease-out forwards;
+    animation: fade-in-right 0.4s ease-out forwards;
+  }
+
+  .animate-fade-in-up {
+    animation: fade-in-up 0.4s ease-out forwards;
   }
 
   @keyframes shake {
@@ -421,210 +383,35 @@
     }
 
     25% {
-      transform: translateX(-5px);
+      transform: translateX(-4px);
     }
 
     75% {
-      transform: translateX(5px);
-    }
-  }
-
-  .btn-outline-enhanced:hover {
-    background: rgba(0, 229, 255, 0.08);
-    border-color: #00E5FF;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 229, 255, 0.2);
-  }
-
-  .btn-outline-enhanced:active {
-    transform: translateY(0);
-  }
-
-  /* Enhanced glassmorphism */
-  .glass {
-    background: rgba(255, 255, 255, 0.75);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    box-shadow: 0 8px 32px 0 rgba(10, 27, 46, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.5) inset;
-  }
-
-  .glass-dark {
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(28px) saturate(180%);
-    -webkit-backdrop-filter: blur(28px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 12px 40px 0 rgba(10, 27, 46, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.6) inset;
-  }
-
-  /* Enhanced blueprint grid with subtle animation */
-  .blueprint-grid {
-    background-image:
-      linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    animation: blueprintGrid 50s ease-in-out infinite;
-  }
-
-  /* Hero glow effect */
-  .hero-glow {
-    position: relative;
-  }
-
-  .hero-glow::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 120%;
-    height: 120%;
-    background: radial-gradient(circle, rgba(0, 229, 255, 0.15) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: -1;
-  }
-
-  /* Enhanced shadow utilities */
-  .shadow-soft {
-    box-shadow: 0 2px 8px rgba(10, 27, 46, 0.06), 0 4px 16px rgba(10, 27, 46, 0.04);
-  }
-
-  .shadow-soft-lg {
-    box-shadow: 0 4px 12px rgba(10, 27, 46, 0.08), 0 8px 24px rgba(10, 27, 46, 0.06);
-  }
-
-  .shadow-soft-xl {
-    box-shadow: 0 8px 16px rgba(10, 27, 46, 0.1), 0 16px 32px rgba(10, 27, 46, 0.08);
-  }
-
-  /* Premium hero gradient */
-  .hero-gradient {
-    background: linear-gradient(135deg,
-        rgba(0, 229, 255, 0.08) 0%,
-        rgba(0, 184, 212, 0.05) 30%,
-        rgba(10, 27, 46, 0.02) 60%,
-        rgba(255, 255, 255, 0) 100%);
-  }
-
-  /* Text glow for hero headline */
-  .text-glow {
-    text-shadow: 0 0 20px rgba(0, 229, 255, 0.3), 0 0 40px rgba(0, 229, 255, 0.15);
-  }
-
-  /* Enhanced hover lift with better shadow */
-  .hover-lift {
-    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.35s ease;
-  }
-
-  .hover-lift:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 16px 32px rgba(10, 27, 46, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.6) inset;
-  }
-
-  /* User provided styles for Futuristic Construction Tech aesthetic */
-  .glass {
-    background: rgba(255, 255, 255, 0.1) !important;
-    backdrop-filter: blur(10px) !important;
-    -webkit-backdrop-filter: blur(10px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
-  }
-
-  .glass-dark {
-    background: rgba(0, 0, 0, 0.3) !important;
-    backdrop-filter: blur(15px) !important;
-    -webkit-backdrop-filter: blur(15px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2) !important;
-  }
-
-  .blueprint-grid {
-    background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px) !important;
-    background-size: 40px 40px !important;
-    animation: pan-grid 60s linear infinite !important;
-  }
-
-  @keyframes pan-grid {
-    0% {
-      background-position: 0% 0%;
-    }
-
-    100% {
-      background-position: 100% 100%;
-    }
-  }
-
-  .hover-lift {
-    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out !important;
-  }
-
-  .hover-lift:hover {
-    transform: translateY(-5px) !important;
-    box-shadow: 0 8px 15px rgba(0, 182, 212, 0.4) !important;
-    /* Accent color shadow */
-  }
-
-  @keyframes fade-in-left {
-    from {
-      opacity: 0;
-      transform: translateX(-20px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
-  @keyframes fade-in-right {
-    from {
-      opacity: 0;
-      transform: translateX(20px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
-  @keyframes fade-in-up {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .animate-fade-in-left {
-    animation: fade-in-left 1s ease-out forwards;
-  }
-
-  .animate-fade-in-right {
-    animation: fade-in-right 1s ease-out forwards;
-  }
-
-  @keyframes shake {
-
-    0%,
-    100% {
-      transform: translateX(0);
-    }
-
-    25% {
-      transform: translateX(-5px);
-    }
-
-    75% {
-      transform: translateX(5px);
+      transform: translateX(4px);
     }
   }
 
   .animate-shake {
     animation: shake 0.3s ease-in-out;
+  }
+
+  /* ============================================
+     SPACING TOKENS
+     ============================================ */
+
+  .space-section {
+    @apply space-y-6;
+  }
+
+  .space-content {
+    @apply space-y-4;
+  }
+
+  .padding-page {
+    @apply p-6 lg:p-8;
+  }
+
+  .padding-card {
+    @apply p-5 lg:p-6;
   }
 }

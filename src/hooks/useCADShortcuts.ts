@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useBlueprintStore } from '@/store/blueprintStore';
+import { useBlueprintStore } from '@/features/blueprint/store/blueprintStore';
 import { Node } from '@xyflow/react';
 
 // Clipboard for copy/paste

@@ -2,10 +2,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { RoleGuard } from '../RoleGuard'
-import { useAuthStore } from '@/store/authStore'
+import { useAuthStore } from '@/features/auth/store/authStore'
 import { USER_ROLES } from '@/constants'
 
-vi.mock('@/store/authStore')
+vi.mock('@/features/auth/store/authStore')
 
 const AdminContent = () => <div>Admin Only Content</div>
 const ForbiddenContent = () => <div>Access Denied</div>

@@ -3,10 +3,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { ProtectedRoute } from '../ProtectedRoute'
-import { useAuthStore } from '@/store/authStore'
+import { useAuthStore } from '@/features/auth/store/authStore'
 import { USER_ROLES } from '@/constants'
 
-vi.mock('@/store/authStore')
+vi.mock('@/features/auth/store/authStore')
 
 const TestComponent = () => <div>Protected Content</div>
 const LoginComponent = () => <div>Login Page</div>

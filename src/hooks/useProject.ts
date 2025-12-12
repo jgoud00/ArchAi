@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getProject } from '@/services/projects'
+import { getProject } from '@/features/projects/services/projects'
 import { Project } from '@/types'
 
 export const useProject = (projectId: string | undefined) => {
