@@ -1,11 +1,12 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Plus, ArrowLeft } from 'lucide-react'
+import { Plus, ArrowLeft, CalendarDays } from 'lucide-react'
 import { getProjectTasks } from '@/features/projects/services/tasks'
 import { getProject } from '@/features/projects/services/projects'
 import { Task, Project } from '@/types'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
+import { Card, CardContent } from '@/components/ui/Card'
 import { useToast } from '@/hooks/useToast'
 import { GanttChart } from '@/features/projects/components/GanttChart'
 
@@ -35,6 +36,8 @@ export const Timeline = () => {
         endDate: new Date(t.endDate)
       }))
       setTasks(parsedTasks)
+      // Debug logging for development
+      console.log('[Timeline] Loaded tasks:', parsedTasks.length, parsedTasks)
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Failed to load timeline'
       showToast(message, 'error')
@@ -89,7 +92,23 @@ export const Timeline = () => {
         </Button>
       </div>
 
-      <GanttChart tasks={tasks} onTaskUpdate={handleTaskUpdate} />
+      {tasks.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <CalendarDays className="h-16 w-16 text-muted-foreground/50 mb-4" />
+            <h3 className="text-lg font-semibold mb-1">No tasks yet</h3>
+            <p className="text-muted-foreground text-sm mb-4 text-center">
+              Create your first task to start building your project timeline
+            </p>
+            <Button onClick={handleNewTask}>
+              <Plus className="h-4 w-4 mr-2" />
+              New Task
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <GanttChart tasks={tasks} onTaskUpdate={handleTaskUpdate} />
+      )}
     </div>
   )
 }
